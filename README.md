@@ -1,0 +1,1 @@
+Baca "./DOKUMENTASI/DOCUMENTATION.md" dan "./DOKUMENTASI/ParentShield.md".
