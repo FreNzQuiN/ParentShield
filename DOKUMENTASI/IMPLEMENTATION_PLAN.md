@@ -22,14 +22,25 @@ Dokumen ini adalah rencana implementasi final untuk membangun ParentShield secar
 
 ## 2) Referensi Sumber (Wajib)
 
-- Integrasi AdGuard API: `DOKUMENTASI/DOCUMENTATION.md:7`, `DOKUMENTASI/DOCUMENTATION.md:15`
-- Flow aplikasi wajib: `DOKUMENTASI/ParentShield.md:13`, `DOKUMENTASI/ParentShield.md:14`
-- Device limit + rollback: `DOKUMENTASI/ParentShield.md:15`, `DOKUMENTASI/ParentShield.md:18`
-- UI implementation detail: `DOKUMENTASI/ParentShield_UI.md:172`, `DOKUMENTASI/ParentShield_UI.md:592`
-- AddDevice koreksi Android/Windows/iOS: `DOKUMENTASI/ParentShield_UI.md:523`
-- Popup global add device: `DOKUMENTASI/ParentShield_UI.md:544`
-- State management wajib: `DOKUMENTASI/ParentShield_UI.md:566`
-- Cursor pagination query log: `DOKUMENTASI/ParentShield_UI.md:642`, `DOKUMENTASI/DOCUMENTATION.md:77`
+- **Integrasi AdGuard API:** `DOKUMENTASI/DOCUMENTATION.json`
+  - Auth header: `components.securitySchemes.ApiKey`
+  - Create device: `paths./oapi/v1/devices.post` → schema `DeviceCreate`
+  - Device settings: `paths./oapi/v1/devices/{device_id}/settings.put` → schema `DeviceSettingsUpdate`
+  - DNS server settings: `paths./oapi/v1/dns_servers/{dns_server_id}/settings.put` → schema `DNSServerSettingsUpdate`
+  - iOS profile: `paths./oapi/v1/devices/{device_id}/doh.mobileconfig.get`
+  - Query log + cursor: `paths./oapi/v1/query_log.get` → schema `QueryLogResponse`, `Page`
+  - Stats: `paths./oapi/v1/stats/time.get`, `paths./oapi/v1/stats/categories.get`
+  - Account limits: `paths./oapi/v1/account/limits.get` → schema `AccountLimits`, `Limit`
+  - Device status (inferred): `paths./oapi/v1/stats/devices.get` → field `last_activity_time_millis`
+
+- **Flow aplikasi wajib:** `DOKUMENTASI/ParentShield.md` → Bagian B, item 2–4
+- **Device limit + rollback:** `DOKUMENTASI/ParentShield.md` → Bagian B, item 3 dan 6
+- **UI implementation detail:** `DOKUMENTASI/ParentShield_UI.md` → section Dashboard, Devices
+- **AddDevice koreksi Android/Windows/iOS:** `DOKUMENTASI/ParentShield_UI.md` → section AddDevice
+- **Popup global add device:** `DOKUMENTASI/ParentShield_UI.md` → section Global Popup
+- **State management wajib:** `DOKUMENTASI/ParentShield_UI.md` → section State Management
+- **Cursor pagination query log:** `DOKUMENTASI/ParentShield_UI.md` → section Activity History;
+  `DOKUMENTASI/DOCUMENTATION.json` → schema `QueryLogResponse.pages[]`, `Page.page_cursor`
 
 > Catatan scope: **Tidak mengimplementasikan scheduler/jam malam** pada plan ini.
 
@@ -72,15 +83,19 @@ Frontend React+TS ↔ Laravel Internal API ↔ AdGuard DNS API
 - Base URL: `https://api.adguard-dns.io/oapi/v1`
 - Header auth: `Authorization: ApiKey {api_key}`
 - Endpoint kunci:
-  - `PUT /dns_servers/{dns_server_id}/settings`
-  - `POST /devices`
-  - `PUT /devices/{id}/settings`
-  - `GET /devices/{id}/doh.mobileconfig`
-  - `GET /query_log`
-  - `GET /stats/categories`
-  - `GET /stats/time`
-  - `GET /account/limits`
-  - `GET /web_services`
+    - `GET /dns_servers`                              ← WAJIB: ambil dns_server_id sebelum create device
+    - `PUT /dns_servers/{dns_server_id}/settings`
+    - `POST /devices`                                 ← requires: name, device_type, dns_server_id
+    - `PUT /devices/{id}`                             ← update nama/tipe device
+    - `PUT /devices/{id}/settings`                    ← update protection_enabled, detect_doh_auth_only
+    - `GET /devices/{id}/doh.mobileconfig`            ← iOS DoH profile
+    - `GET /devices/{id}/dot.mobileconfig`            ← iOS DoT profile (alternatif)
+    - `GET /query_log`
+    - `GET /stats/categories`
+    - `GET /stats/time`
+    - `GET /stats/devices`                            ← sumber last_activity_time_millis untuk status device
+    - `GET /account/limits`
+    - `GET /web_services`
 
 ---
 
@@ -178,18 +193,19 @@ Halaman:
 - AddDevice Modal (Android/Windows/iOS)
 
 **Backend**
-- Endpoint:
-  - list devices
-  - add/register device
-  - update device settings
-  - sync orphan devices dari AdGuard ke DB
-  - delete device
-  - account limits
-  - doh.mobileconfig download (iOS)
-- Rollback transaksi bisnis:
-  - POST `/devices` sukses, PUT `/devices/{id}/settings` gagal → delete remote + hapus DB
-  - timeout deteksi koneksi → rollback
+  - Endpoint:
+    - list DNS servers (`GET /dns_servers`) — untuk resolve `dns_server_id` default user
+    - list devices
+    - add/register device — payload wajib include `dns_server_id` (resolve dari DNS server default)
+    - update device name/type (`PUT /devices/{id}`)
+    - update device settings (`PUT /devices/{id}/settings`)
+    ...
+   - Rollback transaksi bisnis:
+   - POST `/devices` sukses, PUT `/devices/{id}/settings` gagal → DELETE `/devices/{id}` remote + hapus DB
 
+  > **Catatan:** AdGuard API tidak mengembalikan field `status` atau `last_seen_at` pada Device object.
+  > Status aktif device harus diinfer dari `last_activity_time_millis` via `GET /stats/devices`.
+  > Polling "status koneksi" berarti polling endpoint stats, bukan endpoint device langsung.
 **Frontend**
 - Device grid + slot banner dinamis (`X/5`).
 - Empty slot card membuka AddDevice modal.
@@ -238,10 +254,16 @@ Halaman:
 - Panel proteksi global (optimistic update + rollback jika gagal).
 - Device anak list + link ke devices.
 
-**Catatan penting**
-- Toggle “Filter Pencarian Aman” belum mapping API final; sementara:
-  - opsi A: hide dulu
-  - opsi B: tampil disabled + tooltip “menunggu dukungan backend”
+  **Catatan penting**
+  - Toggle "Filter Pencarian Aman" → mapping ke `DNSServerSettings.parental_control_settings`:
+    - `engines_safe_search_enabled` (safe search di search engine)
+    - `youtube_safe_search_enabled` (safe search YouTube)
+    - Update via `PUT /dns_servers/{dns_server_id}/settings`
+    - Ini setting level DNS server (berlaku semua device), bukan per-device.
+  - Semua endpoint stats (`/stats/time`, `/stats/categories`, dll.) memerlukan
+    `time_from_millis` dan `time_to_millis` sebagai **parameter wajib**.
+    Laravel aggregation endpoint harus selalu menghitung time range default (misal: 24 jam terakhir)
+    dan meneruskannya ke AdGuard — tidak boleh dihilangkan.
 
 **Acceptance**
 - Data dashboard tampil <latensi target internal>.
@@ -253,12 +275,13 @@ Halaman:
 Halaman:
 - `/activity`
 
-**Backend**
-- Endpoint activity dengan:
-  - filter keyword/status/device
-  - `time_from_millis`, `time_to_millis`
-  - cursor passthrough dari AdGuard
-- Normalisasi BigInt agar aman di frontend (recommended: stringify di Laravel).
+ **Backend**
+  - Endpoint activity dengan:
+    - filter: `search` (domain name), `statuses`, `devices`, `categories`, `countries`, `companies`
+    - `time_from_millis` dan `time_to_millis` — **REQUIRED** oleh AdGuard API, backend wajib selalu sertakan (default: range tertentu jika tidak dipilih user)
+    - Cursor pagination: response AdGuard mengembalikan `{ items: [], pages: [] }`
+      di mana cursor berikutnya diambil dari `pages[].page_cursor` (bukan field `cursor` di root).
+      Backend wajib menormalisasi ini sebelum dikirim ke frontend.
 
 **Frontend**
 - Filter bar.
@@ -416,8 +439,11 @@ Satu fitur dianggap selesai jika:
 
 ## 13) Keputusan Produk yang Perlu Dipatok Sebelum Implementasi Dashboard
 
-1. Toggle “Filter Pencarian Aman”:
-   - hide sementara / disable / mapping khusus?
+  1. Toggle "Filter Pencarian Aman":
+     - ✅ RESOLVED: mapping ke `parental_control_settings.engines_safe_search_enabled`
+         `youtube_safe_search_enabled` via `PUT /dns_servers/{dns_server_id}/settings`.
+     - Perlu keputusan UX: apakah toggle ini satu tombol gabungan (engines + youtube sekaligus)
+       atau dua toggle terpisah?
 2. Tombol “Kelola” device:
    - route `/devices/:id` sederhana atau modal quick-manage?
 3. Strategy BigInt final:
