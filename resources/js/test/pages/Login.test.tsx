@@ -40,29 +40,29 @@ describe('Login', () => {
   it('renders login form', () => {
     render(<Login />, { wrapper: createWrapper() });
     expect(screen.getByText('ParentShield')).toBeInTheDocument();
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByLabelText('Password')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+    expect(screen.getByLabelText('Alamat Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Kata Sandi')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /masuk/i })).toBeInTheDocument();
   });
 
   it('shows client-side validation errors', async () => {
     render(<Login />, { wrapper: createWrapper() });
-    fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
-    expect(await screen.findByText('Email is required.')).toBeInTheDocument();
-    expect(screen.getByText('Password is required.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /masuk/i }));
+    expect(await screen.findByText('Email wajib diisi.')).toBeInTheDocument();
+    expect(screen.getByText('Kata sandi wajib diisi.')).toBeInTheDocument();
   });
 
   it('calls onLogin with credentials', async () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
     render(<Login />, { wrapper: createWrapper({ onLogin }) });
 
-    fireEvent.change(screen.getByLabelText('Email'), {
+    fireEvent.change(screen.getByLabelText('Alamat Email'), {
       target: { value: 'test@example.com' },
     });
-    fireEvent.change(screen.getByLabelText('Password'), {
+    fireEvent.change(screen.getByLabelText('Kata Sandi'), {
       target: { value: 'password123' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
+    fireEvent.click(screen.getByRole('button', { name: /masuk/i }));
 
     await waitFor(() => {
       expect(onLogin).toHaveBeenCalledWith('test@example.com', 'password123');
@@ -78,13 +78,13 @@ describe('Login', () => {
 
   it('disables form when loading', () => {
     render(<Login />, { wrapper: createWrapper({ loading: true }) });
-    expect(screen.getByLabelText('Email')).toBeDisabled();
-    expect(screen.getByLabelText('Password')).toBeDisabled();
+    expect(screen.getByLabelText('Alamat Email')).toBeDisabled();
+    expect(screen.getByLabelText('Kata Sandi')).toBeDisabled();
   });
 
   it('has links to register and forgot password', () => {
     render(<Login />, { wrapper: createWrapper() });
-    expect(screen.getByText('Create one')).toHaveAttribute('href', '/register');
-    expect(screen.getByText('Forgot password?')).toHaveAttribute('href', '/forgot-password');
+    expect(screen.getByText('Buat Akun')).toHaveAttribute('href', '/register');
+    expect(screen.getByText('Lupa kata sandi?')).toHaveAttribute('href', '/forgot-password');
   });
 });

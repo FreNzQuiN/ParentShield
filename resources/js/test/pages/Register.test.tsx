@@ -39,51 +39,51 @@ describe('Register', () => {
 
   it('renders register form', () => {
     render(<Register />, { wrapper: createWrapper() });
-    expect(screen.getByLabelText('Name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByLabelText('Password')).toBeInTheDocument();
-    expect(screen.getByLabelText('Confirm Password')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
+    expect(screen.getByLabelText('Nama Lengkap')).toBeInTheDocument();
+    expect(screen.getByLabelText('Alamat Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Kata Sandi')).toBeInTheDocument();
+    expect(screen.getByLabelText('Konfirmasi Kata Sandi')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /buat akun/i })).toBeInTheDocument();
   });
 
   it('shows validation for empty fields', async () => {
     render(<Register />, { wrapper: createWrapper() });
-    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
-    expect(await screen.findByText('Name is required.')).toBeInTheDocument();
-    expect(screen.getByText('Email is required.')).toBeInTheDocument();
-    expect(screen.getByText('Password is required.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /buat akun/i }));
+    expect(await screen.findByText('Nama lengkap wajib diisi.')).toBeInTheDocument();
+    expect(screen.getByText('Email wajib diisi.')).toBeInTheDocument();
+    expect(screen.getByText('Kata sandi wajib diisi.')).toBeInTheDocument();
   });
 
   it('validates password length', async () => {
     render(<Register />, { wrapper: createWrapper() });
-    fireEvent.change(screen.getByLabelText('Password'), {
+    fireEvent.change(screen.getByLabelText('Kata Sandi'), {
       target: { value: 'short' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
-    expect(await screen.findByText('Password must be at least 8 characters.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /buat akun/i }));
+    expect(await screen.findByText('Kata sandi minimal 8 karakter.')).toBeInTheDocument();
   });
 
   it('validates password confirmation match', async () => {
     render(<Register />, { wrapper: createWrapper() });
-    fireEvent.change(screen.getByLabelText('Password'), {
+    fireEvent.change(screen.getByLabelText('Kata Sandi'), {
       target: { value: 'password123' },
     });
-    fireEvent.change(screen.getByLabelText('Confirm Password'), {
+    fireEvent.change(screen.getByLabelText('Konfirmasi Kata Sandi'), {
       target: { value: 'different' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
-    expect(await screen.findByText('Passwords do not match.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /buat akun/i }));
+    expect(await screen.findByText('Kata sandi tidak cocok.')).toBeInTheDocument();
   });
 
   it('calls onRegister with all fields', async () => {
     const onRegister = vi.fn().mockResolvedValue(undefined);
     render(<Register />, { wrapper: createWrapper({ onRegister }) });
 
-    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'John' } });
-    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'john@test.com' } });
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    fireEvent.change(screen.getByLabelText('Nama Lengkap'), { target: { value: 'John' } });
+    fireEvent.change(screen.getByLabelText('Alamat Email'), { target: { value: 'john@test.com' } });
+    fireEvent.change(screen.getByLabelText('Kata Sandi'), { target: { value: 'password123' } });
+    fireEvent.change(screen.getByLabelText('Konfirmasi Kata Sandi'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: /buat akun/i }));
 
     await waitFor(() => {
       expect(onRegister).toHaveBeenCalledWith(
@@ -94,14 +94,14 @@ describe('Register', () => {
 
   it('disables form when loading', () => {
     render(<Register />, { wrapper: createWrapper({ loading: true }) });
-    expect(screen.getByLabelText('Name')).toBeDisabled();
-    expect(screen.getByLabelText('Email')).toBeDisabled();
-    expect(screen.getByLabelText('Password')).toBeDisabled();
-    expect(screen.getByLabelText('Confirm Password')).toBeDisabled();
+    expect(screen.getByLabelText('Nama Lengkap')).toBeDisabled();
+    expect(screen.getByLabelText('Alamat Email')).toBeDisabled();
+    expect(screen.getByLabelText('Kata Sandi')).toBeDisabled();
+    expect(screen.getByLabelText('Konfirmasi Kata Sandi')).toBeDisabled();
   });
 
   it('has link to login', () => {
     render(<Register />, { wrapper: createWrapper() });
-    expect(screen.getByText('Sign in')).toHaveAttribute('href', '/login');
+    expect(screen.getByText('Masuk')).toHaveAttribute('href', '/login');
   });
 });
