@@ -35,7 +35,7 @@ export default function DeviceAnakList({ devices }: DeviceAnakListProps) {
       </div>
 
       <div>
-        {devices.map((device, idx) => (
+        {devices.slice(0, 3).map((device, idx) => (
           <Link
             key={device.id}
             to={`/devices`}

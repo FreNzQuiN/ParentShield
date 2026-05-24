@@ -1,13 +1,13 @@
+import { useMemo, useState, useEffect } from 'react';
 import type { TimeSeriesPoint } from '../../../types/dashboard';
 
 interface BarChartProps {
   data: TimeSeriesPoint[];
 }
 
-function formatHour(millis: number): string {
+function formatHourShort(millis: number): string {
   const d = new Date(millis);
-  const h = d.getHours();
-  return `${h.toString().padStart(2, '0')}:00`;
+  return String(d.getHours());
 }
 
 function formatAxisValue(n: number): string {
@@ -15,8 +15,41 @@ function formatAxisValue(n: number): string {
   return String(n);
 }
 
+function mergePoints(points: TimeSeriesPoint[], factor: number): TimeSeriesPoint[] {
+  if (factor <= 1) return points;
+  const result: TimeSeriesPoint[] = [];
+  for (let i = 0; i < points.length; i += factor) {
+    const slice = points.slice(i, i + factor);
+    result.push({
+      hour: slice[0].hour,
+      allowed: slice.reduce((s, p) => s + p.allowed, 0),
+      blocked: slice.reduce((s, p) => s + p.blocked, 0),
+    });
+  }
+  return result;
+}
+
+function useIsMobile(): boolean {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    setMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return mobile;
+}
+
 export default function BarChart({ data }: BarChartProps) {
-  if (!data.length) {
+  const isMobile = useIsMobile();
+
+  const displayData = useMemo(() => {
+    if (!data.length) return [];
+    return isMobile ? mergePoints(data, 2) : data;
+  }, [data, isMobile]);
+
+  if (!displayData.length) {
     return (
       <div className="flex h-[200px] items-center justify-center text-sm text-[#727785]">
         Belum ada data aktivitas.
@@ -24,7 +57,7 @@ export default function BarChart({ data }: BarChartProps) {
     );
   }
 
-  const maxVal = Math.max(...data.map((d) => d.allowed + d.blocked), 1);
+  const maxVal = Math.max(...displayData.map((d) => d.allowed + d.blocked), 1);
   const yTicks = [0, Math.round(maxVal / 2), maxVal];
 
   return (
@@ -36,27 +69,64 @@ export default function BarChart({ data }: BarChartProps) {
           </span>
         ))}
       </div>
-      {data.map((point, i) => {
+      {displayData.map((point) => {
         const total = point.allowed + point.blocked;
-        const heightPct = maxVal === 0 ? 0 : Math.max((total / maxVal) * 100, 2);
+        const hasBlocked = point.blocked > 0;
+        const hasAllowed = point.allowed > 0;
+        const allowedPct = maxVal === 0 ? 0 : (point.allowed / maxVal) * 100;
+        const blockedPct = maxVal === 0 ? 0 : (point.blocked / maxVal) * 100;
+        const totalPct = allowedPct + blockedPct;
+        const barHeight = Math.max(totalPct, total > 0 ? 4 : 0);
         const isPeak = total === maxVal && total > 0;
+
+        if (!total) {
+          return (
+            <div
+              key={point.hour}
+              className="relative flex flex-1 flex-col justify-end items-center h-full"
+            >
+              <div className="w-3/4 rounded-t bg-[#ebeef4]" style={{ height: '2px' }} />
+              <span className="mt-1 text-[10px] text-[#727785]">
+                {formatHourShort(point.hour)}
+              </span>
+            </div>
+          );
+        }
+
         return (
           <div
             key={point.hour}
             className="relative flex flex-1 flex-col justify-end items-center h-full"
-            title={`${formatHour(point.hour)} — Diizinkan: ${point.allowed.toLocaleString()}, Diblokir: ${point.blocked.toLocaleString()}`}
+            title={`${formatHourShort(point.hour)}:00 — Diizinkan: ${point.allowed.toLocaleString()}, Diblokir: ${point.blocked.toLocaleString()}`}
           >
             <div
-              className="w-3/4 rounded-t transition-all"
-              style={{
-                height: `${heightPct}%`,
-                backgroundColor: isPeak ? '#005bbf' : '#adc7ff',
-                opacity: isPeak ? 1 : 0.65,
-                minHeight: total > 0 ? '4px' : '0px',
-              }}
-            />
+              className="w-3/4 flex flex-col justify-end overflow-hidden rounded-t transition-all duration-500 ease-out"
+              style={{ height: `${barHeight}%`, minHeight: '4px' }}
+            >
+              {hasAllowed && (
+                <div
+                  className="w-full transition-all duration-500 ease-out"
+                  style={{
+                    height: `${(allowedPct / totalPct) * 100}%`,
+                    backgroundColor: isPeak ? '#005bbf' : '#adc7ff',
+                    opacity: isPeak && !hasBlocked ? 1 : 0.65,
+                    minHeight: '2px',
+                  }}
+                />
+              )}
+              {hasBlocked && (
+                <div
+                  className="w-full rounded-t transition-all duration-500 ease-out"
+                  style={{
+                    height: `${(blockedPct / totalPct) * 100}%`,
+                    backgroundColor: '#dd3635',
+                    minHeight: '2px',
+                  }}
+                />
+              )}
+            </div>
             <span className="mt-1 text-[10px] text-[#727785]">
-              {formatHour(point.hour)}
+              {formatHourShort(point.hour)}
             </span>
           </div>
         );

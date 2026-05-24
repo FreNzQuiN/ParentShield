@@ -7,6 +7,8 @@ interface UseDashboardResult {
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
+  softRefresh: () => Promise<void>;
+  isRefreshing: boolean;
   toggleSafebrowsing: (key: keyof SafebrowsingSettings, value: boolean) => Promise<void>;
 }
 
@@ -14,6 +16,7 @@ export function useDashboard(): UseDashboardResult {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -32,6 +35,18 @@ export function useDashboard(): UseDashboardResult {
     }
   }, []);
 
+  const softRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const result = await fetchDashboard();
+      setData(result);
+    } catch {
+      // silent – keep current data
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
   const toggleSafebrowsing = useCallback(
     async (key: keyof SafebrowsingSettings, value: boolean) => {
       await updateSafebrowsing(key, value);
@@ -43,5 +58,5 @@ export function useDashboard(): UseDashboardResult {
     refresh();
   }, [refresh]);
 
-  return { data, loading, error, refresh, toggleSafebrowsing };
+  return { data, loading, error, refresh, softRefresh, isRefreshing, toggleSafebrowsing };
 }
