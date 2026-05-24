@@ -5,7 +5,7 @@ import Loading from '../../app/components/shared/Loading';
 describe('Loading', () => {
   it('renders with default message', () => {
     render(<Loading />);
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Memuat...')).toBeInTheDocument();
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 

@@ -23,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const isAuthenticated = user !== null;
+  const hasApiKey = user?.has_api_key === true;
 
   const setAuthToken = useCallback((token: string) => {
     setStoredToken(token);
@@ -42,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
     } catch (err: unknown) {
       const e = err as { message?: string };
-      setLoginError(e?.message ?? 'Login failed. Please try again.');
+      setLoginError(e?.message ?? 'Login gagal. Silakan coba lagi.');
       throw err;
     } finally {
       setLoading(false);
@@ -66,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
     } catch (err: unknown) {
       const e = err as { message?: string };
-      setLoginError(e?.message ?? 'Registration failed. Please try again.');
+      setLoginError(e?.message ?? 'Registrasi gagal. Silakan coba lagi.');
       throw err;
     } finally {
       setLoading(false);
@@ -81,6 +82,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     }
   }, [removeAuthToken]);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const { user: userData } = await authApi.me();
+      setUser(userData);
+    } catch {
+      // ignore — user stays logged in with stale data
+    }
+  }, []);
 
   const clearError = useCallback(() => setLoginError(null), []);
 
@@ -111,10 +121,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         loginError,
         isAuthenticated,
+        hasApiKey,
         onLogin,
         onRegister,
         onLogout,
         clearError,
+        refreshUser,
       }}
     >
       {children}

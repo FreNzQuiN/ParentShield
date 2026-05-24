@@ -2,6 +2,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  has_api_key?: boolean;
 }
 
 export interface AuthData {

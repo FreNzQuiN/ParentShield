@@ -84,7 +84,8 @@ Frontend React+TS ↔ Laravel Internal API ↔ AdGuard DNS API
 - Header auth: `Authorization: ApiKey {api_key}`
 - Endpoint kunci:
     - `GET /dns_servers`                              ← WAJIB: ambil dns_server_id sebelum create device
-    - `PUT /dns_servers/{dns_server_id}/settings`
+    - `GET /dns_servers/{id}`                          ← baca DNSServer termasuk settings (safebrowsing, parental, dll)
+    - `PUT /dns_servers/{dns_server_id}/settings`      ← update setting DNS server
     - `POST /devices`                                 ← requires: name, device_type, dns_server_id
     - `PUT /devices/{id}`                             ← update nama/tipe device
     - `PUT /devices/{id}/settings`                    ← update protection_enabled, detect_doh_auth_only
@@ -96,6 +97,36 @@ Frontend React+TS ↔ Laravel Internal API ↔ AdGuard DNS API
     - `GET /stats/devices`                            ← sumber last_activity_time_millis untuk status device
     - `GET /account/limits`
     - `GET /web_services`
+
+> ⚠️ **KRITIKAL — API field mapping yang sudah diverifikasi (jangan diguess):**
+> 
+> **`GET /stats/time`** → response `{ stats: [{ time_millis, value: { queries, blocked, companies } }] }`
+>   - BUKAN `{ time: [...], processed, blocked }` seperti dugaan awal.
+>   - `value.queries` = jumlah allowed/tidak diblokir.
+> 
+> **`GET /stats/categories`** → response `{ stats: [{ category_type: "ADS", queries: 100 }] }`
+>   - BUKAN `{ categories: [{ name, count, percent }] }`.
+>   - `queries` = total queries kategori (bukan count). `percent` tidak ada — hitung manual.
+> 
+> **`GET /stats/domains`** → response `{ stats: [{ domain, value: { queries, blocked, companies } }] }`
+>   - BUKAN `{ domains: [{ domain, count, percent }] }`.
+> 
+> **`GET /stats/devices`** → response `{ stats: [{ device_id, value: { queries, blocked, companies }, last_activity_time_millis }] }`
+>   - BUKAN flat array. Data di dalam `stats[]`.
+> 
+> **`GET /dns_servers/{id}/settings`** → **TIDAK ADA method GET!** Hanya PUT.
+>   - Untuk baca settings: `GET /dns_servers/{id}` → extract `response.settings`.
+> 
+> **`PUT /dns_servers/{id}/settings`** → payload `{ safebrowsing_settings: { ... }, parental_control_settings: { ... } }`
+>   - `safebrowsing_enabled` atau `block_newly_registered_domains` di **top-level TIDAK VALID**.
+>   - Wajib nested: `{ safebrowsing_settings: { enabled: true, block_dangerous_domains: true, block_nrd: true } }`.
+>   - `parental_settings` → nama benar: `parental_control_settings`.
+> 
+> **`GET /devices`** → response langsung array of Device.
+>   - BUKAN `{ devices: [...] }` — langsung array di root.
+> 
+> **`GET /account/limits`** → response `{ devices: { max, used } }`.
+>   - Langsung object, bukan `{ limits: ... }`.
 
 ---
 

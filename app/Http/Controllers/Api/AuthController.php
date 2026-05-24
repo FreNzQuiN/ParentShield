@@ -24,7 +24,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->created([
-            'user' => $user->only(['id', 'name', 'email']),
+            'user' => $user->only(['id', 'name', 'email']) + ['has_api_key' => false],
             'token' => $token,
         ], 'Registration successful.');
     }
@@ -39,7 +39,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->success([
-            'user' => $user->only(['id', 'name', 'email']),
+            'user' => $user->only(['id', 'name', 'email']) + ['has_api_key' => $user->adguard_api_key_verified_at !== null],
             'token' => $token,
         ], 'Login successful.');
     }
@@ -56,7 +56,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         return $this->success([
-            'user' => $user->only(['id', 'name', 'email']),
+            'user' => $user->only(['id', 'name', 'email']) + ['has_api_key' => $user->adguard_api_key_verified_at !== null],
         ]);
     }
 

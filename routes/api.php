@@ -31,4 +31,16 @@ Route::middleware(['api', AddCorrelationId::class])->prefix('v1')->group(functio
             Route::get('/me', [\App\Http\Controllers\Api\AuthController::class, 'me']);
         });
     });
+
+    // Setup API key (requires auth, no API key needed)
+    Route::middleware(['auth:sanctum'])->prefix('setup-api-key')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Api\SetupApiKeyController::class, 'store']);
+        Route::get('/status', [\App\Http\Controllers\Api\SetupApiKeyController::class, 'status']);
+    });
+
+    // Protected — requires auth + API key
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
+        Route::put('/dashboard/safebrowsing', [\App\Http\Controllers\Api\DashboardController::class, 'updateSafebrowsing']);
+    });
 });

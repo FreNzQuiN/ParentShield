@@ -24,15 +24,15 @@ describe('ForgotPassword', () => {
 
   it('renders email form', () => {
     render(<ForgotPassword />, { wrapper: Wrapper });
-    expect(screen.getByText('Reset your password')).toBeInTheDocument();
+    expect(screen.getByText('Atur ulang kata sandi')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /send reset link/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /kirim link reset/i })).toBeInTheDocument();
   });
 
   it('shows validation for empty email', async () => {
     render(<ForgotPassword />, { wrapper: Wrapper });
-    fireEvent.click(screen.getByRole('button', { name: /send reset link/i }));
-    expect(await screen.findByText('Email is required.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /kirim link reset/i }));
+    expect(await screen.findByText('Email wajib diisi.')).toBeInTheDocument();
   });
 
   it('shows success state after sending', async () => {
@@ -42,17 +42,17 @@ describe('ForgotPassword', () => {
     fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: 'test@example.com' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /send reset link/i }));
+    fireEvent.click(screen.getByRole('button', { name: /kirim link reset/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Check your email for the reset link.')).toBeInTheDocument();
+      expect(screen.getByText('Periksa email Anda untuk link reset.')).toBeInTheDocument();
     });
-    expect(screen.getByText('Back to Sign In')).toHaveAttribute('href', '/login');
+    expect(screen.getByText('Kembali ke Masuk')).toHaveAttribute('href', '/login');
   });
 
   it('has link back to login', () => {
     render(<ForgotPassword />, { wrapper: Wrapper });
-    expect(screen.getByText('Back to Sign In')).toHaveAttribute('href', '/login');
+    expect(screen.getByText('Kembali ke Masuk')).toHaveAttribute('href', '/login');
   });
 
   it('disables form when loading', async () => {
@@ -64,7 +64,7 @@ describe('ForgotPassword', () => {
     fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: 'test@example.com' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /send reset link/i }));
+    fireEvent.click(screen.getByRole('button', { name: /kirim link reset/i }));
 
     await waitFor(() => {
       expect(screen.getByLabelText('Email')).toBeDisabled();

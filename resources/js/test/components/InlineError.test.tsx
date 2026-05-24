@@ -12,7 +12,7 @@ describe('InlineError', () => {
   it('renders retry button when onRetry provided', () => {
     const onRetry = vi.fn();
     render(<InlineError message="Failed" onRetry={onRetry} />);
-    const button = screen.getByText('Try Again');
+    const button = screen.getByText('Coba Lagi');
     expect(button).toBeInTheDocument();
     fireEvent.click(button);
     expect(onRetry).toHaveBeenCalledTimes(1);

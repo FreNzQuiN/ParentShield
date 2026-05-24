@@ -47,7 +47,7 @@ export default function ToastContainer() {
           <button
             onClick={() => removeToast(toast.id)}
             className="ml-2 rounded p-1 hover:bg-white/20 transition-colors"
-            aria-label="Dismiss"
+            aria-label="Tutup"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

@@ -20,13 +20,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+const AUTH_ROUTES = ['/auth/login', '/auth/register', '/auth/forgot-password'];
+
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiErrorResponse>) => {
     if (error.response) {
       const { status, data } = error.response;
+      const requestUrl = error.config?.url ?? '';
 
-      if (status === 401) {
+      if (status === 401 && !AUTH_ROUTES.some((r) => requestUrl.startsWith(r))) {
         window.location.href = '/login';
         return Promise.reject(error);
       }
@@ -39,7 +42,7 @@ api.interceptors.response.use(
       return Promise.reject({
         success: false,
         code: data?.code ?? 'NETWORK_ERROR',
-        message: data?.message ?? 'An unexpected error occurred.',
+        message: data?.message ?? 'Terjadi kesalahan tak terduga.',
         errors: data?.errors,
       } as ApiErrorResponse);
     }
@@ -48,14 +51,14 @@ api.interceptors.response.use(
       return Promise.reject({
         success: false,
         code: 'TIMEOUT',
-        message: 'Request timed out. Please try again.',
+        message: 'Permintaan waktu habis. Silakan coba lagi.',
       } as ApiErrorResponse);
     }
 
     return Promise.reject({
       success: false,
       code: 'NETWORK_ERROR',
-      message: 'Network error. Please check your connection.',
+      message: 'Gangguan jaringan. Periksa koneksi Anda.',
     } as ApiErrorResponse);
   },
 );

@@ -26,84 +26,57 @@ Ekstrak langsung dari kode Figma. Buat file `src/styles/tokens.ts` atau gunakan 
 
 ### 1.1 Warna
 
-```ts
-// src/styles/tokens.ts
-export const colors = {
-  // Brand
-  primary:        '#005bbf',   // Blue utama — tombol, link, active state
-  primaryLight:   'rgba(26, 115, 232, 0.1)', // Background active nav item
+> File referensi tokens ada di `resources/js/app/styles/tokens.ts`. Nilai di bawah adalah ekstraksi dari Figma. Implementasi aktual ada di file tersebut.
 
-  // Background
-  bgPage:         '#f7f9ff',   // Background halaman utama
-  bgSidebar:      '#f1f4fa',   // Background sidebar
-  bgCard:         '#ffffff',   // Background kartu
-  bgCardInner:    '#f7f9ff',   // Background toggle row dalam card
-  bgTag:          '#ebeef4',   // Background pill/badge netral
-
-  // Text
-  textPrimary:    '#181c20',   // Judul, angka
-  textSecondary:  '#414754',   // Subtitle, label, body
-  textMuted:      '#414754',   // Sama dengan secondary, opacity bisa ditambah
-
-  // Status
-  success:        '#1b6d24',   // Online, aktif, toggle ON
-  successBadge:   '#a0f399',   // Background badge "+5%"
-  danger:         '#ba1a1a',   // Diblokir, angka merah
-  dangerLight:    '#ffb3ac',   // Progress bar danger muted
-  dangerBar:      '#dd3635',   // Progress bar danger medium
-
-  // Border & Divider
-  border:         'rgba(193, 198, 214, 0.2)',  // Border kartu
-  borderInner:    'rgba(193, 198, 214, 0.3)',  // Border divider dalam kartu
-  borderToggle:   'rgba(193, 198, 214, 0.1)',  // Border toggle row
-
-  // Interaktif
-  inactiveToggle: '#dfe3e8',   // Toggle OFF background
-  inactiveDot:    '#dfe3e8',   // Dot status offline
-
-  // Chart
-  chartPrimary:   '#005bbf',   // Bar chart — peak
-  chartBar:       {
-    opacity20: 'rgba(0, 91, 191, 0.2)',
-    opacity30: 'rgba(0, 91, 191, 0.3)',
-    opacity40: 'rgba(0, 91, 191, 0.4)',
-    opacity50: 'rgba(0, 91, 191, 0.5)',
-    opacity60: 'rgba(0, 91, 191, 0.6)',
-    opacity80: 'rgba(0, 91, 191, 0.8)',
-    opacity90: 'rgba(0, 91, 191, 0.9)',
-  },
-  chartBarBg:     '#ebeef4',   // Background track progress bar
-  chartBlue:      '#adc7ff',   // Progress bar warna sekunder
-};
-```
+| Token | Value | Penggunaan |
+|-------|-------|-----------|
+| `primary` | `#005bbf` | Tombol, link, active state |
+| `primaryLight` | `rgba(26, 115, 232, 0.1)` | Background active nav item |
+| `bgPage` | `#f7f9ff` | Background halaman utama |
+| `bgSidebar` | `#f1f4fa` | Background sidebar |
+| `bgCard` | `#ffffff` | Background kartu |
+| `bgCardInner` | `#f7f9ff` | Background toggle row dalam card |
+| `bgTag` | `#ebeef4` | Background pill/badge netral |
+| `textPrimary` | `#181c20` | Judul, angka |
+| `textSecondary` | `#414754` | Subtitle, label, body |
+| `textMuted` | `#727785` | Placeholder, icon |
+| `success` | `#1b6d24` | Online, aktif, toggle ON |
+| `successBadge` | `#a0f399` | Background badge "+5%" |
+| `danger` | `#ba1a1a` | Diblokir, angka merah |
+| `dangerLight` | `#ffb3ac` | Progress bar danger muted |
+| `dangerBar` | `#dd3635` | Progress bar danger medium |
+| `border` | `rgba(193, 198, 214, 0.2)` | Border kartu |
+| `borderInner` | `rgba(193, 198, 214, 0.3)` | Border divider dalam kartu |
+| `borderToggle` | `rgba(193, 198, 214, 0.1)` | Border toggle row |
+| `inactiveToggle` / `inactiveDot` | `#dfe3e8` | Toggle OFF background, dot offline |
+| `chartPrimary` | `#005bbf` | Bar chart — peak |
+| `chartBlue` | `#adc7ff` | Progress bar warna sekunder |
+| `chartBarBg` | `#ebeef4` | Background track progress bar |
 
 ### 1.2 Tipografi
 
 Dua font family digunakan: **Roboto** (UI utama) dan **Liberation Serif** (brand name + subtitle sidebar).
 
-```ts
-export const typography = {
-  // Brand
-  brand: {
-    name:    { font: 'Liberation Serif', weight: 700, size: 24, lineHeight: 32 },
-    tagline: { font: 'Liberation Serif', weight: 400, size: 12, lineHeight: 16 },
-  },
+**⚠️ Catatan: Ukuran di bawah adalah nilai original Figma. Implementasi aktual mengalami penyesuaian — lihat [Section 10](#10-implementasi-font-sizing-keputusan-deviasi-dari-figma).**
 
-  // Headings (Roboto)
-  h1: { weight: 700, size: 32, lineHeight: 40, letterSpacing: '-0.5px' }, // Welcome msg
-  h2: { weight: 700, size: 32, lineHeight: 40 },                          // Page title
-  h3: { weight: 500, size: 20, lineHeight: 28 },                          // Section title
-  h4: { weight: 700, size: 20, lineHeight: 28 },                          // Card heading
-  h5: { weight: 700, size: 18, lineHeight: 28 },                          // Modal title
+| Level | Figma (px) | Implementasi (px) | Tailwind |
+|-------|-----------|-------------------|----------|
+| Hero / page title | 32 | 24 | `text-[24px]` |
+| Section title | 20 | 20 | `text-[20px]` |
+| Body / label | 14 | 14 | `text-sm` |
+| Caption | 12 | 12 | `text-xs` |
 
-  // Body (Roboto)
-  bodyLg:  { weight: 400, size: 18, lineHeight: 28 },                     // Subtitle welcome
-  body:    { weight: 500, size: 14, lineHeight: 20, letterSpacing: '0.5px' }, // Default
-  bodyMd:  { weight: 400, size: 14, lineHeight: 24 },                     // Paragraf biasa
-  caption: { weight: 500, size: 12, lineHeight: 16 },                     // Label kecil
-  code:    { weight: 400, size: 14, lineHeight: 24 },                     // DNS URL copy box
-};
-```
+Detail font family & weight:
+
+| Token | Font | Weight | Size (Figma) | Size (Implem) |
+|-------|------|--------|-------------|--------------|
+| Brand name | Liberation Serif | 700 | 24px | 24px |
+| Brand tagline | Liberation Serif | 400 | 12px | 12px |
+| Hero / page title | Roboto | 700 | 32px | **24px** |
+| Section title | Roboto | 500 | 20px | 20px |
+| Body default | Roboto | 500 | 14px | 14px |
+| Body paragraf | Roboto | 400 | 14px | 14px |
+| Caption | Roboto | 500 | 12px | 12px |
 
 ### 1.3 Dimensi Layout
 
@@ -237,6 +210,8 @@ RegisterCard (w-440)
 **Node ID:** `2014:357` | **Route:** `/forgot-password`  
 **Layout:** Fullscreen, card 440px × 498px.
 
+> ⚠️ **Belum sesuai Figma:** Implementasi saat ini (`pages/ForgotPassword.tsx`) masih menggunakan teks Inggris dan styling berbeda dari Figma (masih placeholder dari fase awal). Belum di-refactor ke shared `AuthLayout` dan `FormInput`.
+
 **Struktur card:**
 ```
 ForgotPasswordCard (w-440)
@@ -254,22 +229,29 @@ ForgotPasswordCard (w-440)
 
 ### 3.4 Setup API Key
 **Node ID:** `2034:98` | **Route:** `/setup-api-key`  
-**Layout:** Fullscreen, card 448px × 592px. **Tidak ada sidebar.**
+**Layout:** Fullscreen, card centered, **Tidak ada sidebar.**
 
 **Struktur card:**
 ```
-APIKeyCard (w-448, centered)
+APIKeyCard (max-w-[440px], centered)
 ├── Brand Identity (logo centered)
-├── Stepper indicator (minimal — 1 titik, horizontal line, di tengah)
-├── "Masukkan Kunci API" (Bold 32px, centered)
-├── Deskripsi (3 baris — jelaskan tujuan API Key, centered)
+├── Stepper indicator (1 titik aktif, 1 titik nonaktif, garis horizontal)
+├── "Masukkan Kunci API" (Bold 24px, centered)
+├── Deskripsi (2 baris — jelaskan tujuan API Key, centered)
 ├── Form
 │   ├── Label: "Kunci API"
-│   ├── Input (h-50, icon key di kiri, placeholder: "ag_...")
-│   └── Button "Simpan & Lanjutkan" (w-full, h-48) + arrow icon
+│   ├── Input (h-50, icon key di kiri, placeholder: "Masukkan kunci API Anda")
+│   │   └── Toggle visibility (eye icon)
+│   └── Button "Simpan & Lanjutkan" (w-full, h-48)
 └── Help Link (centered)
-    └── "Di mana menemukan API KEY?" (color-primary, font-size-14)
+    └── "Di mana menemukan API KEY?" (color-primary, text-sm)
 ```
+
+**Catatan:**
+- Tidak ada validasi format key (`ag_`) — AdGuard API key bisa format apapun.
+- Key diverifikasi via `POST /api/v1/setup-api-key` → call `GET /dns_servers` ke AdGuard.
+- Jika valid, key disimpan terenkripsi (`Crypt::encryptString`), user di-redirect ke `/dashboard`.
+- Guard: `RequireApiKey` redirect ke halaman ini jika `hasApiKey === false`.
 
 ---
 
@@ -278,15 +260,17 @@ APIKeyCard (w-448, centered)
 
 **Layout:** Sidebar (256px) + Main Content (1024px, bg-bgPage).
 
+> ⚠️ **Font adjustment:** Ukuran font di section ini adalah original Figma. Implementasi aktual menggunakan ukuran lebih kecil — lihat [Section 10](#10-implementasi-font-sizing-keputusan-deviasi-dari-figma).
+
 **Main Content — 4 section vertikal:**
 
 **Section 1 — Welcome Header:**
 ```
 Header (w-full, pb-3.5)
-├── "Selamat Pagi, {nama}." (Roboto Bold 32px, tracking -0.5)
+├── "Selamat Pagi, {nama}." (Roboto Bold 24px, tracking -0.5)  ← Implem: 24px (Figma: 32px)
 └── Row (gap-8)
     ├── Shield Icon (16x20)
-    └── "Lindungi Keluargamu dari Bahaya Internet." (Roboto 18px, color-textSecondary)
+    └── "Lindungi Keluargamu dari Bahaya Internet." (Roboto 14px, color-textSecondary)  ← Implem: 14px (Figma: 18px)
 ```
 
 **Section 2 — Stat Cards (3 kolom):**
@@ -481,7 +465,7 @@ Main Content
         │   └── Text penjelasan integrasi AdGuard DNS
         ├── Form
         │   ├── Label: "API Key AdGuard"
-        │   ├── Input (h-48, placeholder "Contoh: ag_82k1...m39")
+        │   ├── Input (h-48, placeholder "Contoh: kunci API dari AdGuard DNS")
         │   │   └── Icon visibility toggle di kanan input
         │   └── Helper text (14px, color-textSecondary)
         ├── Actions
@@ -698,3 +682,43 @@ Tidak ada endpoint langsung. Implementasi di Laravel:
 | Empty state grid devices | Tidak ada di Figma |
 | Device detail/management page | Ada tombol "Kelola" tapi halaman tujuan tidak ada |
 | Konfirmasi hapus device | Tidak ada di Figma |
+
+---
+
+## 10. Font Sizing — Standarisasi & Deviasi dari Figma
+
+### Latar Belakang
+Figma spec menentukan `body: 14px` (section 1.2). Namun implementasi awal menggunakan **16px** untuk input, placeholder, dan subtitle — nilai yang tidak sesuai spec. Ini menyebabkan teks terasa terlalu besar (pengguna perlu zoom 90%).
+
+### Dua Jenis Perubahan
+
+#### A. Bug Fix: 16px → 14px (kembali ke spec Figma)
+Beberapa elemen menggunakan 16px yang seharusnya 14px sesuai Figma:
+
+| Elemen | Sebelum (bug) | Sesudah (fix) | Figma spec |
+|--------|--------------|--------------|------------|
+| Input value + placeholder | 16px | 14px (`text-sm`) | 14px (body) |
+| Subtitle halaman auth | 16px | 14px (`text-sm`) | 14px |
+| Teks link footer card | 16px | 14px (`text-sm`) | 14px (body) |
+
+#### B. Deviasi Disengaja: Hero & subtitle dashboard
+Figma menentukan ukuran hero terlalu besar untuk pemakaian riil:
+
+| Elemen | Figma (px) | Implementasi | Alasan |
+|--------|-----------|--------------|--------|
+| Welcome heading | 32 | **24px** | Terlalu dominan, disamakan dengan level page title |
+| Subtitle dashboard | 18 | **14px** | Konsisten dengan body text global |
+
+### Tingkat font yang distandarisasi:
+| Level | Ukuran | Tailwind | Penggunaan |
+|-------|--------|----------|------------|
+| Hero / page title | 24px | `text-[24px]` | Welcome heading, "Masuk", "Buat Akun Baru" |
+| Section title | 20px | `text-[20px]` | Brand name, card section headers |
+| Body text | 14px | `text-sm` | Input values, placeholders, subtitles, paragraphs, links |
+| Label / button | 14px | `text-sm` | Form labels, button text |
+| Caption | 12px | `text-xs` | Helper text, footer, small links |
+
+### Catatan untuk agent selanjutnya:
+- **Semua font body menggunakan `text-sm` (14px)** kecuali heading/judul.
+- Jangan gunakan `text-base` (16px) untuk body — itu bug yang sudah diperbaiki.
+- Jika ingin mengembalikan hero/subtitle dashboard ke ukuran Figma: ganti `text-[24px]` → `text-[32px]` dan `text-sm` → `text-[18px]` di `pages/Dashboard.tsx`.
