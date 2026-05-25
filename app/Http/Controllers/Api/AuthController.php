@@ -66,12 +66,12 @@ class AuthController extends Controller
             $status = Password::sendResetLink($request->only('email'));
 
             if ($status !== Password::RESET_LINK_SENT) {
-                Log::warning('Password reset requested for non-existent or invalid email', [
+                Log::info('Password reset requested for non-existent or invalid email', [
                     'email' => $request->input('email'),
                 ]);
             }
         } catch (\Throwable $e) {
-            Log::warning('Password reset failed', [
+            Log::error('Password reset failed unexpectedly', [
                 'email' => $request->input('email'),
                 'error' => $e->getMessage(),
             ]);

@@ -86,8 +86,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (QueryException $e, Request $request) {
             if ($request->is('api/*')) {
-                report($e);
-
                 return response()->json([
                     'success' => false,
                     'code' => 'DB_CONNECTION_ERROR',
@@ -98,8 +96,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (ConnectionException $e, Request $request) {
             if ($request->is('api/*')) {
-                report($e);
-
                 return response()->json([
                     'success' => false,
                     'code' => 'SERVICE_UNAVAILABLE',

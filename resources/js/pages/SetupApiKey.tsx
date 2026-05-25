@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../app/contexts/AuthContext';
 import { Loading, InlineError, AuthLayout, FormInput } from '../app/components/shared';
@@ -7,7 +7,7 @@ import { useToast } from '../app/contexts/ToastContext';
 import { storeApiKey } from '../app/services/api/setupApiKey';
 
 export default function SetupApiKey() {
-  const { refreshUser } = useAuth();
+  const { refreshUser, hasApiKey } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -17,6 +17,13 @@ export default function SetupApiKey() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [justSubmitted, setJustSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (justSubmitted && hasApiKey) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [justSubmitted, hasApiKey, navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,9 +37,9 @@ export default function SetupApiKey() {
 
     try {
       await storeApiKey(apiKey.trim());
+      setJustSubmitted(true);
       await refreshUser();
       addToast({ type: 'success', message: 'Kunci API berhasil diverifikasi!' });
-      navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
       const e = err as { message?: string; errors?: Record<string, string[]>; code?: string };
       if (e?.code === 'VALIDATION_ERROR' && e?.errors) {

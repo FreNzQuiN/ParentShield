@@ -44,7 +44,7 @@ class DashboardController extends Controller
                 $user->save();
             }
 
-            return $this->error($e->getMessage(), $e->getCode(), $e->getStatusCode());
+            return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
         } catch (\Exception $e) {
             Log::error('Dashboard unexpected error', [
                 'user_id' => $user->id,
@@ -146,7 +146,7 @@ class DashboardController extends Controller
                 $user->save();
             }
 
-            return $this->error($e->getMessage(), $e->getCode(), $e->getStatusCode());
+            return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
         } catch (\Exception $e) {
             Log::error('Safebrowsing unexpected error', [
                 'user_id' => $user->id,

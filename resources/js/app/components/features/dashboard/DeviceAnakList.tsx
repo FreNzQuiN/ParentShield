@@ -6,8 +6,15 @@ interface DeviceAnakListProps {
   devices: DashboardDevice[];
 }
 
+const KNOWN_ACRONYMS: Record<string, string> = {
+  ios: 'iOS',
+  macos: 'macOS',
+  ipados: 'iPadOS',
+  tvos: 'tvOS',
+};
+
 function getDeviceLabel(type: string): string {
-  return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+  return KNOWN_ACRONYMS[type.toLowerCase()] ?? type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 }
 
 export default function DeviceAnakList({ devices }: DeviceAnakListProps) {
