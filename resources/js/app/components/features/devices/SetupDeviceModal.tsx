@@ -74,62 +74,62 @@ export default function SetupDeviceModal({
   const dnsAddresses: DnsAddresses | null = device?.dns_addresses ?? null;
 
   return (
-    <Modal open={open} onClose={handleClose} title={getTitle()} size="lg">
-      <div className="mb-6">
-        <div className="flex items-center gap-2">
-          <StepDot number={1} active={step === 1} completed={step === 2} label="Buat Perangkat" />
-          <div className={`h-px flex-1 ${step === 2 ? 'bg-[#005bbf]' : 'bg-[#dfe3e8]'}`} />
-          <StepDot number={2} active={step === 2} completed={false} label="Setup Perangkat" />
+    <Modal open={open} onClose={handleClose} title={getTitle()} size={step === 1 ? 'md' : 'lg'}>
+      <div className="mb-6 flex justify-center">
+        <div className="flex items-start gap-3 sm:gap-6">
+          <div className="flex flex-col items-center gap-1">
+            <span className={`flex size-8 items-center justify-center rounded-full text-sm font-medium ${step >= 1 ? 'bg-primary text-white' : 'bg-inactive text-text-muted'}`}>
+              {step === 2 ? '✓' : 1}
+            </span>
+            <span className={`text-xs whitespace-nowrap ${step === 1 ? 'font-medium text-text-primary' : 'text-text-muted'}`}>
+              Buat Perangkat
+            </span>
+          </div>
+          <div className={`mt-3 h-0.5 w-12 sm:w-20 ${step === 2 ? 'bg-primary' : 'bg-inactive'}`} />
+          <div className="flex flex-col items-center gap-1">
+            <span className={`flex size-8 items-center justify-center rounded-full text-sm font-medium ${step === 2 ? 'bg-primary text-white' : 'bg-inactive text-text-muted'}`}>
+              2
+            </span>
+            <span className={`text-xs whitespace-nowrap ${step === 2 ? 'font-medium text-text-primary' : 'text-text-muted'}`}>
+              Setup Perangkat
+            </span>
+          </div>
         </div>
       </div>
 
-      {step === 1 && (
-        <CreateDeviceForm
-          loading={loading}
-          error={error}
-          onSubmit={handleCreate}
-        />
-      )}
+      <div key={step} className="animate-fadeIn">
+        {step === 1 && (
+          <CreateDeviceForm
+            loading={loading}
+            error={error}
+            onSubmit={handleCreate}
+          />
+        )}
 
-      {step === 2 && device && dnsAddresses && (
-        <>
-          {deviceType === 'ANDROID' && <AndroidSetupInstructions dnsAddresses={dnsAddresses} />}
-          {deviceType === 'IOS' && (
-            <IosSetupInstructions
-              deviceId={device.id}
-              deviceName={device.name}
-            />
-          )}
-          {deviceType === 'WINDOWS' && <WindowsSetupInstructions dnsAddresses={dnsAddresses} />}
+        {step === 2 && device && dnsAddresses && (
+          <>
+            {deviceType === 'ANDROID' && <AndroidSetupInstructions dnsAddresses={dnsAddresses} />}
+            {deviceType === 'IOS' && (
+              <IosSetupInstructions
+                deviceId={device.id}
+                deviceName={device.name}
+              />
+            )}
+            {deviceType === 'WINDOWS' && <WindowsSetupInstructions dnsAddresses={dnsAddresses} />}
 
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={handleClose}
-              className="rounded-[8px] bg-[#005bbf] px-8 py-3 font-['Roboto',sans-serif] text-sm tracking-[0.5px] text-white transition-colors hover:bg-[#004d9e]"
-            >
-              Selesai
-            </button>
-          </div>
-        </>
-      )}
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleClose}
+                className="rounded-lg bg-primary px-8 py-3 text-sm tracking-[0.5px] text-white transition-colors hover:bg-primary-hover"
+              >
+                Selesai
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </Modal>
   );
 }
 
-function StepDot({ number, active, completed, label }: { number: number; active: boolean; completed: boolean; label: string }) {
-  const baseClass = 'flex size-8 items-center justify-center rounded-full text-sm font-medium';
-  const circleClass = active || completed
-    ? 'bg-[#005bbf] text-white'
-    : 'bg-[#dfe3e8] text-[#727785]';
 
-  return (
-    <div className="flex items-center gap-2">
-      <span className={`${baseClass} ${circleClass}`}>
-        {completed ? '✓' : number}
-      </span>
-      <span className={`font-['Roboto',sans-serif] text-sm ${active ? 'font-medium text-[#181c20]' : 'text-[#727785]'}`}>
-        {label}
-      </span>
-    </div>
-  );
-}

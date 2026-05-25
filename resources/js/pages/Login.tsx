@@ -47,15 +47,15 @@ export default function Login() {
         <div className="flex flex-col items-center pb-6 pt-3">
           <div className="flex items-center gap-2">
             <ShieldIcon />
-            <span className="font-['Roboto',sans-serif] text-[20px] font-bold text-[#005bbf]">
+            <span className="text-xl font-bold text-primary">
               ParentShield
             </span>
           </div>
         </div>
-        <h1 className="text-center font-['Roboto',sans-serif] text-[24px] font-medium text-[#181c20]">
+        <h1 className="text-center text-2xl font-medium text-text-primary">
           Masuk
         </h1>
-        <p className="text-center font-['Roboto',sans-serif] text-sm text-[#414754]">
+        <p className="text-center text-sm text-text-secondary">
           Masuk untuk mengelola profil perlindungan keluarga Anda.
         </p>
       </div>
@@ -89,7 +89,7 @@ export default function Login() {
             labelRight={
               <Link
                 to="/forgot-password"
-                className="font-['Roboto',sans-serif] text-[12px] font-medium text-[#005bbf]"
+                className="text-xs font-medium text-primary"
               >
                 Lupa kata sandi?
               </Link>
@@ -110,7 +110,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#005bbf] font-['Roboto',sans-serif] text-[14px] font-medium tracking-[0.5px] text-white transition-colors hover:bg-[#004a9e] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-medium tracking-[0.5px] text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? <Loading size="sm" message="Memproses..." /> : 'Masuk'}
             </button>
@@ -118,10 +118,10 @@ export default function Login() {
         </form>
       </div>
 
-      <div className="border-t border-[#e5e8ee] pt-3">
-        <p className="text-center font-['Roboto',sans-serif] text-sm text-[#414754]">
+      <div className="border-t border-inactive pt-3">
+        <p className="text-center text-sm text-text-secondary">
           Belum memiliki akun?{' '}
-          <Link to="/register" className="font-medium text-[#005bbf]">
+          <Link to="/register" className="font-medium text-primary">
             Buat Akun
           </Link>
         </p>

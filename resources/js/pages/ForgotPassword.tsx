@@ -47,16 +47,16 @@ export default function ForgotPassword() {
       {sent ? (
         <div className="flex flex-col items-center gap-4 py-6 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-            <svg className="h-6 w-6 text-[#1b6d24]" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+            <svg className="h-6 w-6 text-success" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
             </svg>
           </div>
-          <p className="font-['Roboto',sans-serif] text-sm text-[#414754]">
+          <p className="text-sm text-text-secondary">
             Periksa email Anda untuk link reset kata sandi.
           </p>
           <Link
             to="/login"
-            className="font-['Roboto',sans-serif] text-sm font-medium text-[#005bbf] transition-colors hover:text-[#004a9e]"
+            className="text-sm font-medium text-primary transition-colors hover:text-primary-hover"
           >
             Kembali ke Masuk
           </Link>
@@ -64,10 +64,10 @@ export default function ForgotPassword() {
       ) : (
         <>
           <div className="flex flex-col items-center gap-3 pt-3">
-            <h1 className="text-center font-['Roboto',sans-serif] text-[24px] font-medium text-[#181c20]">
+            <h1 className="text-center text-2xl font-medium text-text-primary">
               Atur Ulang Kata Sandi
             </h1>
-            <p className="max-w-[360px] text-center font-['Roboto',sans-serif] text-sm text-[#414754]">
+            <p className="max-w-[360px] text-center text-sm text-text-secondary">
               Masukkan email Anda dan kami akan mengirimkan link untuk mengatur ulang kata sandi.
             </p>
           </div>
@@ -91,7 +91,7 @@ export default function ForgotPassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#005bbf] font-['Roboto',sans-serif] text-[14px] font-medium tracking-[0.5px] text-white transition-colors hover:bg-[#004a9e] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-medium tracking-[0.5px] text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading ? <Loading size="sm" message="Mengirim..." /> : 'Kirim Link Reset'}
                 </button>
@@ -99,11 +99,11 @@ export default function ForgotPassword() {
             </form>
           </div>
 
-          <div className="border-t border-[#e5e8ee] pt-3">
-            <p className="text-center font-['Roboto',sans-serif] text-sm text-[#414754]">
+          <div className="border-t border-inactive pt-3">
+            <p className="text-center text-sm text-text-secondary">
               <Link
                 to="/login"
-                className="font-medium text-[#005bbf]"
+                className="font-medium text-primary"
               >
                 Kembali ke Masuk
               </Link>

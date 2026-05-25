@@ -10,16 +10,16 @@ export default function EmptySlotCard({ slotNumber, totalSlots, onClick }: Empty
   return (
     <button
       onClick={onClick}
-      className="flex cursor-pointer flex-col items-center justify-center rounded-[12px] border-2 border-dashed border-[#c1c6d6] bg-transparent p-[25px] transition-colors hover:border-[#005bbf] hover:bg-[rgba(0,91,191,0.03)]"
+      className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-transparent p-6 transition-colors hover:border-primary hover:bg-primary/[0.03]"
     >
-      <div className="mb-4 flex size-[64px] items-center justify-center rounded-full bg-[#e5e8ee]">
-        <PlusIcon className="size-[18px] text-[#727785]" />
+      <div className="flex size-[56px] items-center justify-center rounded-full bg-bg-sidebar">
+        <PlusIcon className="size-[18px] text-text-muted" />
       </div>
-      <p className="font-['Roboto',sans-serif] text-[20px] text-[#727785]">
-        Tambah Perangkat
+      <p className="mt-3 text-xl text-text-muted">
+        Slot {slotNumber}
       </p>
-      <p className="mt-2 font-['Roboto',sans-serif] text-xs text-[#c1c6d6]">
-        Slot {slotNumber} dari {totalSlots}
+      <p className="mt-2 text-xs text-border">
+        {totalSlots - slotNumber + 1} slot tersedia dari {totalSlots}
       </p>
     </button>
   );

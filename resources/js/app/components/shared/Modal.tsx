@@ -22,30 +22,28 @@ export default function Modal({ open, onClose, title, children, size = 'md' }: M
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:items-center"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className={`${sizeClasses[size]} w-full rounded-xl bg-white p-6 shadow-lg`}
+        className={`${sizeClasses[size]} max-h-[85vh] w-full overflow-y-auto rounded-xl bg-bg-card p-6 shadow-lg`}
         role="dialog"
         aria-modal="true"
         aria-label={title}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-['Roboto',sans-serif] text-[20px] font-medium text-[#181c20]">
+        <div className="relative mb-4">
+          <h2 className="text-center text-xl font-semibold text-text-primary">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-[#727785] hover:bg-[#f1f4fa] transition-colors"
+            className="absolute right-0 top-0 rounded-lg p-1 text-text-muted hover:bg-bg-sidebar transition-colors"
             aria-label="Tutup"
           >
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-y-auto">
-          {children}
-        </div>
+        {children}
       </div>
     </div>
   );

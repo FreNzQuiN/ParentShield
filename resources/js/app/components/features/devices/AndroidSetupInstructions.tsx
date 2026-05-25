@@ -1,6 +1,7 @@
 import { AndroidIcon, CopyIcon } from '../../shared/icons';
 import type { DnsAddresses } from '../../../types/device';
 import { useToast } from '../../../contexts/ToastContext';
+import { Step } from '../../shared/StepList';
 
 interface AndroidSetupInstructionsProps {
   dnsAddresses: DnsAddresses;
@@ -19,63 +20,52 @@ export default function AndroidSetupInstructions({ dnsAddresses }: AndroidSetupI
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center gap-3">
-        <AndroidIcon className="size-8 text-[#727785]" />
+        <AndroidIcon className="size-8 text-text-muted" />
         <div>
-          <h3 className="font-['Roboto',sans-serif] text-[20px] font-medium text-[#181c20]">Setup Perangkat Android</h3>
-          <p className="text-xs text-[#727785]">DNS-over-TLS (Private DNS)</p>
+          <h3 className="text-xl font-medium text-text-primary">Setup Perangkat Android</h3>
+          <p className="text-xs text-text-muted">DNS-over-TLS (Private DNS)</p>
         </div>
       </div>
 
-      <div className="rounded-lg border border-[#dfe3e8] bg-[#f7f9ff] p-4">
-        <p className="mb-2 font-['Roboto',sans-serif] text-xs font-medium text-[#414754]">DNS-over-TLS URL</p>
-        <div className="flex items-center gap-2">
-          <code className="flex-1 truncate rounded bg-white px-3 py-2 text-sm text-[#181c20]">
-            {dnsAddresses.dns_over_tls_url}
-          </code>
-          <button
-            onClick={() => copyToClipboard(dnsAddresses.dns_over_tls_url, 'URL')}
-            className="rounded-lg p-2 text-[#005bbf] hover:bg-[#f1f4fa] transition-colors"
-            aria-label="Salin URL"
-          >
-            <CopyIcon className="size-4" />
-          </button>
-        </div>
-      </div>
+      <CopyField
+        label="DNS-over-TLS URL"
+        value={dnsAddresses.dns_over_tls_url}
+        onCopy={() => copyToClipboard(dnsAddresses.dns_over_tls_url, 'URL')}
+      />
 
-      <div className="rounded-lg border border-[#dfe3e8] bg-[#f7f9ff] p-4">
-        <p className="mb-2 font-['Roboto',sans-serif] text-xs font-medium text-[#414754]">Hostname (tanpa tls://)</p>
-        <div className="flex items-center gap-2">
-          <code className="flex-1 truncate rounded bg-white px-3 py-2 text-sm text-[#181c20]">
-            {hostname}
-          </code>
-          <button
-            onClick={() => copyToClipboard(hostname, 'Hostname')}
-            className="rounded-lg p-2 text-[#005bbf] hover:bg-[#f1f4fa] transition-colors"
-            aria-label="Salin hostname"
-          >
-            <CopyIcon className="size-4" />
-          </button>
-        </div>
-      </div>
+      <CopyField
+        label="Hostname (tanpa tls://)"
+        value={hostname}
+        onCopy={() => copyToClipboard(hostname, 'Hostname')}
+      />
 
       <div className="flex flex-col gap-3">
-        <p className="font-['Roboto',sans-serif] text-sm font-medium text-[#181c20]">Langkah-langkah:</p>
-        <Step number={1} text="Buka Settings → Network & Internet → Private DNS" />
-        <Step number={2} text='Pilih "Private DNS provider hostname"' />
-        <Step number={3} text={`Masukkan hostname: ${hostname}`} />
-        <Step number={4} text="Tekan Save" />
+        <p className="text-sm font-medium text-text-primary">Langkah-langkah:</p>
+        <div className="flex flex-col gap-1 border-l-2 border-primary/20 pl-4 ml-1">
+          <Step number={1} text="Buka Settings → Network & Internet → Private DNS" />
+          <Step number={2} text='Pilih "Private DNS provider hostname"' />
+          <Step number={3} text={`Masukkan hostname: ${hostname}`} />
+          <Step number={4} text="Tekan Save" />
+        </div>
       </div>
     </div>
   );
 }
 
-function Step({ number, text }: { number: number; text: string }) {
+function CopyField({ label, value, onCopy }: { label: string; value: string; onCopy: () => void }) {
   return (
-    <div className="flex items-start gap-3">
-      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#005bbf] text-xs text-white">
-        {number}
-      </span>
-      <p className="pt-0.5 font-['Roboto',sans-serif] text-sm text-[#414754]">{text}</p>
+    <div className="flex items-center justify-between rounded-lg border border-inactive bg-bg-card-inner px-4 py-2.5">
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-medium text-text-secondary">{label}</p>
+        <code className="block truncate text-sm text-text-primary">{value}</code>
+      </div>
+      <button
+        onClick={onCopy}
+        className="ml-2 shrink-0 rounded-lg p-1.5 text-primary hover:bg-bg-sidebar transition-colors"
+        aria-label={`Salin ${label}`}
+      >
+        <CopyIcon className="size-4" />
+      </button>
     </div>
   );
 }

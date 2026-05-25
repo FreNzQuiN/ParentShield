@@ -30,7 +30,7 @@ export default function FormInput({
       <div className="flex items-center justify-between">
         <label
           htmlFor={id}
-          className="font-['Roboto',sans-serif] text-[14px] font-medium tracking-[0.5px] text-[#181c20]"
+          className="text-sm font-medium tracking-[0.5px] text-text-primary"
         >
           {label}
         </label>
@@ -47,12 +47,12 @@ export default function FormInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={
-            'h-[50px] w-full rounded-[8px] border-2 bg-[#f7f9ff] outline-none transition-colors placeholder:font-[\'Roboto\',sans-serif] placeholder:text-sm placeholder:text-[#727785] ' +
+            'h-12 w-full rounded-lg border-2 bg-bg-card-inner outline-none transition-colors placeholder:text-sm placeholder:text-text-muted ' +
             (icon ? 'pl-[41px]' : 'px-[18px]') +
             ' ' +
             (rightElement ? 'pr-[44px]' : 'pr-3') +
-            " font-['Roboto',sans-serif] text-sm text-[#727785] " +
-            (error ? 'border-red-500' : 'border-[#c1c6d6]') +
+            " text-sm text-text-muted " +
+            (error ? 'border-red-500' : 'border-border') +
             ' ' + className
           }
           {...props}
@@ -64,7 +64,7 @@ export default function FormInput({
         )}
       </div>
       {helperText && !error && (
-        <p className="font-['Roboto',sans-serif] text-[12px] font-medium text-[#414754]">
+        <p className="text-xs font-medium text-text-secondary">
           {helperText}
         </p>
       )}

@@ -43,7 +43,8 @@ resources/js/
 │   ├── components/
 │   │   ├── features/              # SideNavBar, AppLayout, Dashboard/*, devices/*
 │   │   └── shared/                # AuthLayout, FormInput, Loading, LoadingOverlay,
-│   │                              # InlineError, Toast, EmptyState, Modal, icons
+│   │                              # InlineError, Toast, EmptyState, Modal, StepList,
+│   │                              # ConfirmDialog, icons
 │   ├── contexts/                  # AuthContext, ToastContext
 │   ├── hooks/                     # useDashboard, useIsMobile, useDialog
 │   ├── routes/guards/             # ProtectedRoute, RequireApiKey
@@ -160,6 +161,7 @@ Defined in `resources/css/app.css` via Tailwind v4 `@theme`, available as utilit
 | Token | Value | Penggunaan |
 |-------|-------|-----------|
 | `primary` | `#005bbf` | Tombol, link, active state |
+| `primary-hover` | `#004d9e` | Hover state tombol primary |
 | `primary-light` | `rgba(26, 115, 232, 0.1)` | Background active nav item |
 | `bg-page` | `#f7f9ff` | Background halaman utama |
 | `bg-sidebar` | `#f1f4fa` | Background sidebar |
@@ -170,18 +172,22 @@ Defined in `resources/css/app.css` via Tailwind v4 `@theme`, available as utilit
 | `text-secondary` | `#414754` | Subtitle, label, body |
 | `text-muted` | `#727785` | Placeholder, icon |
 | `success` | `#1b6d24` | Online, toggle ON |
-| `success-badge` | `#a0f399` | Background badge |
+| `success-badge` | `#a0f399` | Background badge success |
 | `danger` | `#ba1a1a` | Diblokir, angka merah |
+| `danger-hover` | `#a01515` | Hover state tombol danger |
 | `danger-bar` | `#dd3635` | Progress bar danger |
+| `danger-light` | `#ffb3ac` | Background danger ringan |
+| `error` | `#ef4444` | Form validation error |
 | `inactive` | `#dfe3e8` | Toggle OFF, dot offline |
+| `border` | `#c1c6d6` | Border input, separator |
 | `chart-blue` | `#adc7ff` | Bar chart secondary |
 
 ### Tipografi
 
 | Level | Ukuran | Tailwind | Elemen |
 |-------|--------|----------|--------|
-| Hero / page title | 24px | `text-[24px]` | Welcome heading, judul halaman auth |
-| Section title | 20px | `text-[20px]` | Card section headers |
+| Hero / page title | 24px | `text-2xl` | Welcome heading, judul halaman auth |
+| Section title | 20px | `text-xl` | Card section headers |
 | Body / label | 14px | `text-sm` | Input, placeholder, subtitle, button |
 | Caption | 12px | `text-xs` | Helper text, footer |
 

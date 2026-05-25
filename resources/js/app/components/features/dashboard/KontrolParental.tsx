@@ -43,7 +43,7 @@ function ToggleSwitch({
       disabled={disabled}
       className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
         disabled ? 'opacity-60' : ''
-      } ${active ? activeColor ?? 'bg-[#1b6d24]' : 'bg-[#dfe3e8]'}`}
+      } ${active ? activeColor ?? 'bg-success' : 'bg-inactive'}`}
       aria-label={ariaLabel}
     >
       <span
@@ -98,11 +98,11 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
   return (
     <div className="rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
       <div className="mb-3 flex items-center gap-2">
-        <GlobeIcon className="text-[#005bbf]" />
-        <h3 className="font-['Roboto',sans-serif] text-sm font-medium text-[#181c20]">Kontrol Parental</h3>
+        <GlobeIcon className="text-primary" />
+        <h3 className="text-sm font-medium text-text-primary">Kontrol Parental</h3>
         <Link
           to="/parental-control"
-          className="ml-auto text-xs font-medium text-[#005bbf] hover:underline"
+          className="ml-auto text-xs font-medium text-primary hover:underline"
         >
           Lihat Semua
         </Link>
@@ -110,10 +110,10 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
 
       <div className="flex flex-col gap-2">
         {MAIN_TOGGLES.map((t) => (
-          <div key={t.key} className="flex items-center justify-between rounded-lg bg-[#f7f9ff] p-3">
+          <div key={t.key} className="flex items-center justify-between rounded-lg bg-bg-card-inner p-3">
             <div className="flex-1 mr-3">
-              <p className="font-['Roboto',sans-serif] text-sm font-medium text-[#181c20]">{t.label}</p>
-              <p className="font-['Roboto',sans-serif] text-xs text-[#727785]">{t.description}</p>
+              <p className="text-sm font-medium text-text-primary">{t.label}</p>
+              <p className="text-xs text-text-muted">{t.description}</p>
             </div>
             <ToggleSwitch
               active={settings[t.key]}
@@ -126,7 +126,7 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
       </div>
 
       <div className="mt-4 pt-3 border-t border-[rgba(193,198,214,0.3)]">
-        <h4 className="mb-2 font-['Roboto',sans-serif] text-xs font-semibold tracking-[0.3px] text-[#414754] uppercase">
+        <h4 className="mb-2 text-xs font-semibold tracking-[0.3px] text-text-secondary uppercase">
           Pembatasan Layanan
         </h4>
         <div className="flex flex-col gap-2">
@@ -136,19 +136,19 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
             const isPartial = state === 'partial';
 
             return (
-              <div key={key} className="flex items-center justify-between rounded-lg bg-[#f7f9ff] p-3">
+              <div key={key} className="flex items-center justify-between rounded-lg bg-bg-card-inner p-3">
                 <div className="flex items-center gap-2 flex-1 mr-3">
-                  <span className="font-['Roboto',sans-serif] text-sm font-medium text-[#181c20]">
+                  <span className="text-sm font-medium text-text-primary">
                     {groupLabel(key)}
                   </span>
                   {isPartial && (
-                    <span className="text-[10px] text-[#727785] font-medium">Sebagian</span>
+                    <span className="text-[10px] text-text-muted font-medium">Sebagian</span>
                   )}
                 </div>
                 <ToggleSwitch
                   active={isBlocked}
                   disabled={toggling === `grp:${key}`}
-                  activeColor="bg-[#dd3635]"
+                  activeColor="bg-danger-bar"
                   ariaLabel={groupLabel(key)}
                   onClick={() => handleGroupToggle(key, !isBlocked)}
                 />

@@ -24,15 +24,15 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldIconSmall />
-            <span className="font-['Liberation_Serif',serif] text-[22px] font-bold text-[#005bbf] lg:text-[24px]">
+            <span className="text-[22px] font-bold text-primary lg:text-2xl">
               ParentShield
             </span>
           </div>
-          <button onClick={onClose} className="rounded p-1 hover:bg-[rgba(26,115,232,0.1)] lg:hidden" aria-label="Tutup menu">
+          <button onClick={onClose} className="rounded p-1 hover:bg-primary-light lg:hidden" aria-label="Tutup menu">
             <CloseIcon />
           </button>
         </div>
-        <p className="font-['Liberation_Serif',serif] text-[12px] text-[#414754]">
+        <p className="text-[12px] text-text-secondary">
           Dashboard Keluarga
         </p>
       </div>
@@ -48,14 +48,14 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
               onClick={onClose}
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors lg:px-4 lg:py-3 ${
                 isActive
-                  ? 'bg-[rgba(26,115,232,0.1)] text-[#005bbf]'
-                  : 'text-[#414754] hover:bg-[rgba(26,115,232,0.05)]'
+                  ? 'bg-primary-light text-primary'
+                  : 'text-text-secondary hover:bg-primary/5'
               }`}
             >
               <Icon
-                className={isActive ? 'text-[#005bbf]' : 'text-[#414754]'}
+                className={isActive ? 'text-primary' : 'text-text-secondary'}
               />
-              <span className="font-['Roboto',sans-serif] text-[13px] font-medium tracking-[0.5px] lg:text-[14px]">
+              <span className="text-[13px] font-medium tracking-[0.5px] lg:text-[14px]">
                 {item.label}
               </span>
             </Link>
@@ -66,10 +66,10 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
       <div className="px-3 pb-4 lg:px-4">
         <button
           onClick={() => { onClose(); onLogout(); }}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[#414754] transition-colors hover:bg-[rgba(26,115,232,0.05)] lg:px-4 lg:py-3"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-text-secondary transition-colors hover:bg-primary/5 lg:px-4 lg:py-3"
         >
           <LogoutIcon />
-          <span className="font-['Roboto',sans-serif] text-[13px] font-medium tracking-[0.5px] lg:text-[14px]">
+          <span className="text-[13px] font-medium tracking-[0.5px] lg:text-[14px]">
             Keluar
           </span>
         </button>
@@ -85,12 +85,12 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
       )}
 
       {/* Sidebar desktop (lg+) — fixed, full viewport height */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[256px] flex-col bg-[#f1f4fa] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[256px] flex-col bg-bg-sidebar shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] lg:flex">
         {sidebarContent}
       </aside>
 
       {/* Sidebar mobile/tablet — overlay + slide-in */}
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-[256px] flex-col bg-[#f1f4fa] shadow-lg transition-transform lg:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-[256px] flex-col bg-bg-sidebar shadow-lg transition-transform lg:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {sidebarContent}
       </aside>
     </>

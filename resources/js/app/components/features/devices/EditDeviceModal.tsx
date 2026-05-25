@@ -55,7 +55,7 @@ export default function EditDeviceModal({ open, device, onClose, onSuccess }: Ed
         <div>
           <label
             htmlFor="edit-device-name"
-            className="mb-2 block font-['Roboto',sans-serif] text-sm font-medium tracking-[0.5px] text-[#181c20]"
+            className="mb-2 block text-sm font-medium tracking-[0.5px] text-text-primary"
           >
             Nama Perangkat
           </label>
@@ -65,12 +65,12 @@ export default function EditDeviceModal({ open, device, onClose, onSuccess }: Ed
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={64}
-            className={`h-[50px] w-full rounded-[8px] border-2 bg-[#f7f9ff] px-[18px] font-['Roboto',sans-serif] text-sm text-[#727785] outline-none transition-colors placeholder:font-['Roboto',sans-serif] placeholder:text-sm placeholder:text-[#727785] ${
-              fieldError ? 'border-red-500' : 'border-[#c1c6d6]'
+            className={`h-12 w-full rounded-lg border-2 bg-bg-card-inner px-[18px] text-sm text-text-primary outline-none transition-colors placeholder:text-sm placeholder:text-text-muted ${
+              fieldError ? 'border-error' : 'border-border'
             }`}
             disabled={loading}
           />
-          {fieldError && <p className="mt-1 text-xs text-red-600">{fieldError}</p>}
+          {fieldError && <p className="mt-1 text-xs text-error">{fieldError}</p>}
         </div>
 
         {error && (
@@ -84,14 +84,14 @@ export default function EditDeviceModal({ open, device, onClose, onSuccess }: Ed
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="flex-1 rounded-[8px] border border-[#c1c6d6] bg-white py-3 font-['Roboto',sans-serif] text-sm text-[#414754] transition-colors hover:bg-[#f1f4fa] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-lg border border-border bg-white py-3 text-sm text-text-secondary transition-colors hover:bg-bg-sidebar disabled:cursor-not-allowed disabled:opacity-50"
           >
             Batal
           </button>
           <button
             type="submit"
             disabled={loading || !name.trim()}
-            className="flex-1 rounded-[8px] bg-[#005bbf] py-3 font-['Roboto',sans-serif] text-sm tracking-[0.5px] text-white transition-colors hover:bg-[#004d9e] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-lg bg-primary py-3 text-sm tracking-[0.5px] text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? 'Menyimpan...' : 'Simpan'}
           </button>

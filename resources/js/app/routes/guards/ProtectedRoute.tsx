@@ -7,7 +7,7 @@ export default function ProtectedRoute() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f7f9ff]">
+      <div className="flex min-h-screen items-center justify-center bg-bg-page">
         <Loading size="lg" message="Memuat..." />
       </div>
     );

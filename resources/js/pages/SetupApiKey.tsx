@@ -59,21 +59,21 @@ export default function SetupApiKey() {
         <div className="flex flex-col items-center pb-6 pt-3">
           <div className="flex items-center gap-2">
             <ShieldIcon />
-            <span className="font-['Roboto',sans-serif] text-[20px] font-bold text-[#005bbf]">
+            <span className="text-xl font-bold text-primary">
               ParentShield
             </span>
           </div>
         </div>
         {/* Stepper indicator */}
         <div className="flex items-center gap-1 pb-4">
-          <div className="size-2 rounded-full bg-[#005bbf]" />
-          <div className="h-px w-16 bg-[#c1c6d6]" />
-          <div className="size-2 rounded-full bg-[#dfe3e8]" />
+          <div className="size-2 rounded-full bg-primary" />
+          <div className="h-px w-16 bg-border" />
+          <div className="size-2 rounded-full bg-inactive" />
         </div>
-        <h1 className="text-center font-['Roboto',sans-serif] text-[24px] font-medium text-[#181c20]">
+        <h1 className="text-center text-2xl font-medium text-text-primary">
           Masukkan Kunci API
         </h1>
-        <p className="max-w-[360px] text-center font-['Roboto',sans-serif] text-sm text-[#414754]">
+        <p className="max-w-[360px] text-center text-sm text-text-secondary">
           Hubungkan akun AdGuard DNS Anda dengan memasukkan kunci API.
           Kunci ini diperlukan untuk mengelola perlindungan perangkat anak.
         </p>
@@ -114,7 +114,7 @@ export default function SetupApiKey() {
             <button
               type="submit"
               disabled={loading}
-              className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#1a73e8] font-['Roboto',sans-serif] text-[14px] font-medium tracking-[0.5px] text-white transition-colors hover:bg-[#1557b0] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-medium tracking-[0.5px] text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? <Loading size="sm" message="Memproses..." /> : 'Simpan & Lanjutkan'}
             </button>
@@ -122,12 +122,12 @@ export default function SetupApiKey() {
         </form>
       </div>
 
-      <div className="border-t border-[#e5e8ee] pt-3">
-        <p className="text-center font-['Roboto',sans-serif] text-sm text-[#414754]">
+      <div className="border-t border-inactive pt-3">
+        <p className="text-center text-sm text-text-secondary">
           <Link
             to="https://adguard-dns.io/dashboard/user-settings/api-keys"
             target="_blank"
-            className="font-medium text-[#005bbf]"
+            className="font-medium text-primary"
           >
             Di mana menemukan API KEY?
           </Link>

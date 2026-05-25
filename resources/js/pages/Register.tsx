@@ -54,15 +54,15 @@ export default function Register() {
         <div className="flex flex-col items-center pb-6 pt-3">
           <div className="flex items-center gap-2">
             <ShieldIcon />
-            <span className="font-['Roboto',sans-serif] text-[20px] font-bold text-[#005bbf]">
+            <span className="text-xl font-bold text-primary">
               ParentShield
             </span>
           </div>
         </div>
-        <h1 className="text-center font-['Roboto',sans-serif] text-[24px] font-medium text-[#181c20]">
+        <h1 className="text-center text-2xl font-medium text-text-primary">
           Buat Akun Baru
         </h1>
-        <p className="text-center font-['Roboto',sans-serif] text-sm text-[#414754]">
+        <p className="text-center text-sm text-text-secondary">
           Buat profil dan kelola keamanan digital keluarga Anda.
         </p>
       </div>
@@ -148,7 +148,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="flex h-[48px] w-full items-center justify-center gap-2 rounded-full bg-[#005bbf] font-['Roboto',sans-serif] text-[14px] font-medium tracking-[0.5px] text-white transition-colors hover:bg-[#004a9e] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-medium tracking-[0.5px] text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (
                 <Loading size="sm" message="Memproses..." />
@@ -163,12 +163,12 @@ export default function Register() {
         </form>
       </div>
 
-      <div className="border-t border-[#dfe3e8] pb-3 pt-[13px]">
-        <p className="text-center font-['Roboto',sans-serif] text-sm text-[#414754]">
+      <div className="border-t border-inactive pb-3 pt-[13px]">
+        <p className="text-center text-sm text-text-secondary">
           Sudah memiliki akun?{' '}
           <Link
             to="/login"
-            className="font-['Roboto',sans-serif] text-[14px] font-medium tracking-[0.5px] text-[#005bbf]"
+            className="text-sm font-medium tracking-[0.5px] text-primary"
           >
             Masuk
           </Link>

@@ -43,7 +43,7 @@ export default function CreateDeviceForm({ loading, error, onSubmit }: CreateDev
       <div>
         <label
           htmlFor="device-name"
-          className="mb-2 block font-['Roboto',sans-serif] text-sm font-medium tracking-[0.5px] text-[#181c20]"
+          className="mb-2 block text-sm font-medium tracking-[0.5px] text-text-primary"
         >
           Nama Perangkat
         </label>
@@ -54,16 +54,16 @@ export default function CreateDeviceForm({ loading, error, onSubmit }: CreateDev
           onChange={(e) => setName(e.target.value)}
           placeholder="Contoh: iPhone Anak"
           maxLength={64}
-          className={`h-[50px] w-full rounded-[8px] border-2 bg-[#f7f9ff] px-[18px] font-['Roboto',sans-serif] text-sm text-[#727785] outline-none transition-colors placeholder:font-['Roboto',sans-serif] placeholder:text-sm placeholder:text-[#727785] ${
-            nameError ? 'border-red-500' : 'border-[#c1c6d6]'
+          className={`h-12 w-full rounded-lg border-2 bg-bg-card-inner px-[18px] text-sm text-text-primary outline-none transition-colors placeholder:text-sm placeholder:text-text-muted ${
+            nameError ? 'border-error' : 'border-border'
           }`}
           disabled={loading}
         />
-        {nameError && <p className="mt-1 text-xs text-red-600">{nameError}</p>}
+        {nameError && <p className="mt-1 text-xs text-error">{nameError}</p>}
       </div>
 
       <div>
-        <p className="mb-2 font-['Roboto',sans-serif] text-sm font-medium tracking-[0.5px] text-[#181c20]">
+        <p className="mb-2 text-sm font-medium tracking-[0.5px] text-text-primary">
           Tipe Perangkat
         </p>
         <div className="grid grid-cols-3 gap-3">
@@ -73,22 +73,22 @@ export default function CreateDeviceForm({ loading, error, onSubmit }: CreateDev
               type="button"
               onClick={() => setDeviceType(value)}
               disabled={loading}
-              className={`flex flex-col items-center gap-2 rounded-[8px] border-2 p-4 transition-colors ${
+              className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors ${
                 deviceType === value
-                  ? 'border-[#005bbf] bg-[#f1f4fa]'
-                  : 'border-[#c1c6d6] bg-white hover:border-[#005bbf]/50'
+                  ? 'border-primary bg-bg-sidebar'
+                  : 'border-border bg-white hover:border-primary/50'
               }`}
             >
-              <Icon className={`size-6 ${deviceType === value ? 'text-[#005bbf]' : 'text-[#727785]'}`} />
-              <span className={`font-['Roboto',sans-serif] text-sm ${
-                deviceType === value ? 'font-medium text-[#005bbf]' : 'text-[#414754]'
+              <Icon className={`size-6 ${deviceType === value ? 'text-primary' : 'text-text-muted'}`} />
+              <span className={`text-sm ${
+                deviceType === value ? 'font-medium text-primary' : 'text-text-secondary'
               }`}>
                 {label}
               </span>
             </button>
           ))}
         </div>
-        {typeError && <p className="mt-1 text-xs text-red-600">{typeError}</p>}
+        {typeError && <p className="mt-1 text-xs text-error">{typeError}</p>}
       </div>
 
       {error && (
@@ -100,7 +100,7 @@ export default function CreateDeviceForm({ loading, error, onSubmit }: CreateDev
       <button
         type="submit"
         disabled={loading || !name.trim()}
-        className="h-[50px] w-full rounded-[8px] bg-[#005bbf] font-['Roboto',sans-serif] text-sm tracking-[0.5px] text-white transition-colors hover:bg-[#004d9e] disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-12 w-full rounded-lg bg-primary text-sm tracking-[0.5px] text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? 'Membuat...' : 'Buat Perangkat'}
       </button>

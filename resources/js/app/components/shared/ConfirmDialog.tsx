@@ -32,8 +32,8 @@ export default function ConfirmDialog({
   if (!open) return null;
 
   const confirmStyles = {
-    danger: 'bg-[#ba1a1a] text-white hover:bg-[#a01515]',
-    default: 'bg-[#005bbf] text-white hover:bg-[#004d9e]',
+    danger: 'bg-danger text-white hover:bg-danger-hover',
+    default: 'bg-primary text-white hover:bg-primary-hover',
   };
 
   return (
@@ -42,30 +42,30 @@ export default function ConfirmDialog({
       onClick={(e) => { if (e.target === e.currentTarget && !loading) onCancel(); }}
     >
       <div
-        className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg"
+        className="w-full max-w-sm rounded-xl bg-bg-card p-6 shadow-lg"
         role="dialog"
         aria-modal="true"
         aria-label={title}
         aria-describedby={descId}
       >
-        <h2 className="mb-2 font-['Roboto',sans-serif] text-[20px] font-medium text-[#181c20]">
+        <h2 className="mb-2 text-center text-xl font-semibold text-text-primary">
           {title}
         </h2>
-        <p id={descId} className="mb-6 font-['Roboto',sans-serif] text-sm text-[#414754]">
+        <p id={descId} className="mb-6 text-sm text-text-secondary">
           {message}
         </p>
         <div className="flex gap-3">
           <button
             onClick={onCancel}
             disabled={loading}
-            className="flex-1 rounded-[8px] border border-[#c1c6d6] bg-white py-3 font-['Roboto',sans-serif] text-sm text-[#414754] transition-colors hover:bg-[#f1f4fa] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-lg border border-border bg-white py-3 text-sm text-text-secondary transition-colors hover:bg-bg-sidebar disabled:cursor-not-allowed disabled:opacity-50"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`flex-1 rounded-[8px] py-3 font-['Roboto',sans-serif] text-sm tracking-[0.5px] transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${confirmStyles[variant]}`}
+            className={`flex-1 rounded-lg py-3 text-sm tracking-[0.5px] transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${confirmStyles[variant]}`}
           >
             {loading ? (loadingLabel ?? `${confirmLabel}...`) : confirmLabel}
           </button>

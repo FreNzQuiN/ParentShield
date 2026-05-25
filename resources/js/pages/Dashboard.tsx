@@ -16,12 +16,12 @@ function greeting(): string {
 function GreetingHeader({ userName }: { userName: string | undefined }) {
   return (
     <section className="pb-2 pl-1 md:pl-2">
-      <h1 className="font-['Roboto',sans-serif] text-[20px] font-bold tracking-[-0.5px] text-[#181c20] md:text-[24px]">
+      <h1 className="text-xl font-bold tracking-[-0.5px] text-text-primary md:text-2xl">
         {greeting()}, {userName ?? 'Pengguna'}.
       </h1>
       <div className="mt-1 flex items-center gap-2">
         <ShieldIconSmall />
-        <p className="font-['Roboto',sans-serif] text-xs text-[#414754] md:text-sm">
+        <p className="text-xs text-text-secondary md:text-sm">
           Lindungi Keluargamu dari Bahaya Internet.
         </p>
       </div>
@@ -76,13 +76,13 @@ export default function Dashboard() {
             icon={<DashboardBlockIcon />}
             label="Berhasil Diblokir"
             value={(data?.stats.blocked_count ?? 0).toLocaleString()}
-            valueColor="#ba1a1a"
+            valueColor="var(--color-danger)"
           />
           <StatCard
             icon={<DashboardDeviceIcon />}
             label="Device"
             value={data?.stats.active_devices ?? 0}
-            valueColor={data?.stats.suspicious_devices ? '#c2410c' : '#1b6d24'}
+            valueColor={data?.stats.suspicious_devices ? '#c2410c' : 'var(--color-success)'}
             badge={data?.stats.suspicious_devices ? `${data.stats.suspicious_devices} Mencurigakan` : undefined}
             badgeVariant={data?.stats.suspicious_devices ? 'warning' : undefined}
             caption={
@@ -97,17 +97,17 @@ export default function Dashboard() {
           <div className="flex flex-col gap-5 md:col-span-2 md:gap-6">
             <div className="rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-['Roboto',sans-serif] text-[16px] font-medium text-[#181c20] md:text-[20px]">
+                <h2 className="text-[16px] font-medium text-text-primary md:text-xl">
                   Aktivitas Harian
                 </h2>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-[#ebeef4] px-2 py-0.5 text-[10px] text-[#727785] md:px-3 md:py-1 md:text-xs">
+                  <span className="rounded-full bg-bg-tag px-2 py-0.5 text-[10px] text-text-muted md:px-3 md:py-1 md:text-xs">
                     24 Jam Terakhir
                   </span>
                   <button
                     onClick={softRefresh}
                     disabled={isRefreshing}
-                    className="flex size-6 items-center justify-center rounded-full text-[#727785] transition-colors hover:bg-[#ebeef4] disabled:opacity-50 md:size-7"
+                    className="flex size-6 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-bg-tag disabled:opacity-50 md:size-7"
                     aria-label="Muat ulang"
                   >
                     <svg
@@ -134,12 +134,12 @@ export default function Dashboard() {
               <ProgressBarList
                 title="Aktivitas Terbanyak"
                 items={topActivities}
-                barColor="#005bbf"
+                barColor="var(--color-primary)"
               />
               <ProgressBarList
                 title="Kategori Sumber Blokir"
                 items={sourcesBlocked}
-                barColor="#dd3635"
+                barColor="var(--color-danger-bar)"
               />
             </div>
           </div>
@@ -157,4 +157,3 @@ export default function Dashboard() {
     </div>
   );
 }
-

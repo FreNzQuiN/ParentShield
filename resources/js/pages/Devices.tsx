@@ -151,15 +151,15 @@ export default function Devices() {
   }
 
   return (
-    <div className="relative flex flex-1 flex-col gap-[48px]">
+    <div className="relative flex flex-1 flex-col gap-12">
       <LoadingOverlay visible={refreshing && devices.length > 0} />
 
-      <div className={`flex flex-col gap-[48px] ${refreshing ? 'pointer-events-none select-none' : ''}`}>
+      <div className={`flex flex-col gap-12 ${refreshing ? 'pointer-events-none select-none' : ''}`}>
       <div>
-        <h1 className="font-['Roboto',sans-serif] text-[24px] font-medium text-[#181c20]">
+        <h1 className="text-2xl font-medium text-text-primary">
           Perangkat Dilindungi
         </h1>
-        <p className="mt-1 font-['Roboto',sans-serif] text-sm text-[#414754]">
+        <p className="mt-1 text-sm text-text-secondary">
           Kelola dan pantau semua perangkat yang terhubung di rumah Anda.
         </p>
       </div>
@@ -189,12 +189,12 @@ export default function Devices() {
       </div>
 
       {devices.length === 0 && (
-        <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-[#c1c6d6] p-12">
-          <p className="font-['Roboto',sans-serif] text-[20px] text-[#727785]">Belum ada perangkat</p>
-          <p className="text-sm text-[#727785]">Tambahkan perangkat untuk mulai memantau aktivitas internet anak.</p>
+        <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-border p-12">
+          <p className="text-xl text-text-muted">Belum ada perangkat</p>
+          <p className="text-sm text-text-muted">Tambahkan perangkat untuk mulai memantau aktivitas internet anak.</p>
           <button
             onClick={handleOpenSetup}
-            className="rounded-[8px] bg-[#005bbf] px-6 py-3 font-['Roboto',sans-serif] text-sm tracking-[0.5px] text-white hover:bg-[#004d9e] transition-colors"
+            className="rounded-lg bg-primary px-6 py-3 text-sm tracking-[0.5px] text-white transition-colors hover:bg-primary-hover"
           >
             Tambah Perangkat
           </button>
@@ -202,7 +202,7 @@ export default function Devices() {
       )}
 
       {slotCount <= 0 && devices.length > 0 && (
-        <p className="text-center text-xs text-[#727785]">
+        <p className="text-center text-xs text-text-muted">
           Batas perangkat tercapai. Tingkatkan paket untuk menambah perangkat.
         </p>
       )}

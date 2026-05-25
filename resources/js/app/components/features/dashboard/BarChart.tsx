@@ -52,7 +52,7 @@ export default function BarChart({ data }: BarChartProps) {
 
   if (!displayData.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center text-sm text-[#727785]">
+      <div className="flex h-[200px] items-center justify-center text-sm text-text-muted">
         Belum ada data aktivitas.
       </div>
     );
@@ -65,7 +65,7 @@ export default function BarChart({ data }: BarChartProps) {
     <div className="flex h-[200px] items-end gap-0.5">
       <div className="flex h-full flex-col justify-between pb-6 pr-2 text-right">
         {[...yTicks].reverse().map((v) => (
-          <span key={v} className="text-[10px] leading-none text-[#727785]">
+          <span key={v} className="text-[10px] leading-none text-text-muted">
             {formatAxisValue(v)}
           </span>
         ))}
@@ -93,15 +93,15 @@ export default function BarChart({ data }: BarChartProps) {
               >
                 <BarSegment
                   pct={(allowedPct / totalPct) * 100}
-                  color={isPeak ? '#005bbf' : '#adc7ff'}
+                  color={isPeak ? 'var(--color-primary)' : 'var(--color-chart-blue)'}
                   style={{ opacity: isPeak && !hasBlocked ? 1 : 0.65 }}
                 />
-                {hasBlocked && <BarSegment pct={(blockedPct / totalPct) * 100} color="#dd3635" />}
+                {hasBlocked && <BarSegment pct={(blockedPct / totalPct) * 100} color="var(--color-danger-bar)" />}
               </div>
             ) : (
-              <div className="w-3/4 rounded-t bg-[#ebeef4]" style={{ height: `${EMPTY_BAR_HEIGHT}px` }} />
+              <div className="w-3/4 rounded-t bg-bg-tag" style={{ height: `${EMPTY_BAR_HEIGHT}px` }} />
             )}
-            <span className="mt-1 text-[10px] text-[#727785]">{hourLabel}</span>
+            <span className="mt-1 text-[10px] text-text-muted">{hourLabel}</span>
           </div>
         );
       })}
