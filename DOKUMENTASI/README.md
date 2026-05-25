@@ -7,7 +7,7 @@ Aplikasi monitoring orang tua untuk aktivitas internet anak, menggunakan API AdG
 | Layer | Teknologi |
 |-------|-----------|
 | Backend | Laravel 12, PHP 8.2+ |
-| Frontend | React 18, TypeScript, Tailwind CSS |
+| Frontend | React 19, TypeScript, Tailwind CSS |
 | Auth | Laravel Sanctum (SPA) |
 | CI/CD | Vite, PHPUnit, Vitest |
 
@@ -29,6 +29,7 @@ app/
 │   ├── Controllers/Api/           # AuthController, DashboardController,
 │   │                              # SetupApiKeyController
 │   ├── Middleware/
+│   │   ├── AddCorrelationId.php   # X-Correlation-Id header
 │   │   └── CheckApiKey.php        # Middleware verifikasi API key
 │   └── Requests/Auth/             # Register, Login, ForgotPassword requests
 ├── Models/User.php                # + adguard_api_key_encrypted, verified_at
@@ -145,12 +146,12 @@ Semua pesan error user-facing dalam **Bahasa Indonesia**.
 
 ### AdGuardService Error Mapping
 
-| Status AdGuard | Kode Error | Pesan User |
-|---------------|------------|------------|
-| 401 | ADGUARD_UNAUTHORIZED | Kunci API tidak valid... |
-| 405 | ADGUARD_METHOD_ERROR | Terjadi kesalahan pada server... |
-| 429 | ADGUARD_RATE_LIMITED | Terlalu banyak permintaan... |
-| timeout | ADGUARD_CONNECTION_ERROR | Layanan sedang sibuk... |
+| Status AdGuard | Kode Error | Status HTTP | Pesan User |
+|---------------|------------|-------------|------------|
+| 401 | ADGUARD_UNAUTHORIZED | 401 | Kunci API tidak valid... |
+| 405 | ADGUARD_METHOD_NOT_ALLOWED | 502 | Layanan AdGuard sedang sibuk. |
+| 429 | ADGUARD_RATE_LIMITED | 429 | Terlalu banyak permintaan... |
+| timeout | ADGUARD_CONNECTION_ERROR | 503 | Layanan sedang sibuk, silakan coba beberapa saat lagi. |
 
 ## Design Tokens
 
