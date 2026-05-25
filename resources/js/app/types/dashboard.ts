@@ -3,6 +3,7 @@ export interface DashboardStats {
   blocked_count: number;
   blocked_categories: string[];
   active_devices: number;
+  suspicious_devices: number;
 }
 
 export interface TimeSeriesPoint {
@@ -29,6 +30,19 @@ export interface SafebrowsingSettings {
   block_nrd_enabled: boolean;
 }
 
+export interface BlockedWebService {
+  id: string;
+  enabled: boolean;
+}
+
+export interface ParentalControlSettings {
+  enabled: boolean;
+  block_adult_websites_enabled: boolean;
+  engines_safe_search_enabled: boolean;
+  youtube_safe_search_enabled: boolean;
+  blocked_services: BlockedWebService[];
+}
+
 export interface DashboardDevice {
   id: string;
   name: string;
@@ -50,7 +64,9 @@ export interface DashboardData {
   time_series: TimeSeriesPoint[];
   top_activities: TopActivity[];
   categories_blocked: BlockedCategory[];
+  sources_blocked: { name: string; count: number; percentage: number }[];
   safebrowsing: SafebrowsingSettings;
+  parental_control: ParentalControlSettings;
   devices: DashboardDevice[];
   account_limits: AccountLimits;
 }

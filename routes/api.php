@@ -43,5 +43,6 @@ Route::middleware('api')->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum', 'check.api-key'])->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
         Route::put('/dashboard/safebrowsing', [\App\Http\Controllers\Api\DashboardController::class, 'updateSafebrowsing']);
+        Route::put('/dashboard/parental-control', [\App\Http\Controllers\Api\DashboardController::class, 'updateParentalControl']);
     });
 });

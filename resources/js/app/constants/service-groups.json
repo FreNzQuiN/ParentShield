@@ -1,0 +1,14 @@
+{
+  "youtube": ["youtube"],
+  "roblox": ["roblox"],
+  "medsos": [
+    "instagram", "facebook", "twitter", "tiktok", "snapchat",
+    "whatsapp", "telegram", "discord", "reddit", "pinterest",
+    "linkedin", "bluesky", "mastodon", "signal", "viber",
+    "wechat", "kakaotalk", "line", "qq", "weibo", "vk", "ok"
+  ],
+  "belanja": [
+    "shopee", "lazada", "amazon", "aliexpress", "ebay",
+    "temu", "shein", "mercado_libre"
+  ]
+}

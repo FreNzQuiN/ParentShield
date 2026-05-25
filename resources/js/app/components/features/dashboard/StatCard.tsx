@@ -5,11 +5,12 @@ interface StatCardProps {
   label: string;
   value: string | number;
   badge?: string;
+  badgeVariant?: 'success' | 'warning';
   valueColor?: string;
   caption?: string;
 }
 
-export default function StatCard({ icon, label, value, badge, valueColor, caption }: StatCardProps) {
+export default function StatCard({ icon, label, value, badge, badgeVariant = 'success', valueColor, caption }: StatCardProps) {
   return (
     <div className="flex items-start gap-3 rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)] md:gap-4 md:p-5">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f7f9ff] md:h-10 md:w-10">

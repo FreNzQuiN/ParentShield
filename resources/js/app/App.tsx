@@ -14,6 +14,7 @@ import Activity from '../pages/Activity';
 import Devices from '../pages/Devices';
 import Settings from '../pages/Settings';
 import SetupApiKey from '../pages/SetupApiKey';
+import ParentalControl from '../pages/ParentalControl';
 import NotFound from '../pages/NotFound';
 
 function GuestGuard({ children }: { children: ReactNode }) {
@@ -74,6 +75,7 @@ export default function App() {
                   <Route path="/activity" element={<Activity />} />
                   <Route path="/devices" element={<Devices />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/parental-control" element={<ParentalControl />} />
                 </Route>
               </Route>
             </Route>

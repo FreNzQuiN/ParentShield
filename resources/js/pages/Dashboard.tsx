@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useAuth } from '../app/contexts/AuthContext';
 import { ShieldIconSmall, DashboardQueryIcon, DashboardBlockIcon, DashboardDeviceIcon } from '../app/components/shared/icons';
 import { useDashboard } from '../app/hooks/useDashboard';
-import { StatCard, BarChart, ProgressBarList, ProteksiGlobal, DeviceAnakList, DashboardSkeleton } from '../app/components/features/dashboard';
+import { StatCard, BarChart, ProgressBarList, KontrolParental, DashboardSkeleton } from '../app/components/features/dashboard';
 import { Loading, InlineError } from '../app/components/shared';
 
 function greeting(): string {
@@ -15,20 +15,20 @@ function greeting(): string {
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { data, loading, error, refresh, softRefresh, isRefreshing, toggleSafebrowsing } = useDashboard();
+  const { data, loading, error, refresh, softRefresh, isRefreshing, toggleParentalControl } = useDashboard();
 
   const topActivities = useMemo(() =>
-    (data?.top_activities ?? []).slice(0, 3).map((a) => ({
+    (data?.top_activities ?? []).slice(0, 5).map((a) => ({
       label: a.domain,
       value: a.count,
       percentage: a.percentage,
     })), [data]);
 
-  const categoriesBlocked = useMemo(() =>
-    (data?.categories_blocked ?? []).slice(0, 3).map((c) => ({
-      label: c.name,
-      value: c.count,
-      percentage: c.percentage,
+  const sourcesBlocked = useMemo(() =>
+    (data?.sources_blocked ?? []).slice(0, 5).map((s) => ({
+      label: s.name,
+      value: s.count,
+      percentage: s.percentage,
     })), [data]);
 
   if (loading && !data) {
@@ -78,9 +78,16 @@ export default function Dashboard() {
           />
           <StatCard
             icon={<DashboardDeviceIcon />}
-            label="Device Aktif"
+            label="Device"
             value={data?.stats.active_devices ?? 0}
-            valueColor="#1b6d24"
+            valueColor={data?.stats.suspicious_devices ? '#c2410c' : '#1b6d24'}
+            badge={data?.stats.suspicious_devices ? `${data.stats.suspicious_devices} Mencurigakan` : undefined}
+            badgeVariant={data?.stats.suspicious_devices ? 'warning' : 'success'}
+            caption={
+              data?.stats.suspicious_devices
+                ? `${data.stats.suspicious_devices} device tidak aktif >6 jam`
+                : undefined
+            }
           />
         </section>
 
@@ -128,21 +135,20 @@ export default function Dashboard() {
                 barColor="#005bbf"
               />
               <ProgressBarList
-                title="Kategori Lalu Lintas"
-                items={categoriesBlocked}
+                title="Kategori Sumber Blokir"
+                items={sourcesBlocked}
                 barColor="#dd3635"
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-5 md:col-span-1 md:gap-6">
-            {data?.safebrowsing && (
-              <ProteksiGlobal
-                settings={data.safebrowsing}
-                onToggle={toggleSafebrowsing}
+            {data?.parental_control && (
+              <KontrolParental
+                settings={data.parental_control}
+                onToggle={toggleParentalControl}
               />
             )}
-            <DeviceAnakList devices={data?.devices ?? []} />
           </div>
         </section>
       </div>

@@ -14,7 +14,33 @@ use Illuminate\Support\Facades\Log;
 class AdGuardService
 {
     private const DEVICE_ONLINE_THRESHOLD_MS = 300000;
+    private const SUSPICIOUS_THRESHOLD_MS = 21600000;
     private const DASHBOARD_CACHE_TTL_SECONDS = 30;
+
+    public static function getServiceGroups(): array
+    {
+        static $groups = null;
+        if ($groups === null) {
+            $path = resource_path('js/app/constants/service-groups.json');
+            $groups = file_exists($path) ? (json_decode(file_get_contents($path), true) ?? []) : [];
+        }
+        return $groups;
+    }
+
+    private const FILTERING_SOURCE_LABELS = [
+        'FILTERS' => 'Filter Standar',
+        'USER_FILTER' => 'Aturan Sendiri',
+        'SAFEBROWSING' => 'Situs Berbahaya',
+        'PARENTAL_ADULT' => 'Konten Dewasa',
+        'PARENTAL_BLOCKED_SERVICE' => 'Layanan Diblokir',
+        'PARENTAL_SAFE_SEARCH' => 'Pencarian Aman',
+        'PARENTAL_YOUTUBE' => 'YouTube Terbatas',
+        'PARENTAL_SCHEDULE' => 'Jadwal Waktu',
+        'PARENTAL_FILTERING_CATEGORY' => 'Kategori Filter',
+        'NEWLY_REGISTERED_DOMAINS' => 'Domain Baru',
+        'TYPOSQUATTING' => 'Typo Squatting',
+        'HOMOGLYPH' => 'Homoglyph',
+    ];
 
     private string $baseUrl;
     private ?string $apiKey;
@@ -65,6 +91,7 @@ class AdGuardService
             'limits'         => ['method' => 'get', 'endpoint' => '/account/limits',    'data' => []],
             'deviceStats'    => ['method' => 'get', 'endpoint' => '/stats/devices',     'data' => ['time_from_millis' => $timeFrom, 'time_to_millis' => $timeTo]],
             'dnsServers'     => ['method' => 'get', 'endpoint' => '/dns_servers',       'data' => []],
+            'queryLog'       => ['method' => 'get', 'endpoint' => '/query_log',         'data' => ['time_from_millis' => $timeFrom, 'time_to_millis' => $timeTo, 'limit' => 1000]],
         ]);
 
         $timeStats = $this->safeGet(fn() => $this->parsePoolJson($responses['timeStats']));
@@ -73,6 +100,7 @@ class AdGuardService
         $limits = $this->safeGet(fn() => $this->parsePoolJson($responses['limits']), []);
         $deviceStats = $this->safeGet(fn() => $this->parsePoolJson($responses['deviceStats']), []);
         $dnsServers = $this->safeGet(fn() => $this->parsePoolJson($responses['dnsServers']), []);
+        $queryLog = $this->safeGet(fn() => $this->parsePoolJson($responses['queryLog']), []);
 
         $dnsServer = $this->findDefaultDnsServer($dnsServers);
         $settings = $dnsServer['settings'] ?? null;
@@ -81,6 +109,8 @@ class AdGuardService
         $blockedCategories = $this->aggregateCategoryStats($categoryStats);
         $deviceList = $this->buildDeviceList($devices, $deviceStats, $now);
         $safebrowsing = $this->extractSafebrowsingSettings($settings);
+        $parentalControl = $this->extractParentalControlSettings($settings);
+        $sourcesBlocked = $this->aggregateFilteringSources($queryLog);
 
         $deviceCount = count($devices);
 
@@ -90,11 +120,14 @@ class AdGuardService
                 'blocked_count' => $aggregated['blocked'],
                 'blocked_categories' => array_slice(array_map(fn($c) => $c['name'], $blockedCategories), 0, 3),
                 'active_devices' => $deviceList['active_count'],
+                'suspicious_devices' => $deviceList['suspicious_count'],
             ],
             'time_series' => $aggregated['series'],
             'top_activities' => array_slice($this->safeGet(fn() => $this->getTopDomains($timeFrom, $timeTo), []), 0, 5),
             'categories_blocked' => array_slice($blockedCategories, 0, 5),
+            'sources_blocked' => array_slice($sourcesBlocked, 0, 5),
             'safebrowsing' => $safebrowsing,
+            'parental_control' => $parentalControl,
             'devices' => $deviceList['list'],
             'account_limits' => [
                 'devices' => [
@@ -170,13 +203,44 @@ class AdGuardService
         return $categories;
     }
 
+    private function aggregateFilteringSources(?array $queryLog): array
+    {
+        if (!$queryLog) return [];
+
+        $items = $queryLog['items'] ?? [];
+        $counts = [];
+
+        foreach ($items as $item) {
+            $source = $item['filtering_info']['filtering_type'] ?? null;
+            if ($source) {
+                $counts[$source] = ($counts[$source] ?? 0) + 1;
+            }
+        }
+
+        $total = array_sum($counts) ?: 1;
+        $result = [];
+
+        foreach ($counts as $source => $count) {
+            $result[] = [
+                'name' => self::FILTERING_SOURCE_LABELS[$source] ?? $source,
+                'count' => $count,
+                'percentage' => round(($count / $total) * 100, 1),
+            ];
+        }
+
+        usort($result, fn($a, $b) => $b['count'] <=> $a['count']);
+
+        return $result;
+    }
+
     private function buildDeviceList(array $devices, array $deviceStats, \Illuminate\Support\Carbon $now): array
     {
         $activeCount = 0;
+        $suspiciousCount = 0;
         $list = [];
 
         if (!$devices) {
-            return ['active_count' => $activeCount, 'list' => $list];
+            return ['active_count' => $activeCount, 'suspicious_count' => $suspiciousCount, 'list' => $list];
         }
 
         $deviceLastSeen = [];
@@ -190,9 +254,14 @@ class AdGuardService
             $deviceId = $device['id'] ?? '';
             $lastSeen = $deviceLastSeen[$deviceId] ?? null;
             $isOnline = $lastSeen && ($now->valueOf() - $lastSeen) < self::DEVICE_ONLINE_THRESHOLD_MS;
+            $isSuspicious = $lastSeen && ($now->valueOf() - $lastSeen) >= self::SUSPICIOUS_THRESHOLD_MS;
 
             if ($isOnline) {
                 $activeCount++;
+            }
+
+            if ($isSuspicious) {
+                $suspiciousCount++;
             }
 
             $list[] = [
@@ -205,7 +274,7 @@ class AdGuardService
             ];
         }
 
-        return ['active_count' => $activeCount, 'list' => $list];
+        return ['active_count' => $activeCount, 'suspicious_count' => $suspiciousCount, 'list' => $list];
     }
 
     private function extractSafebrowsingSettings(?array $settings): array
@@ -227,6 +296,29 @@ class AdGuardService
             'block_dangerous_enabled' => !empty($safebrowsing['block_dangerous_domains'])
                 || !empty($safebrowsing['enabled']),
             'block_nrd_enabled' => !empty($safebrowsing['block_nrd']),
+        ];
+    }
+
+    private function extractParentalControlSettings(?array $settings): array
+    {
+        if (!$settings) {
+            return [
+                'enabled' => false,
+                'block_adult_websites_enabled' => false,
+                'engines_safe_search_enabled' => false,
+                'youtube_safe_search_enabled' => false,
+                'blocked_services' => [],
+            ];
+        }
+
+        $parental = $settings['parental_control_settings'] ?? [];
+
+        return [
+            'enabled' => !empty($parental['enabled']),
+            'block_adult_websites_enabled' => !empty($parental['block_adult_websites_enabled']),
+            'engines_safe_search_enabled' => !empty($parental['engines_safe_search_enabled']),
+            'youtube_safe_search_enabled' => !empty($parental['youtube_safe_search_enabled']),
+            'blocked_services' => $parental['blocked_services'] ?? [],
         ];
     }
 
