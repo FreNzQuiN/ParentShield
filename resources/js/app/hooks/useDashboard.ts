@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { DashboardData, ParentalControlSettings, SafebrowsingSettings } from '../types/dashboard';
 import { fetchDashboard, updateParentalControl, updateSafebrowsing } from '../services/api/dashboard';
 import { SERVICE_GROUPS } from '../constants/serviceGroups';
@@ -33,6 +33,9 @@ export function useDashboard(): UseDashboardResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const dataRef = useRef(data);
+  dataRef.current = data;
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -97,7 +100,7 @@ export function useDashboard(): UseDashboardResult {
     ) => {
       const snapshot =
         key === 'blocked_service' || key === 'service_group'
-          ? [...(data?.parental_control?.blocked_services ?? [])]
+          ? [...(dataRef.current?.parental_control?.blocked_services ?? [])]
           : null;
 
       setData((prev) => {

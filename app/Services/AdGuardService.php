@@ -141,7 +141,7 @@ class AdGuardService
     private function safeGet(callable $callback, mixed $default = null): mixed
     {
         try {
-            return $callback();
+            return $callback() ?? $default;
         } catch (AdGuardApiException $e) {
             throw $e;
         } catch (\Throwable $e) {
@@ -576,6 +576,12 @@ class AdGuardService
             return $responses;
         } catch (AdGuardApiException $e) {
             throw $e;
+        } catch (ConnectionException $e) {
+            throw new AdGuardApiException(
+                'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
+                'ADGUARD_CONNECTION_ERROR',
+                503
+            );
         } catch (\Exception $e) {
             throw new AdGuardApiException(
                 'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
