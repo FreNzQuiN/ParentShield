@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\AdGuardApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\SetupApiKeyRequest;
 use App\Models\User;
@@ -24,8 +25,16 @@ class SetupApiKeyController extends Controller
 
         try {
             $isValid = $this->adGuard->verifyApiKey();
-        } catch (\Exception $e) {
+        } catch (AdGuardApiException $e) {
             Log::error('Setup API key verification failed', [
+                'user_id' => $request->user()->id,
+                'error' => $e->getMessage(),
+                'code' => $e->getErrorCode(),
+            ]);
+
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Setup API key verification failed (unexpected)', [
                 'user_id' => $request->user()->id,
                 'error' => $e->getMessage(),
             ]);

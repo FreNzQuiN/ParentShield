@@ -80,7 +80,7 @@ class AdGuardService
                 'active_devices' => $deviceList['active_count'],
             ],
             'time_series' => $aggregated['series'],
-            'top_activities' => array_slice($this->getTopDomains($timeFrom, $timeTo), 0, 5),
+            'top_activities' => array_slice($this->safeGet(fn() => $this->getTopDomains($timeFrom, $timeTo), []), 0, 5),
             'categories_blocked' => array_slice($blockedCategories, 0, 5),
             'safebrowsing' => $safebrowsing,
             'devices' => $deviceList['list'],

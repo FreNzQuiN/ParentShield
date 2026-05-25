@@ -1,9 +1,8 @@
 <?php
 
-use App\Http\Middleware\AddCorrelationId;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['api', AddCorrelationId::class])->prefix('v1')->group(function () {
+Route::middleware('api')->prefix('v1')->group(function () {
     // Health
     Route::get('/health', function () {
         return response()->json([

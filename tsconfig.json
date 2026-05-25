@@ -15,9 +15,8 @@
         "noFallthroughCasesInSwitch": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "baseUrl": ".",
         "paths": {
-            "@/*": ["resources/js/app/*"]
+            "@/*": ["./resources/js/app/*"]
         }
     },
     "include": ["resources/js/**/*.ts", "resources/js/**/*.tsx"],
