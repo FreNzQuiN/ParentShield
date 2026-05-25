@@ -87,6 +87,13 @@ Monitoring (fitur device/activity/settings bertahap)
 | GET | `/api/v1/setup-api-key/status` | sanctum | Cek status API key |
 | GET | `/api/v1/dashboard` | sanctum+key | Data aggregated dashboard |
 | PUT | `/api/v1/dashboard/safebrowsing` | sanctum+key | Toggle proteksi |
+| PUT | `/api/v1/dashboard/parental-control` | sanctum+key | Update kontrol parental |
+| GET | `/api/v1/devices` | sanctum+key | Daftar perangkat |
+| POST | `/api/v1/devices` | sanctum+key | Tambah perangkat |
+| GET | `/api/v1/devices/{device}` | sanctum+key | Detail perangkat |
+| PUT | `/api/v1/devices/{device}` | sanctum+key | Ubah nama perangkat |
+| DELETE | `/api/v1/devices/{device}` | sanctum+key | Hapus perangkat |
+| GET | `/api/v1/devices/{device}/doh.mobileconfig` | sanctum+key | Unduh mobileconfig |
 
 ### Response Format
 
@@ -193,7 +200,7 @@ PROTECTED:    /dashboard, /activity, /devices, /settings
 
 ```bash
 php artisan test          # PHPUnit (36 tests)
-npx vitest run            # Vitest (37 tests)
+npx vitest run            # Vitest (95 tests)
 npm run build             # Vite build check
 ```
 
@@ -201,4 +208,5 @@ Backend tests mencakup: auth flow, API response contract, dashboard access contr
 setup API key validation, exception handling.
 
 Frontend tests mencakup: component rendering, form states (loading/error/success),
-auth context, route guards.
+auth context, route guards, API client interceptors, hooks (useDashboard),
+Dashboard page, Devices page (including CRUD modals, delete confirm, race guard).
