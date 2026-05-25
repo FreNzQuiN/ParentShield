@@ -85,7 +85,7 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
       )}
 
       {/* Sidebar desktop (lg+) */}
-      <aside className="hidden lg:flex lg:h-screen lg:w-[240px] lg:flex-col lg:bg-[#f1f4fa] lg:shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]">
+      <aside className="hidden lg:flex lg:h-screen lg:w-[256px] lg:flex-col lg:bg-[#f1f4fa] lg:shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]">
         {sidebarContent}
       </aside>
 

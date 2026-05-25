@@ -57,7 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AdGuardApiException $e, Request $request) {
             return response()->json([
                 'success' => false,
-                'code' => $e->getCode() ?: 'ADGUARD_ERROR',
+                'code' => $e->getErrorCode() ?: 'ADGUARD_ERROR',
                 'message' => $e->getMessage(),
             ], $e->getStatusCode());
         });
@@ -122,25 +122,13 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('api/*')) {
                 $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
 
-                $payload = [
-                    'success' => false,
-                    'code' => 'INTERNAL_ERROR',
-                    'message' => config('app.debug')
-                        ? $e->getMessage()
-                        : 'Terjadi kesalahan yang tidak terduga.',
-                ];
-
-                if (config('app.debug')) {
-                    $payload['debug'] = [
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine(),
-                        'trace' => collect($e->getTrace())->take(5)->toArray(),
-                    ];
-                }
-
                 report($e);
 
-                return response()->json($payload, $status);
+                return response()->json([
+                    'success' => false,
+                    'code' => 'INTERNAL_ERROR',
+                    'message' => 'Terjadi kesalahan yang tidak terduga.',
+                ], $status);
             }
         });
     })->create();

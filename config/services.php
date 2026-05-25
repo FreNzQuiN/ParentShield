@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'adguard' => [
+        'base_url' => env('ADGUARD_BASE_URL', 'https://api.adguard-dns.io/oapi/v1'),
+    ],
+
 ];

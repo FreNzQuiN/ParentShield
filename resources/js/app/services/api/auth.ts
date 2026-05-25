@@ -2,10 +2,11 @@ import api from './client';
 import type { ApiSuccessResponse } from '../../types/api';
 import type { AuthData, MeData } from '../../types/auth';
 
-export function csrfCookie(): Promise<void> {
-  return fetch('/sanctum/csrf-cookie', {
-    credentials: 'include',
-  }).then(() => undefined);
+export async function csrfCookie(): Promise<void> {
+  const response = await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
+  if (!response.ok) {
+    throw new Error('Gagal mendapatkan CSRF cookie.');
+  }
 }
 
 export async function login(email: string, password: string): Promise<AuthData> {

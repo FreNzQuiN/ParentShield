@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useAuth } from '../app/contexts/AuthContext';
-import { ShieldIconSmall } from '../app/components/shared/icons';
+import { ShieldIconSmall, DashboardQueryIcon, DashboardBlockIcon, DashboardDeviceIcon } from '../app/components/shared/icons';
 import { useDashboard } from '../app/hooks/useDashboard';
 import { StatCard, BarChart, ProgressBarList, ProteksiGlobal, DeviceAnakList, DashboardSkeleton } from '../app/components/features/dashboard';
 import { Loading, InlineError } from '../app/components/shared';
@@ -46,7 +46,7 @@ export default function Dashboard() {
   return (
     <div className="relative flex flex-col gap-5 md:gap-6">
       {(loading || isRefreshing) && data && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-white/60 lg:inset-y-0 lg:left-[240px] lg:right-0">
+        <div className="fixed inset-0 z-20 flex items-center justify-center bg-white/60 lg:inset-y-0 lg:left-[256px] lg:right-0">
           <Loading message="Memuat..." size="sm" />
         </div>
       )}
@@ -66,30 +66,22 @@ export default function Dashboard() {
 
         <section className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
           <StatCard
-            icon={<QueryIcon />}
+            icon={<DashboardQueryIcon />}
             label="Permintaan Total"
             value={(data?.stats.total_queries ?? 0).toLocaleString()}
           />
           <StatCard
-            icon={<BlockIcon />}
+            icon={<DashboardBlockIcon />}
             label="Berhasil Diblokir"
             value={(data?.stats.blocked_count ?? 0).toLocaleString()}
             valueColor="#ba1a1a"
-            caption={(data?.stats.blocked_categories ?? []).join(', ') || 'Belum ada'}
           />
-          <div className="col-span-2 md:col-span-1">
-            <StatCard
-              icon={<DeviceStatIcon />}
-              label="Device Aktif"
-              value={data?.stats.active_devices ?? 0}
-              valueColor="#1b6d24"
-              caption={
-                data?.devices
-                  ? data.devices.filter((d) => d.is_online).map((d) => d.name).join(', ') || 'Belum online'
-                  : ''
-              }
-            />
-          </div>
+          <StatCard
+            icon={<DashboardDeviceIcon />}
+            label="Device Aktif"
+            value={data?.stats.active_devices ?? 0}
+            valueColor="#1b6d24"
+          />
         </section>
 
         <section className="flex flex-col gap-5 md:grid md:grid-cols-3 md:gap-6">
@@ -158,27 +150,3 @@ export default function Dashboard() {
   );
 }
 
-function QueryIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M9 1C4.58 1 1 4.58 1 9s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm1-9H8v5h2V6zm0 6H8v2h2v-2z" fill="#005bbf" />
-    </svg>
-  );
-}
-
-function BlockIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M9 1L2 4v5c0 4.5 3 8.5 7 9 4-.5 7-4.5 7-9V4L9 1zm0 2.5L14 5.7v3.3c0 3.3-2.1 6.4-5 7.3V3.5z" fill="#ba1a1a" />
-    </svg>
-  );
-}
-
-function DeviceStatIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect x="2" y="1" width="14" height="16" rx="2" stroke="#1b6d24" strokeWidth="1.5" fill="none" />
-      <circle cx="9" cy="13" r="1.5" fill="#1b6d24" />
-    </svg>
-  );
-}

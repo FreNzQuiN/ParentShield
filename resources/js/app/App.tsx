@@ -5,7 +5,7 @@ import { useAuth } from './contexts/AuthContext';
 import { ToastContainer } from './components/shared';
 import { ProtectedRoute, RequireApiKey } from './routes/guards';
 import { AppLayout } from './components/features';
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import ForgotPassword from '../pages/ForgotPassword';
@@ -16,25 +16,11 @@ import Settings from '../pages/Settings';
 import SetupApiKey from '../pages/SetupApiKey';
 import NotFound from '../pages/NotFound';
 
-function AuthRedirect() {
+function GuestGuard({ children }: { children: ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) return null;
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />;
-}
-
-function RegisterGuard() {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) return null;
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />;
-}
-
-function ForgotPasswordGuard() {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) return null;
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <ForgotPassword />;
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>;
 }
 
 function LogoutHandler() {
@@ -55,9 +41,9 @@ export default function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<AuthRedirect />} />
-            <Route path="/register" element={<RegisterGuard />} />
-            <Route path="/forgot-password" element={<ForgotPasswordGuard />} />
+            <Route path="/login" element={<GuestGuard><Login /></GuestGuard>} />
+            <Route path="/register" element={<GuestGuard><Register /></GuestGuard>} />
+            <Route path="/forgot-password" element={<GuestGuard><ForgotPassword /></GuestGuard>} />
             <Route path="/logout" element={<LogoutHandler />} />
 
             <Route element={<ProtectedRoute />}>

@@ -34,7 +34,8 @@ Route::middleware(['api', AddCorrelationId::class])->prefix('v1')->group(functio
 
     // Setup API key (requires auth, no API key needed)
     Route::middleware(['auth:sanctum'])->prefix('setup-api-key')->group(function () {
-        Route::post('/', [\App\Http\Controllers\Api\SetupApiKeyController::class, 'store']);
+        Route::post('/', [\App\Http\Controllers\Api\SetupApiKeyController::class, 'store'])
+            ->middleware('throttle:5,1');
         Route::get('/status', [\App\Http\Controllers\Api\SetupApiKeyController::class, 'status']);
     });
 

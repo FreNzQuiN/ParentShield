@@ -20,6 +20,6 @@ describe('InlineError', () => {
 
   it('does not render retry button when onRetry not provided', () => {
     render(<InlineError message="Failed" />);
-    expect(screen.queryByText('Try Again')).not.toBeInTheDocument();
+    expect(screen.queryByText('Coba Lagi')).not.toBeInTheDocument();
   });
 });

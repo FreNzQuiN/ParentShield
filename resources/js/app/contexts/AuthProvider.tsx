@@ -1,21 +1,8 @@
 import { useState, useCallback, useEffect, type ReactNode } from 'react';
 import { AuthContext } from './AuthContext';
+import { getStoredToken, setStoredToken, clearStoredToken } from '../utils/storage';
 import type { User } from '../types/auth';
 import * as authApi from '../services/api/auth';
-
-const TOKEN_KEY = 'auth_token';
-
-function getStoredToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-function setStoredToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-function clearStoredToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -94,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearError = useCallback(() => setLoginError(null), []);
 
-  const checkAuth = useCallback(async (token: string) => {
+  const checkAuth = useCallback(async () => {
     try {
       const { user: userData } = await authApi.me();
       setUser(userData);
@@ -108,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = getStoredToken();
     if (token) {
       setAuthToken(token);
-      checkAuth(token).finally(() => setLoading(false));
+      checkAuth().finally(() => setLoading(false));
     } else {
       setLoading(false);
     }

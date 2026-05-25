@@ -17,7 +17,7 @@ class AdGuardApiExceptionTest extends TestCase
 
         $this->assertEquals(401, $exception->getStatusCode());
         $this->assertEquals('Invalid API key', $exception->getMessage());
-        $this->assertEquals('API_KEY_INVALID', $exception->getCode());
+        $this->assertEquals('API_KEY_INVALID', $exception->getErrorCode());
     }
 
     public function test_exception_defaults(): void
@@ -26,6 +26,6 @@ class AdGuardApiExceptionTest extends TestCase
 
         $this->assertEquals(502, $exception->getStatusCode());
         $this->assertEquals('Terjadi kesalahan pada layanan AdGuard.', $exception->getMessage());
-        $this->assertEquals('ADGUARD_ERROR', $exception->getCode());
+        $this->assertEquals('ADGUARD_ERROR', $exception->getErrorCode());
     }
 }

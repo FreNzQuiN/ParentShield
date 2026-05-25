@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useToast } from '../../../contexts/ToastContext';
 import { GlobeIcon } from '../../shared/icons';
 import type { SafebrowsingSettings } from '../../../types/dashboard';
@@ -35,7 +35,14 @@ const toggles: ToggleRow[] = [
 export default function ProteksiGlobal({ settings, onToggle }: ProteksiGlobalProps) {
   const [optimistic, setOptimistic] = useState<SafebrowsingSettings>(settings);
   const [toggling, setToggling] = useState<keyof SafebrowsingSettings | null>(null);
+  const syncingRef = useRef(false);
   const { addToast } = useToast();
+
+  useEffect(() => {
+    if (!syncingRef.current) {
+      setOptimistic(settings);
+    }
+  }, [settings]);
 
   const handleToggle = useCallback(
     async (key: keyof SafebrowsingSettings) => {
@@ -43,6 +50,7 @@ export default function ProteksiGlobal({ settings, onToggle }: ProteksiGlobalPro
       const label = toggles.find((t) => t.key === key)?.label ?? key;
       setOptimistic((prev) => ({ ...prev, [key]: newValue }));
       setToggling(key);
+      syncingRef.current = true;
 
       try {
         await onToggle(key, newValue);
@@ -52,6 +60,7 @@ export default function ProteksiGlobal({ settings, onToggle }: ProteksiGlobalPro
         addToast({ type: 'error', message: `Gagal memperbarui ${label.toLowerCase()}.` });
       } finally {
         setToggling(null);
+        syncingRef.current = false;
       }
     },
     [optimistic, onToggle, addToast]

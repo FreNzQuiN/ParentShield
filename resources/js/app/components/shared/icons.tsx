@@ -1,8 +1,8 @@
-import { type SVGProps } from 'react';
+import { type HTMLAttributes, type SVGProps } from 'react';
 
 type IconProps = SVGProps<SVGSVGElement>;
 
-export function ShieldIcon(props: IconProps) {
+export function ShieldIcon(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div className="flex size-[40px] items-center justify-center rounded-full bg-[#005bbf]" {...props}>
       <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
@@ -14,7 +14,7 @@ export function ShieldIcon(props: IconProps) {
 
 export function ShieldIconSmall(props: IconProps) {
   return (
-    <svg width="16" height="20" viewBox="0 0 16 20" fill="none" {...props}>
+    <svg width="16" height="22" viewBox="0 0 16 22" fill="none" {...props}>
       <path d="M8 0L0 3v7c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V3L8 0zm0 2.18L14 4.3v5.7c0 4.55-2.77 8.73-6 9.94V2.18z" fill="#005bbf" />
     </svg>
   );
@@ -124,6 +124,31 @@ export function PlusIcon(props: IconProps) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" {...props}>
       <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function DashboardQueryIcon(props: IconProps) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M9 1C4.58 1 1 4.58 1 9s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm1-9H8v5h2V6zm0 6H8v2h2v-2z" fill="#005bbf" />
+    </svg>
+  );
+}
+
+export function DashboardBlockIcon(props: IconProps) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M9 1L2 4v5c0 4.5 3 8.5 7 9 4-.5 7-4.5 7-9V4L9 1zm0 2.5L14 5.7v3.3c0 3.3-2.1 6.4-5 7.3V3.5z" fill="#ba1a1a" />
+    </svg>
+  );
+}
+
+export function DashboardDeviceIcon(props: IconProps) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <rect x="2" y="1" width="14" height="16" rx="2" stroke="#1b6d24" strokeWidth="1.5" fill="none" />
+      <circle cx="9" cy="13" r="1.5" fill="#1b6d24" />
     </svg>
   );
 }

@@ -35,11 +35,11 @@ class DashboardController extends Controller
         } catch (\App\Exceptions\AdGuardApiException $e) {
             Log::warning('Dashboard API error', [
                 'user_id' => $user->id,
-                'code' => $e->getCode(),
+                'code' => $e->getErrorCode(),
                 'message' => $e->getMessage(),
             ]);
 
-            if ($e->getCode() === 'ADGUARD_UNAUTHORIZED') {
+            if ($e->getErrorCode() === 'ADGUARD_UNAUTHORIZED') {
                 $user->adguard_api_key_verified_at = null;
                 $user->save();
             }
@@ -135,11 +135,11 @@ class DashboardController extends Controller
             Log::warning('Safebrowsing update error', [
                 'user_id' => $user->id,
                 'key' => $key,
-                'code' => $e->getCode(),
+                'code' => $e->getErrorCode(),
                 'message' => $e->getMessage(),
             ]);
 
-            if ($e->getCode() === 'ADGUARD_UNAUTHORIZED') {
+            if ($e->getErrorCode() === 'ADGUARD_UNAUTHORIZED') {
                 $user->adguard_api_key_verified_at = null;
                 $user->save();
             }

@@ -10,7 +10,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
@@ -63,8 +63,18 @@ class AuthController extends Controller
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
         try {
-            Password::sendResetLink($request->only('email'));
-        } catch (\Exception) {
+            $status = Password::sendResetLink($request->only('email'));
+
+            if ($status !== Password::RESET_LINK_SENT) {
+                Log::warning('Password reset requested for non-existent or invalid email', [
+                    'email' => $request->input('email'),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Password reset failed', [
+                'email' => $request->input('email'),
+                'error' => $e->getMessage(),
+            ]);
         }
 
         return $this->success(null, 'Jika email terdaftar, tautan reset telah dikirim.');

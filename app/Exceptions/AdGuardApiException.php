@@ -6,6 +6,7 @@ use RuntimeException;
 
 class AdGuardApiException extends RuntimeException
 {
+    private readonly string $errorCode;
     protected int $statusCode;
 
     public function __construct(
@@ -15,8 +16,13 @@ class AdGuardApiException extends RuntimeException
         ?\Throwable $previous = null
     ) {
         parent::__construct($message, 0, $previous);
-        $this->code = $code;
+        $this->errorCode = $code;
         $this->statusCode = $statusCode;
+    }
+
+    public function getErrorCode(): string
+    {
+        return $this->errorCode;
     }
 
     public function getStatusCode(): int

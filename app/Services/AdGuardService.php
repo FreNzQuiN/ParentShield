@@ -3,18 +3,23 @@
 namespace App\Services;
 
 use App\Exceptions\AdGuardApiException;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class AdGuardService
 {
+    private const DEVICE_ONLINE_THRESHOLD_MS = 300000;
+    private const DASHBOARD_CACHE_TTL_SECONDS = 30;
+
     private string $baseUrl;
     private ?string $apiKey;
 
     public function __construct(?string $apiKey = null)
     {
-        $this->baseUrl = 'https://api.adguard-dns.io/oapi/v1';
+        $this->baseUrl = config('services.adguard.base_url');
         $this->apiKey = $apiKey;
     }
 
@@ -25,6 +30,15 @@ class AdGuardService
     }
 
     public function getDashboardData(): array
+    {
+        $cacheKey = 'adguard_dashboard_' . md5($this->apiKey ?? '');
+
+        return Cache::remember($cacheKey, self::DASHBOARD_CACHE_TTL_SECONDS, function () {
+            return $this->fetchDashboardData();
+        });
+    }
+
+    private function fetchDashboardData(): array
     {
         $now = now();
         $twentyFourHoursAgo = $now->copy()->subDay();
@@ -88,7 +102,7 @@ class AdGuardService
             foreach ($devices as $device) {
                 $deviceId = $device['id'] ?? '';
                 $lastSeen = $deviceLastSeen[$deviceId] ?? null;
-                $isOnline = $lastSeen && ($now->valueOf() - $lastSeen) < 300000;
+                $isOnline = $lastSeen && ($now->valueOf() - $lastSeen) < self::DEVICE_ONLINE_THRESHOLD_MS;
 
                 if ($isOnline) {
                     $activeDevices++;
@@ -150,7 +164,7 @@ class AdGuardService
             $response = $this->get('/dns_servers');
             return $response->successful();
         } catch (AdGuardApiException $e) {
-            if ($e->getCode() === 'ADGUARD_UNAUTHORIZED') {
+            if ($e->getErrorCode() === 'ADGUARD_UNAUTHORIZED') {
                 return false;
             }
             throw $e;
@@ -166,7 +180,8 @@ class AdGuardService
     public function getDnsServer(string $dnsServerId): ?array
     {
         $response = $this->get("/dns_servers/{$dnsServerId}");
-        return $response->json();
+        $data = $response->json();
+        return is_array($data) ? $data : null;
     }
 
     public function getDnsServerSettings(string $dnsServerId): ?array
@@ -178,7 +193,7 @@ class AdGuardService
 
     public function updateDnsServerSettings(string $dnsServerId, array $settings): bool
     {
-        $response = $this->put("/dns_servers/{$dnsServerId}/settings", $settings);
+        $response = $this->send('put', "/dns_servers/{$dnsServerId}/settings", $settings);
         return $response->successful();
     }
 
@@ -203,7 +218,8 @@ class AdGuardService
             'time_from_millis' => $timeFrom,
             'time_to_millis' => $timeTo,
         ]);
-        return $response->json();
+        $data = $response->json();
+        return is_array($data) ? $data : null;
     }
 
     public function getCategoryStats(int $timeFrom, int $timeTo): ?array
@@ -212,7 +228,8 @@ class AdGuardService
             'time_from_millis' => $timeFrom,
             'time_to_millis' => $timeTo,
         ]);
-        return $response->json();
+        $data = $response->json();
+        return is_array($data) ? $data : null;
     }
 
     public function getDomainStats(int $timeFrom, int $timeTo): ?array
@@ -221,13 +238,15 @@ class AdGuardService
             'time_from_millis' => $timeFrom,
             'time_to_millis' => $timeTo,
         ]);
-        return $response->json();
+        $data = $response->json();
+        return is_array($data) ? $data : null;
     }
 
     public function getAccountLimits(): ?array
     {
         $response = $this->get('/account/limits');
-        return $response->json();
+        $data = $response->json();
+        return is_array($data) ? $data : null;
     }
 
     private function getTopDomains(int $timeFrom, int $timeTo): array
@@ -245,50 +264,26 @@ class AdGuardService
 
     private function get(string $endpoint, array $query = []): Response
     {
-        if (!$this->apiKey) {
-            throw new AdGuardApiException('Kunci API tidak ditemukan.', 'API_KEY_MISSING', 401);
-        }
-
-        $url = $this->baseUrl . $endpoint;
-
-        Log::debug('AdGuard API GET', ['url' => $url, 'query' => $query]);
-
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'ApiKey ' . $this->apiKey,
-                'Accept' => 'application/json',
-            ])->timeout(15)->get($url, $query);
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            throw new AdGuardApiException(
-                'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
-                'ADGUARD_CONNECTION_ERROR',
-                503
-            );
-        }
-
-        if ($response->failed()) {
-            $this->handleError($response, $url);
-        }
-
-        return $response;
+        return $this->send('get', $endpoint, $query);
     }
 
-    private function put(string $endpoint, array $data = []): Response
+    private function send(string $method, string $endpoint, array $data = []): Response
     {
         if (!$this->apiKey) {
             throw new AdGuardApiException('Kunci API tidak ditemukan.', 'API_KEY_MISSING', 401);
         }
 
         $url = $this->baseUrl . $endpoint;
+        $method = strtolower($method);
 
-        Log::debug('AdGuard API PUT', ['url' => $url, 'data' => $data]);
+        Log::debug("AdGuard API {$method}", ['url' => $url, 'data' => $data]);
 
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'ApiKey ' . $this->apiKey,
                 'Accept' => 'application/json',
-            ])->timeout(15)->put($url, $data);
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            ])->timeout(15)->{$method}($url, $data);
+        } catch (ConnectionException $e) {
             throw new AdGuardApiException(
                 'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
                 'ADGUARD_CONNECTION_ERROR',
