@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import type { ApiErrorResponse } from '../../types/api';
-import { getStoredToken, clearStoredToken } from '../../utils/storage';
+import { getStoredToken } from '../../utils/storage';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -23,10 +23,8 @@ api.interceptors.request.use((config) => {
 
 const AUTH_ROUTES = ['/auth/login', '/auth/register', '/auth/forgot-password'];
 
-function redirect(href: string): never {
-  clearStoredToken();
-  window.location.href = href;
-  return new Promise(() => {}) as never;
+function navigateApp(path: string): void {
+  window.dispatchEvent(new CustomEvent('app:navigate', { detail: { path } }));
 }
 
 api.interceptors.response.use(
@@ -37,15 +35,18 @@ api.interceptors.response.use(
       const requestUrl = error.config?.url ?? '';
 
       if (status === 401 && data?.code === 'ADGUARD_UNAUTHORIZED') {
-        return redirect('/setup-api-key?reason=revoked');
+        navigateApp('/setup-api-key?reason=revoked');
+        return new Promise(() => {}) as never;
       }
 
       if (status === 401 && !AUTH_ROUTES.some((r) => requestUrl.startsWith(r))) {
-        return redirect('/login');
+        navigateApp('/login');
+        return new Promise(() => {}) as never;
       }
 
       if (status === 403 && data?.code === 'API_KEY_REQUIRED') {
-        return redirect('/setup-api-key');
+        navigateApp('/setup-api-key');
+        return new Promise(() => {}) as never;
       }
 
       return Promise.reject({

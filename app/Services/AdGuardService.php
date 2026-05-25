@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Exceptions\AdGuardApiException;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -56,13 +58,23 @@ class AdGuardService
         $timeFrom = $twentyFourHoursAgo->valueOf();
         $timeTo = $now->valueOf();
 
-        $timeStats = $this->safeGet(fn() => $this->getTimeStats($timeFrom, $timeTo));
-        $categoryStats = $this->safeGet(fn() => $this->getCategoryStats($timeFrom, $timeTo));
-        $devices = $this->safeGet(fn() => $this->getDevices(), []);
-        $limits = $this->safeGet(fn() => $this->getAccountLimits(), []);
-        $deviceStats = $this->safeGet(fn() => $this->getDeviceStats($timeFrom, $timeTo), []);
+        $responses = $this->sendMany([
+            'timeStats'      => ['method' => 'get', 'endpoint' => '/stats/time',       'data' => ['time_from_millis' => $timeFrom, 'time_to_millis' => $timeTo]],
+            'categoryStats'  => ['method' => 'get', 'endpoint' => '/stats/categories',  'data' => ['time_from_millis' => $timeFrom, 'time_to_millis' => $timeTo]],
+            'devices'        => ['method' => 'get', 'endpoint' => '/devices',           'data' => []],
+            'limits'         => ['method' => 'get', 'endpoint' => '/account/limits',    'data' => []],
+            'deviceStats'    => ['method' => 'get', 'endpoint' => '/stats/devices',     'data' => ['time_from_millis' => $timeFrom, 'time_to_millis' => $timeTo]],
+            'dnsServers'     => ['method' => 'get', 'endpoint' => '/dns_servers',       'data' => []],
+        ]);
 
-        $dnsServer = $this->getDefaultDnsServer();
+        $timeStats = $this->safeGet(fn() => $this->parsePoolJson($responses['timeStats']));
+        $categoryStats = $this->safeGet(fn() => $this->parsePoolJson($responses['categoryStats']));
+        $devices = $this->safeGet(fn() => $this->parsePoolJson($responses['devices']), []);
+        $limits = $this->safeGet(fn() => $this->parsePoolJson($responses['limits']), []);
+        $deviceStats = $this->safeGet(fn() => $this->parsePoolJson($responses['deviceStats']), []);
+        $dnsServers = $this->safeGet(fn() => $this->parsePoolJson($responses['dnsServers']), []);
+
+        $dnsServer = $this->findDefaultDnsServer($dnsServers);
         $settings = $dnsServer['settings'] ?? null;
 
         $aggregated = $this->aggregateTimeStats($timeStats);
@@ -363,6 +375,87 @@ class AdGuardService
         }
 
         return $response;
+    }
+
+    private function sendMany(array $requests, int $timeout = 15): array
+    {
+        if (!$this->apiKey) {
+            throw new AdGuardApiException('Kunci API tidak ditemukan.', 'API_KEY_MISSING', 401);
+        }
+
+        $headers = [
+            'Authorization' => 'ApiKey ' . $this->apiKey,
+            'Accept' => 'application/json',
+        ];
+
+        try {
+            $responses = Http::pool(function (Pool $pool) use ($requests, $headers, $timeout) {
+                foreach ($requests as $key => $spec) {
+                    $url = $this->baseUrl . $spec['endpoint'];
+                    $method = strtolower($spec['method']);
+
+                    Log::debug("AdGuard API pool {$method}", ['url' => $url, 'data' => $spec['data']]);
+
+                    $pool->as($key)->withHeaders($headers)
+                        ->timeout($timeout)
+                        ->{$method}($url, $spec['data']);
+                }
+            });
+
+            foreach ($responses as $key => $response) {
+                if ($response instanceof \Exception) {
+                    if ($response instanceof ConnectionException) {
+                        throw new AdGuardApiException(
+                            'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
+                            'ADGUARD_CONNECTION_ERROR',
+                            503
+                        );
+                    }
+                    if ($response instanceof RequestException && $response->hasResponse()) {
+                        $this->handleError(
+                            new Response($response->getResponse()),
+                            $this->baseUrl . $requests[$key]['endpoint']
+                        );
+                    }
+                    throw $response;
+                }
+                if ($response instanceof Response && $response->failed()) {
+                    $this->handleError($response, $this->baseUrl . $requests[$key]['endpoint']);
+                }
+            }
+
+            return $responses;
+        } catch (AdGuardApiException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new AdGuardApiException(
+                'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
+                'ADGUARD_API_ERROR',
+                502
+            );
+        }
+    }
+
+    private function parsePoolJson(Response|\Exception $response): ?array
+    {
+        if ($response instanceof \Exception) {
+            throw $response;
+        }
+        $data = $response->json();
+        return is_array($data) ? $data : null;
+    }
+
+    private function findDefaultDnsServer(array $dnsServers): ?array
+    {
+        if (empty($dnsServers)) {
+            return null;
+        }
+        foreach ($dnsServers as $server) {
+            if (!empty($server['default'])) {
+                return $server;
+            }
+        }
+        return $dnsServers[0];
     }
 
     private function handleError(Response $response, string $url): never

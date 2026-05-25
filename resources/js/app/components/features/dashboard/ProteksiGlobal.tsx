@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useToast } from '../../../contexts/ToastContext';
 import { GlobeIcon } from '../../shared/icons';
 import type { SafebrowsingSettings } from '../../../types/dashboard';
@@ -33,41 +33,26 @@ const toggles: ToggleRow[] = [
 ];
 
 export default function ProteksiGlobal({ settings, onToggle }: ProteksiGlobalProps) {
-  const [optimistic, setOptimistic] = useState<SafebrowsingSettings>(settings);
   const [toggling, setToggling] = useState<keyof SafebrowsingSettings | null>(null);
-  const syncingRef = useRef(false);
-  const optimisticRef = useRef(optimistic);
-  optimisticRef.current = optimistic;
   const { addToast } = useToast();
-
-  useEffect(() => {
-    if (!syncingRef.current) {
-      setOptimistic(settings);
-    }
-  }, [settings]);
 
   const handleToggle = useCallback(
     async (key: keyof SafebrowsingSettings) => {
       setToggling(key);
-      syncingRef.current = true;
 
-      const newValue = !optimisticRef.current[key];
-      setOptimistic((prev) => ({ ...prev, [key]: newValue }));
-
+      const newValue = !settings[key];
       const label = toggles.find((t) => t.key === key)?.label ?? key;
 
       try {
         await onToggle(key, newValue);
         addToast({ type: 'success', message: `${label} berhasil ${newValue ? 'diaktifkan' : 'dinonaktifkan'}.` });
       } catch {
-        setOptimistic((prev) => ({ ...prev, [key]: !newValue }));
         addToast({ type: 'error', message: `Gagal memperbarui ${label.toLowerCase()}.` });
       } finally {
         setToggling(null);
-        syncingRef.current = false;
       }
     },
-    [onToggle, addToast]
+    [onToggle, addToast, settings]
   );
 
   return (
@@ -100,13 +85,13 @@ export default function ProteksiGlobal({ settings, onToggle }: ProteksiGlobalPro
               className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
                 toggling === t.key ? 'opacity-60' : ''
               } ${
-                optimistic[t.key] ? 'bg-[#1b6d24]' : 'bg-[#dfe3e8]'
+                settings[t.key] ? 'bg-[#1b6d24]' : 'bg-[#dfe3e8]'
               }`}
               aria-label={t.label}
             >
               <span
                 className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                  optimistic[t.key] ? 'translate-x-5' : 'translate-x-0'
+                  settings[t.key] ? 'translate-x-5' : 'translate-x-0'
                 }`}
               />
             </button>

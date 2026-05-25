@@ -50,7 +50,6 @@ export function useDashboard(): UseDashboardResult {
 
   const toggleSafebrowsing = useCallback(
     async (key: keyof SafebrowsingSettings, value: boolean) => {
-      await updateSafebrowsing(key, value);
       setData((prev) => {
         if (!prev) return prev;
         return {
@@ -58,12 +57,27 @@ export function useDashboard(): UseDashboardResult {
           safebrowsing: { ...prev.safebrowsing, [key]: value },
         };
       });
+
+      try {
+        await updateSafebrowsing(key, value);
+      } catch (err) {
+        setData((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            safebrowsing: { ...prev.safebrowsing, [key]: !value },
+          };
+        });
+        throw err;
+      }
     },
     []
   );
 
   useEffect(() => {
+    const controller = new AbortController();
     refresh();
+    return () => controller.abort();
   }, [refresh]);
 
   return { data, loading, error, refresh, softRefresh, isRefreshing, toggleSafebrowsing };

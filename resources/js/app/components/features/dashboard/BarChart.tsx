@@ -1,5 +1,6 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import type { TimeSeriesPoint } from '../../../types/dashboard';
+import { useIsMobile } from '../../../hooks/useIsMobile';
 
 interface BarChartProps {
   data: TimeSeriesPoint[];
@@ -27,18 +28,6 @@ function mergePoints(points: TimeSeriesPoint[], factor: number): TimeSeriesPoint
     });
   }
   return result;
-}
-
-function useIsMobile(): boolean {
-  const [mobile, setMobile] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    setMobile(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setMobile(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return mobile;
 }
 
 export default function BarChart({ data }: BarChartProps) {

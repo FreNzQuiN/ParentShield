@@ -41,6 +41,7 @@ class DashboardController extends Controller
             ]);
 
             if ($e->getErrorCode() === 'ADGUARD_UNAUTHORIZED') {
+                $this->adGuard->forgetDashboardCache();
                 $user->clearAdguardApiKey();
             }
 
@@ -133,12 +134,13 @@ class DashboardController extends Controller
             ]);
 
             if ($e->getErrorCode() === 'ADGUARD_UNAUTHORIZED') {
+                $this->adGuard->forgetDashboardCache();
                 $user->clearAdguardApiKey();
             }
 
             return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
         } catch (\Exception $e) {
-            Log::error('Safebrowsing unexpected error', [
+            Log::error('Safebrowsing update error', [
                 'user_id' => $user->id,
                 'key' => $key,
                 'error' => $e->getMessage(),

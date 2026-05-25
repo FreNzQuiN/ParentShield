@@ -24,7 +24,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoginError(null);
     setLoading(true);
     try {
-      await authApi.csrfCookie();
       const { user: userData, token } = await authApi.login(email, password);
       setAuthToken(token);
       setUser(userData);
@@ -46,7 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoginError(null);
     setLoading(true);
     try {
-      await authApi.csrfCookie();
       const { user: userData, token } = await authApi.register(
         name, email, password, password_confirmation,
       );

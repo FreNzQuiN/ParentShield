@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-route
 import { ToastProvider } from './contexts/ToastProvider';
 import { AuthProvider } from './contexts/AuthProvider';
 import { useAuth } from './contexts/AuthContext';
-import { ToastContainer } from './components/shared';
+import { ToastContainer, Loading } from './components/shared';
 import { ProtectedRoute, RequireApiKey } from './routes/guards';
 import { AppLayout } from './components/features';
 import { useEffect, type ReactNode } from 'react';
@@ -19,8 +19,27 @@ import NotFound from '../pages/NotFound';
 function GuestGuard({ children }: { children: ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
 
-  if (loading) return null;
+  if (loading) return <Loading size="lg" message="Memuat..." className="min-h-screen" />;
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>;
+}
+
+function AppNavigateListener() {
+  const navigate = useNavigate();
+  const { onLogout } = useAuth();
+
+  useEffect(() => {
+    const handler = async (e: Event) => {
+      const { path } = (e as CustomEvent<{ path: string }>).detail;
+      if (path.startsWith('/login')) {
+        try { await onLogout(); } catch { /* ignore */ }
+      }
+      navigate(path, { replace: true });
+    };
+    window.addEventListener('app:navigate', handler);
+    return () => window.removeEventListener('app:navigate', handler);
+  }, [navigate, onLogout]);
+
+  return null;
 }
 
 function LogoutHandler() {
@@ -39,6 +58,7 @@ export default function App() {
     <ToastProvider>
       <BrowserRouter>
         <AuthProvider>
+          <AppNavigateListener />
           <Routes>
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<GuestGuard><Login /></GuestGuard>} />
@@ -66,3 +86,4 @@ export default function App() {
     </ToastProvider>
   );
 }
+

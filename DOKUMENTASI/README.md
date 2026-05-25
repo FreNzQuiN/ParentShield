@@ -45,7 +45,7 @@ resources/js/
 │   │   └── shared/                # AuthLayout, FormInput, Loading, InlineError,
 │   │                              # Toast, EmptyState, icons
 │   ├── contexts/                  # AuthContext, ToastContext
-│   ├── hooks/                     # useDashboard
+│   ├── hooks/                     # useDashboard, useIsMobile
 │   ├── routes/guards/             # ProtectedRoute, RequireApiKey
 │   ├── services/api/              # client (axios), auth, dashboard, setupApiKey
 │   ├── styles/tokens.ts           # Design tokens
@@ -70,8 +70,7 @@ Monitoring (fitur device/activity/settings bertahap)
 
 1. Belum login → `/login`
 2. Login, API key kosong/revoked → `/setup-api-key`
-3. Login + API key valid → halaman tujuan
-4. Login + API key valid → halaman tujuan (dashboard/protected route)
+3. Login + API key valid → halaman tujuan (dashboard/protected route)
 
 ## Endpoint API
 
@@ -118,7 +117,7 @@ Semua pesan error user-facing dalam **Bahasa Indonesia**.
 |-----------|--------|-------|
 | QueryException (constraint 23*) | 409 | Operasi tidak dapat diproses... |
 | QueryException (syntax 42*) | 500 | Kesalahan sistem... |
-| QueryException (lain) | 500 | Kesalahan sistem... |
+| QueryException (lain) | 503 | Layanan sedang sibuk, silakan coba lagi. |
 | ConnectionException | 502 | Layanan eksternal tidak dapat dijangkau... |
 | TooManyRequestsHttpException | 429 | Terlalu banyak permintaan... |
 | ValidationException | 422 | (pesan validasi per field) |
@@ -132,6 +131,7 @@ Semua pesan error user-facing dalam **Bahasa Indonesia**.
 |--------|------|------|
 | 401 | ADGUARD_UNAUTHORIZED | Redirect `/setup-api-key?reason=revoked` |
 | 401 | (lain) | Redirect `/login` |
+| 403 | API_KEY_REQUIRED | Redirect `/setup-api-key` |
 | 422 | - | Tampilkan inline error |
 | 5xx | - | Tampilkan toast error |
 

@@ -44,8 +44,4 @@ trait ApiResponse
         return $this->success($data, $message, 201);
     }
 
-    protected function noContent(string $message = 'No Content'): JsonResponse
-    {
-        return $this->success(null, $message, 204);
-    }
 }
