@@ -73,18 +73,6 @@ Monitoring (fitur device/activity/settings bertahap)
 3. Login + API key valid → halaman tujuan
 4. Login + API key valid → halaman tujuan (dashboard/protected route)
 
-### API Key Revoked
-
-Backend set `adguard_api_key_verified_at = null` dan `adguard_api_key_encrypted = null`, return 401 `ADGUARD_UNAUTHORIZED`.
-Axios interceptor menangkap kode ini sebelum 401 handler umum, redirect ke `/setup-api-key?reason=revoked`.
-Halaman setup menampilkan banner merah: *"Kunci API sebelumnya tidak valid atau telah dicabut."*
-
-### Error Service Setup API Key
-
-Jika service AdGuard sedang down saat verifikasi API key, `verifyApiKey()` me-rethrow
-`AdGuardApiException` dengan kode `ADGUARD_CONNECTION_ERROR`. Controller menangkapnya
-dan return 503: *"Tidak dapat terhubung ke AdGuard DNS. Periksa koneksi Anda."*
-
 ## Endpoint API
 
 | Method | Path | Auth | Fungsi |
