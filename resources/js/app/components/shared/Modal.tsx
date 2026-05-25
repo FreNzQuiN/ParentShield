@@ -1,5 +1,6 @@
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode } from 'react';
 import { CloseIcon } from './icons';
+import { useDialog } from '../../hooks/useDialog';
 
 interface ModalProps {
   open: boolean;
@@ -10,15 +11,7 @@ interface ModalProps {
 }
 
 export default function Modal({ open, onClose, title, children, size = 'md' }: ModalProps) {
-  useEffect(() => {
-    if (!open) return;
-
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [open, onClose]);
+  useDialog(open, onClose);
 
   if (!open) return null;
 

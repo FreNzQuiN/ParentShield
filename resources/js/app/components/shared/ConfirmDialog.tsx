@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useId } from 'react';
+import { useDialog } from '../../hooks/useDialog';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -6,6 +7,7 @@ interface ConfirmDialogProps {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  loadingLabel?: string;
   variant?: 'danger' | 'default';
   loading?: boolean;
   onConfirm: () => void;
@@ -18,19 +20,14 @@ export default function ConfirmDialog({
   message,
   confirmLabel = 'Hapus',
   cancelLabel = 'Batal',
+  loadingLabel,
   variant = 'danger',
   loading = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !loading) onCancel();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [open, loading, onCancel]);
+  const descId = useId();
+  useDialog(open, loading ? undefined : onCancel);
 
   if (!open) return null;
 
@@ -42,18 +39,19 @@ export default function ConfirmDialog({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && !loading) onCancel(); }}
     >
       <div
         className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg"
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        aria-describedby={descId}
       >
         <h2 className="mb-2 font-['Roboto',sans-serif] text-[20px] font-medium text-[#181c20]">
           {title}
         </h2>
-        <p className="mb-6 font-['Roboto',sans-serif] text-sm text-[#414754]">
+        <p id={descId} className="mb-6 font-['Roboto',sans-serif] text-sm text-[#414754]">
           {message}
         </p>
         <div className="flex gap-3">
@@ -69,7 +67,7 @@ export default function ConfirmDialog({
             disabled={loading}
             className={`flex-1 rounded-[8px] py-3 font-['Roboto',sans-serif] text-sm tracking-[0.5px] transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${confirmStyles[variant]}`}
           >
-            {loading ? 'Menghapus...' : confirmLabel}
+            {loading ? (loadingLabel ?? `${confirmLabel}...`) : confirmLabel}
           </button>
         </div>
       </div>

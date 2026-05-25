@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { AndroidIcon, CopyIcon } from '../../shared/icons';
 import type { DnsAddresses } from '../../../types/device';
 import { useToast } from '../../../contexts/ToastContext';

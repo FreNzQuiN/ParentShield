@@ -37,8 +37,15 @@ export default function DeviceCard({ device, isOnline, lastSeen, onShowSetup, on
         setMenuOpen(false);
       }
     };
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('keydown', keyHandler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('keydown', keyHandler);
+    };
   }, [menuOpen]);
 
   return (

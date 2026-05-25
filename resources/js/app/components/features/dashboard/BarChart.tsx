@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type CSSProperties } from 'react';
 import type { TimeSeriesPoint } from '../../../types/dashboard';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 
@@ -30,6 +30,18 @@ function mergePoints(points: TimeSeriesPoint[], factor: number): TimeSeriesPoint
   return result;
 }
 
+function BarSegment({ pct, color, style: extraStyle }: { pct: number; color: string; style?: CSSProperties }) {
+  if (pct <= 0) return null;
+  return (
+    <div
+      className="w-full transition-all duration-500 ease-out"
+      style={{ height: `${pct}%`, backgroundColor: color, minHeight: '2px', ...extraStyle }}
+    />
+  );
+}
+
+const EMPTY_BAR_HEIGHT = 2;
+
 export default function BarChart({ data }: BarChartProps) {
   const isMobile = useIsMobile();
 
@@ -52,7 +64,7 @@ export default function BarChart({ data }: BarChartProps) {
   return (
     <div className="flex h-[200px] items-end gap-0.5">
       <div className="flex h-full flex-col justify-between pb-6 pr-2 text-right">
-        {yTicks.reverse().map((v) => (
+        {[...yTicks].reverse().map((v) => (
           <span key={v} className="text-[10px] leading-none text-[#727785]">
             {formatAxisValue(v)}
           </span>
@@ -61,62 +73,35 @@ export default function BarChart({ data }: BarChartProps) {
       {displayData.map((point) => {
         const total = point.allowed + point.blocked;
         const hasBlocked = point.blocked > 0;
-        const hasAllowed = point.allowed > 0;
         const allowedPct = maxVal === 0 ? 0 : (point.allowed / maxVal) * 100;
         const blockedPct = maxVal === 0 ? 0 : (point.blocked / maxVal) * 100;
         const totalPct = allowedPct + blockedPct;
         const barHeight = Math.max(totalPct, total > 0 ? 4 : 0);
         const isPeak = total === maxVal && total > 0;
-
-        if (!total) {
-          return (
-            <div
-              key={point.hour}
-              className="relative flex flex-1 flex-col justify-end items-center h-full"
-            >
-              <div className="w-3/4 rounded-t bg-[#ebeef4]" style={{ height: '2px' }} />
-              <span className="mt-1 text-[10px] text-[#727785]">
-                {formatHourShort(point.hour)}
-              </span>
-            </div>
-          );
-        }
+        const hourLabel = formatHourShort(point.hour);
 
         return (
           <div
             key={point.hour}
             className="relative flex flex-1 flex-col justify-end items-center h-full"
-            title={`${formatHourShort(point.hour)}:00 — Diizinkan: ${point.allowed.toLocaleString()}, Diblokir: ${point.blocked.toLocaleString()}`}
+            title={total > 0 ? `${hourLabel}:00 — Diizinkan: ${point.allowed.toLocaleString()}, Diblokir: ${point.blocked.toLocaleString()}` : undefined}
           >
-            <div
-              className="w-3/4 flex flex-col justify-end overflow-hidden rounded-t transition-all duration-500 ease-out"
-              style={{ height: `${barHeight}%`, minHeight: '4px' }}
-            >
-              {hasAllowed && (
-                <div
-                  className="w-full transition-all duration-500 ease-out"
-                  style={{
-                    height: `${(allowedPct / totalPct) * 100}%`,
-                    backgroundColor: isPeak ? '#005bbf' : '#adc7ff',
-                    opacity: isPeak && !hasBlocked ? 1 : 0.65,
-                    minHeight: '2px',
-                  }}
+            {total > 0 ? (
+              <div
+                className="w-3/4 flex flex-col justify-end overflow-hidden rounded-t transition-all duration-500 ease-out"
+                style={{ height: `${barHeight}%`, minHeight: '4px' }}
+              >
+                <BarSegment
+                  pct={(allowedPct / totalPct) * 100}
+                  color={isPeak ? '#005bbf' : '#adc7ff'}
+                  style={{ opacity: isPeak && !hasBlocked ? 1 : 0.65 }}
                 />
-              )}
-              {hasBlocked && (
-                <div
-                  className="w-full rounded-t transition-all duration-500 ease-out"
-                  style={{
-                    height: `${(blockedPct / totalPct) * 100}%`,
-                    backgroundColor: '#dd3635',
-                    minHeight: '2px',
-                  }}
-                />
-              )}
-            </div>
-            <span className="mt-1 text-[10px] text-[#727785]">
-              {formatHourShort(point.hour)}
-            </span>
+                {hasBlocked && <BarSegment pct={(blockedPct / totalPct) * 100} color="#dd3635" />}
+              </div>
+            ) : (
+              <div className="w-3/4 rounded-t bg-[#ebeef4]" style={{ height: `${EMPTY_BAR_HEIGHT}px` }} />
+            )}
+            <span className="mt-1 text-[10px] text-[#727785]">{hourLabel}</span>
           </div>
         );
       })}

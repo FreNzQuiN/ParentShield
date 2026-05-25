@@ -43,14 +43,14 @@ describe('API Client interceptors', () => {
   describe('request interceptor', () => {
     it('attaches Bearer token when token exists in storage', async () => {
       localStorage.setItem('auth_token', 'my-token');
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
       const config = { headers: {} } as InternalAxiosRequestConfig;
       const result = requestHandler!(config);
       expect(result.headers!.Authorization).toBe('Bearer my-token');
     });
 
     it('does not attach token when no token in storage', async () => {
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
       const config = { headers: {} } as InternalAxiosRequestConfig;
       const result = requestHandler!(config);
       expect(result.headers!.Authorization).toBeUndefined();
@@ -59,7 +59,7 @@ describe('API Client interceptors', () => {
 
   describe('response error interceptor — ADGUARD_UNAUTHORIZED', () => {
     it('redirects to /setup-api-key?reason=revoked on 401 + ADGUARD_UNAUTHORIZED', async () => {
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
       const navPromise = listenForNavigate();
       const error = {
         response: { status: 401, data: { code: 'ADGUARD_UNAUTHORIZED' } },
@@ -75,7 +75,7 @@ describe('API Client interceptors', () => {
     });
 
     it('redirects to /login on 401 without ADGUARD code on non-auth route', async () => {
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
       const navPromise = listenForNavigate();
       const error = {
         response: { status: 401, data: { code: 'SESSION_EXPIRED' } },
@@ -91,7 +91,7 @@ describe('API Client interceptors', () => {
     });
 
     it('does NOT redirect on 401 on auth routes (login, register, forgot-password)', async () => {
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
       const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/logout'];
 
       for (const url of authRoutes) {
@@ -106,7 +106,7 @@ describe('API Client interceptors', () => {
     });
 
     it('redirects to /setup-api-key on 403 + API_KEY_REQUIRED', async () => {
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
       const navPromise = listenForNavigate();
       const error = {
         response: { status: 403, data: { code: 'API_KEY_REQUIRED' } },
@@ -122,7 +122,7 @@ describe('API Client interceptors', () => {
     });
 
     it('passes through 422 with errors field', async () => {
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
       const error = {
         response: {
           status: 422,
@@ -143,7 +143,7 @@ describe('API Client interceptors', () => {
     });
 
     it('passes through 5xx with generic message', async () => {
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
       const error = {
         response: { status: 500, data: { code: 'SERVER_ERROR', message: 'Internal error.' } },
         config: { url: '/dashboard' },
@@ -156,7 +156,7 @@ describe('API Client interceptors', () => {
     });
 
     it('handles timeout (ECONNABORTED) with TIMEOUT code', async () => {
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
       const error = {
         code: 'ECONNABORTED',
         response: undefined,
@@ -170,7 +170,7 @@ describe('API Client interceptors', () => {
     });
 
     it('handles network error with NETWORK_ERROR code', async () => {
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
       const error = {
         code: 'ERR_NETWORK',
         response: undefined,
@@ -184,7 +184,7 @@ describe('API Client interceptors', () => {
     });
 
     it('throttles rapid duplicate navigate calls', async () => {
-      const { default: api } = await import('../../../app/services/api/client');
+      await import('../../../app/services/api/client');
 
       const navSpy = vi.fn();
       window.addEventListener('app:navigate', navSpy);

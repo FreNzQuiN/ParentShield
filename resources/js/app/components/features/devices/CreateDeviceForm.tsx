@@ -18,17 +18,20 @@ export default function CreateDeviceForm({ loading, error, onSubmit }: CreateDev
   const [name, setName] = useState('');
   const [deviceType, setDeviceType] = useState<SetupDeviceType | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
+  const [typeError, setTypeError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
     setNameError(null);
+    setTypeError(null);
 
     if (!name.trim()) {
       setNameError('Nama perangkat wajib diisi.');
       return;
     }
     if (!deviceType) {
+      setTypeError('Pilih tipe perangkat.');
       return;
     }
 
@@ -85,6 +88,7 @@ export default function CreateDeviceForm({ loading, error, onSubmit }: CreateDev
             </button>
           ))}
         </div>
+        {typeError && <p className="mt-1 text-xs text-red-600">{typeError}</p>}
       </div>
 
       {error && (
@@ -95,7 +99,7 @@ export default function CreateDeviceForm({ loading, error, onSubmit }: CreateDev
 
       <button
         type="submit"
-        disabled={loading || !name.trim() || !deviceType}
+        disabled={loading || !name.trim()}
         className="h-[50px] w-full rounded-[8px] bg-[#005bbf] font-['Roboto',sans-serif] text-sm tracking-[0.5px] text-white transition-colors hover:bg-[#004d9e] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? 'Membuat...' : 'Buat Perangkat'}

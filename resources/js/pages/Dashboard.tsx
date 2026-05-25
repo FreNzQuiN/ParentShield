@@ -3,7 +3,7 @@ import { useAuth } from '../app/contexts/AuthContext';
 import { ShieldIconSmall, DashboardQueryIcon, DashboardBlockIcon, DashboardDeviceIcon } from '../app/components/shared/icons';
 import { useDashboard } from '../app/hooks/useDashboard';
 import { StatCard, BarChart, ProgressBarList, KontrolParental, DashboardSkeleton } from '../app/components/features/dashboard';
-import { Loading, InlineError } from '../app/components/shared';
+import { LoadingOverlay, InlineError } from '../app/components/shared';
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -11,6 +11,22 @@ function greeting(): string {
   if (h < 15) return 'Selamat Siang';
   if (h < 18) return 'Selamat Sore';
   return 'Selamat Malam';
+}
+
+function GreetingHeader({ userName }: { userName: string | undefined }) {
+  return (
+    <section className="pb-2 pl-1 md:pl-2">
+      <h1 className="font-['Roboto',sans-serif] text-[20px] font-bold tracking-[-0.5px] text-[#181c20] md:text-[24px]">
+        {greeting()}, {userName ?? 'Pengguna'}.
+      </h1>
+      <div className="mt-1 flex items-center gap-2">
+        <ShieldIconSmall />
+        <p className="font-['Roboto',sans-serif] text-xs text-[#414754] md:text-sm">
+          Lindungi Keluargamu dari Bahaya Internet.
+        </p>
+      </div>
+    </section>
+  );
 }
 
 export default function Dashboard() {
@@ -45,24 +61,10 @@ export default function Dashboard() {
 
   return (
     <div className="relative flex flex-col gap-5 md:gap-6">
-      {(loading || isRefreshing) && data && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-white/60">
-          <Loading message="Memuat..." size="sm" />
-        </div>
-      )}
+      <LoadingOverlay visible={(loading || isRefreshing) && !!data} />
 
       <div className={`flex flex-col gap-5 md:gap-6 ${loading || isRefreshing ? 'pointer-events-none select-none' : ''}`}>
-        <section className="pb-2 pl-1 md:pl-2">
-          <h1 className="font-['Roboto',sans-serif] text-[20px] font-bold tracking-[-0.5px] text-[#181c20] md:text-[24px]">
-            {greeting()}, {user?.name ?? 'Pengguna'}.
-          </h1>
-          <div className="mt-1 flex items-center gap-2">
-            <ShieldIconSmall />
-            <p className="font-['Roboto',sans-serif] text-xs text-[#414754] md:text-sm">
-              Lindungi Keluargamu dari Bahaya Internet.
-            </p>
-          </div>
-        </section>
+        <GreetingHeader userName={user?.name} />
 
         <section className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
           <StatCard
@@ -82,7 +84,7 @@ export default function Dashboard() {
             value={data?.stats.active_devices ?? 0}
             valueColor={data?.stats.suspicious_devices ? '#c2410c' : '#1b6d24'}
             badge={data?.stats.suspicious_devices ? `${data.stats.suspicious_devices} Mencurigakan` : undefined}
-            badgeVariant={data?.stats.suspicious_devices ? 'warning' : 'success'}
+            badgeVariant={data?.stats.suspicious_devices ? 'warning' : undefined}
             caption={
               data?.stats.suspicious_devices
                 ? `${data.stats.suspicious_devices} device tidak aktif >6 jam`

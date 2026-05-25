@@ -4,6 +4,7 @@ import type { DeviceDetail, DeviceLimits } from '../app/types/device';
 import { useToast } from '../app/contexts/ToastContext';
 import Loading from '../app/components/shared/Loading';
 import InlineError from '../app/components/shared/InlineError';
+import LoadingOverlay from '../app/components/shared/LoadingOverlay';
 import DeviceCard from '../app/components/features/devices/DeviceCard';
 import EmptySlotCard from '../app/components/features/devices/EmptySlotCard';
 import DeviceLimitBanner from '../app/components/features/devices/DeviceLimitBanner';
@@ -151,11 +152,7 @@ export default function Devices() {
 
   return (
     <div className="relative flex flex-1 flex-col gap-[48px]">
-      {refreshing && devices.length > 0 && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-white/60">
-          <Loading message="Memuat..." size="sm" />
-        </div>
-      )}
+      <LoadingOverlay visible={refreshing && devices.length > 0} />
 
       <div className={`flex flex-col gap-[48px] ${refreshing ? 'pointer-events-none select-none' : ''}`}>
       <div>

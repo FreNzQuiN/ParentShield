@@ -168,9 +168,7 @@ export function useDashboard(): UseDashboardResult {
   );
 
   useEffect(() => {
-    const controller = new AbortController();
     refresh();
-    return () => controller.abort();
   }, [refresh]);
 
   return { data, loading, error, refresh, softRefresh, isRefreshing, toggleSafebrowsing, toggleParentalControl };

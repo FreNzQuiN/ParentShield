@@ -18,16 +18,9 @@ const tabs: { key: WindowsTab; label: string }[] = [
 const WINDOWS_IP = '94.140.14.15';
 
 export default function WindowsSetupInstructions({ dnsAddresses }: WindowsSetupInstructionsProps) {
-  const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState<WindowsTab>('system');
 
   const dohUrl = dnsAddresses.dns_over_https_url ?? '';
-
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      addToast({ type: 'success', message: `${label} tersalin ke clipboard.` });
-    });
-  };
 
   return (
     <div className="flex flex-col gap-5">
@@ -55,9 +48,9 @@ export default function WindowsSetupInstructions({ dnsAddresses }: WindowsSetupI
         ))}
       </div>
 
-      {activeTab === 'system' && <Windows11Content dohUrl={dohUrl} onCopy={copyToClipboard} />}
-      {activeTab === 'chrome' && <ChromeEdgeContent dohUrl={dohUrl} onCopy={copyToClipboard} />}
-      {activeTab === 'firefox' && <FirefoxContent dohUrl={dohUrl} onCopy={copyToClipboard} />}
+      {activeTab === 'system' && <Windows11Content dohUrl={dohUrl} />}
+      {activeTab === 'chrome' && <ChromeEdgeContent dohUrl={dohUrl} />}
+      {activeTab === 'firefox' && <FirefoxContent dohUrl={dohUrl} />}
     </div>
   );
 }
@@ -99,7 +92,7 @@ function Step({ number, text }: { number: number; text: string }) {
   );
 }
 
-function Windows11Content({ dohUrl, onCopy }: { dohUrl: string; onCopy: (text: string, label: string) => void }) {
+function Windows11Content({ dohUrl }: { dohUrl: string }) {
   return (
     <div className="flex flex-col gap-4">
       <CopyField label="IP DNS" value={WINDOWS_IP} />
@@ -117,7 +110,7 @@ function Windows11Content({ dohUrl, onCopy }: { dohUrl: string; onCopy: (text: s
   );
 }
 
-function ChromeEdgeContent({ dohUrl, onCopy }: { dohUrl: string; onCopy: (text: string, label: string) => void }) {
+function ChromeEdgeContent({ dohUrl }: { dohUrl: string }) {
   return (
     <div className="flex flex-col gap-4">
       <CopyField label="DNS-over-HTTPS URL" value={dohUrl} />
@@ -132,7 +125,7 @@ function ChromeEdgeContent({ dohUrl, onCopy }: { dohUrl: string; onCopy: (text: 
   );
 }
 
-function FirefoxContent({ dohUrl, onCopy }: { dohUrl: string; onCopy: (text: string, label: string) => void }) {
+function FirefoxContent({ dohUrl }: { dohUrl: string }) {
   return (
     <div className="flex flex-col gap-4">
       <CopyField label="DNS-over-HTTPS URL" value={dohUrl} />

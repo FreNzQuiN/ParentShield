@@ -4,6 +4,7 @@ import { useAuth } from '../app/contexts/AuthContext';
 import { Loading, InlineError, AuthLayout, FormInput } from '../app/components/shared';
 import { ShieldIcon, UserIcon, EmailIcon, LockIcon, EyeIcon, EyeOffIcon, ArrowRightIcon } from '../app/components/shared/icons';
 import { useToast } from '../app/contexts/ToastContext';
+import { flattenFieldErrors, getErrorMessage } from '../app/utils/error';
 
 export default function Register() {
   const { onRegister, loading, loginError, clearError } = useAuth();
@@ -38,13 +39,11 @@ export default function Register() {
       await onRegister(name, email, password, passwordConfirmation);
       addToast({ type: 'success', message: 'Akun berhasil dibuat!' });
     } catch (err: unknown) {
-      const e = err as { errors?: Record<string, string[]>; message?: string };
-      if (e?.errors) {
-        const flat: Record<string, string> = {};
-        for (const [key, msgs] of Object.entries(e.errors)) flat[key] = msgs[0];
-        setErrors(flat);
+      const fieldErrors = flattenFieldErrors(err);
+      if (fieldErrors) {
+        setErrors(fieldErrors);
       } else {
-        addToast({ type: 'error', message: e?.message ?? 'Terjadi kesalahan. Silakan coba lagi.' });
+        addToast({ type: 'error', message: getErrorMessage(err, 'Terjadi kesalahan. Silakan coba lagi.') });
       }
     }
   };
@@ -115,6 +114,7 @@ export default function Register() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
+                aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
               >
                 {showPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>
@@ -137,6 +137,7 @@ export default function Register() {
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 tabIndex={-1}
+                aria-label={showConfirmPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
               >
                 {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>

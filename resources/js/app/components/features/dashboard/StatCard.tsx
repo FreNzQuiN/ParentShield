@@ -10,6 +10,11 @@ interface StatCardProps {
   caption?: string;
 }
 
+const BADGE_STYLES: Record<string, string> = {
+  success: 'bg-[#a0f399] text-[#1b6d24]',
+  warning: 'bg-[#ffedd5] text-[#c2410c]',
+};
+
 export default function StatCard({ icon, label, value, badge, badgeVariant = 'success', valueColor, caption }: StatCardProps) {
   return (
     <div className="flex items-start gap-3 rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)] md:gap-4 md:p-5">
@@ -22,7 +27,7 @@ export default function StatCard({ icon, label, value, badge, badgeVariant = 'su
             {label}
           </p>
           {badge && (
-            <span className="shrink-0 rounded-full bg-[#a0f399] px-2 py-0.5 text-xs font-medium text-[#1b6d24]">
+            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${BADGE_STYLES[badgeVariant]}`}>
               {badge}
             </span>
           )}

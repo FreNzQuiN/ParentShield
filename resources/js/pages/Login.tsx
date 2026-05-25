@@ -4,6 +4,7 @@ import { useAuth } from '../app/contexts/AuthContext';
 import { Loading, InlineError, AuthLayout, FormInput } from '../app/components/shared';
 import { ShieldIcon, EyeIcon, EyeOffIcon } from '../app/components/shared/icons';
 import { useToast } from '../app/contexts/ToastContext';
+import { flattenFieldErrors, getErrorMessage } from '../app/utils/error';
 
 export default function Login() {
   const { onLogin, loading, loginError, clearError } = useAuth();
@@ -31,13 +32,11 @@ export default function Login() {
       await onLogin(email, password);
       addToast({ type: 'success', message: 'Selamat datang kembali!' });
     } catch (err: unknown) {
-      const e = err as { errors?: Record<string, string[]>; message?: string };
-      if (e?.errors) {
-        const flat: Record<string, string> = {};
-        for (const [key, msgs] of Object.entries(e.errors)) flat[key] = msgs[0];
-        setErrors(flat);
+      const fieldErrors = flattenFieldErrors(err);
+      if (fieldErrors) {
+        setErrors(fieldErrors);
       } else {
-        addToast({ type: 'error', message: e?.message ?? 'Terjadi kesalahan. Silakan coba lagi.' });
+        addToast({ type: 'error', message: getErrorMessage(err, 'Terjadi kesalahan. Silakan coba lagi.') });
       }
     }
   };
@@ -100,6 +99,7 @@ export default function Login() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
+                aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
               >
                 {showPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>
@@ -110,7 +110,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#1a73e8] font-['Roboto',sans-serif] text-[14px] font-medium tracking-[0.5px] text-white transition-colors hover:bg-[#1557b0] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#005bbf] font-['Roboto',sans-serif] text-[14px] font-medium tracking-[0.5px] text-white transition-colors hover:bg-[#004a9e] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? <Loading size="sm" message="Memproses..." /> : 'Masuk'}
             </button>

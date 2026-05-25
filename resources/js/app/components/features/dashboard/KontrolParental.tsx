@@ -24,6 +24,37 @@ function groupLabel(key: ServiceGroupKey): string {
   return def ? `${def.label} (${def.services.length})` : key;
 }
 
+function ToggleSwitch({
+  active,
+  disabled,
+  activeColor,
+  ariaLabel,
+  onClick,
+}: {
+  active: boolean;
+  disabled?: boolean;
+  activeColor?: string;
+  ariaLabel: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+        disabled ? 'opacity-60' : ''
+      } ${active ? activeColor ?? 'bg-[#1b6d24]' : 'bg-[#dfe3e8]'}`}
+      aria-label={ariaLabel}
+    >
+      <span
+        className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+          active ? 'translate-x-5' : 'translate-x-0'
+        }`}
+      />
+    </button>
+  );
+}
+
 export default function KontrolParental({ settings, onToggle }: KontrolParentalProps) {
   const [toggling, setToggling] = useState<string | null>(null);
   const { addToast } = useToast();
@@ -84,18 +115,12 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
               <p className="font-['Roboto',sans-serif] text-sm font-medium text-[#181c20]">{t.label}</p>
               <p className="font-['Roboto',sans-serif] text-xs text-[#727785]">{t.description}</p>
             </div>
-            <button
-              onClick={() => handleMainToggle(t.key)}
+            <ToggleSwitch
+              active={settings[t.key]}
               disabled={toggling === t.key}
-              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-                toggling === t.key ? 'opacity-60' : ''
-              } ${settings[t.key] ? 'bg-[#1b6d24]' : 'bg-[#dfe3e8]'}`}
-              aria-label={t.label}
-            >
-              <span className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                settings[t.key] ? 'translate-x-5' : 'translate-x-0'
-              }`} />
-            </button>
+              ariaLabel={t.label}
+              onClick={() => handleMainToggle(t.key)}
+            />
           </div>
         ))}
       </div>
@@ -120,18 +145,13 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
                     <span className="text-[10px] text-[#727785] font-medium">Sebagian</span>
                   )}
                 </div>
-                <button
-                  onClick={() => handleGroupToggle(key, !isBlocked)}
+                <ToggleSwitch
+                  active={isBlocked}
                   disabled={toggling === `grp:${key}`}
-                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-                    toggling === `grp:${key}` ? 'opacity-60' : ''
-                  } ${isBlocked ? 'bg-[#dd3635]' : 'bg-[#dfe3e8]'}`}
-                  aria-label={groupLabel(key)}
-                >
-                  <span className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                    isBlocked ? 'translate-x-5' : 'translate-x-0'
-                  }`} />
-                </button>
+                  activeColor="bg-[#dd3635]"
+                  ariaLabel={groupLabel(key)}
+                  onClick={() => handleGroupToggle(key, !isBlocked)}
+                />
               </div>
             );
           })}

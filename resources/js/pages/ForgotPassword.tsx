@@ -4,6 +4,7 @@ import { Loading, AuthLayout, FormInput } from '../app/components/shared';
 import { EmailIcon } from '../app/components/shared/icons';
 import { forgotPassword } from '../app/services/api/auth';
 import { useToast } from '../app/contexts/ToastContext';
+import { flattenFieldErrors, getErrorMessage } from '../app/utils/error';
 
 export default function ForgotPassword() {
   const { addToast } = useToast();
@@ -30,15 +31,11 @@ export default function ForgotPassword() {
       setSent(true);
       addToast({ type: 'success', message: 'Link reset terkirim ke email Anda.' });
     } catch (err: unknown) {
-      const e = err as { errors?: Record<string, string[]>; message?: string };
-      if (e?.errors) {
-        const flat: Record<string, string> = {};
-        for (const [key, msgs] of Object.entries(e.errors)) {
-          flat[key] = msgs[0];
-        }
-        setErrors(flat);
+      const fieldErrors = flattenFieldErrors(err);
+      if (fieldErrors) {
+        setErrors(fieldErrors);
       } else {
-        addToast({ type: 'error', message: e?.message ?? 'Gagal mengirim link reset. Coba lagi.' });
+        addToast({ type: 'error', message: getErrorMessage(err, 'Gagal mengirim link reset. Coba lagi.') });
       }
     } finally {
       setLoading(false);
@@ -94,7 +91,7 @@ export default function ForgotPassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#1a73e8] font-['Roboto',sans-serif] text-[14px] font-medium tracking-[0.5px] text-white transition-colors hover:bg-[#1557b0] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#005bbf] font-['Roboto',sans-serif] text-[14px] font-medium tracking-[0.5px] text-white transition-colors hover:bg-[#004a9e] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading ? <Loading size="sm" message="Mengirim..." /> : 'Kirim Link Reset'}
                 </button>

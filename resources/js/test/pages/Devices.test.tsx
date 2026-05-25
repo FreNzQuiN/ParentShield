@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import Devices from '../../pages/Devices';
@@ -189,7 +189,7 @@ describe('Devices page', () => {
     await waitFor(() => screen.getByText('Tambah Perangkat'));
     fireEvent.click(screen.getByText('Tambah Perangkat'));
     fireEvent.click(screen.getByText('Selesai'));
-    expect(fetchDevices).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(fetchDevices).toHaveBeenCalledTimes(2));
   });
 
   it('opens edit modal from device card menu', async () => {

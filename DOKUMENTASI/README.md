@@ -41,15 +41,15 @@ app/
 resources/js/
 ├── app/
 │   ├── components/
-│   │   ├── features/              # SideNavBar, AppLayout, Dashboard/*
-│   │   └── shared/                # AuthLayout, FormInput, Loading, InlineError,
-│   │                              # Toast, EmptyState, icons
+│   │   ├── features/              # SideNavBar, AppLayout, Dashboard/*, devices/*
+│   │   └── shared/                # AuthLayout, FormInput, Loading, LoadingOverlay,
+│   │                              # InlineError, Toast, EmptyState, Modal, icons
 │   ├── contexts/                  # AuthContext, ToastContext
-│   ├── hooks/                     # useDashboard, useIsMobile
+│   ├── hooks/                     # useDashboard, useIsMobile, useDialog
 │   ├── routes/guards/             # ProtectedRoute, RequireApiKey
-│   ├── services/api/              # client (axios), auth, dashboard, setupApiKey
-│   ├── styles/tokens.ts           # Design tokens
-│   └── types/                     # api, auth, dashboard
+│   ├── services/api/              # client (axios), auth, dashboard, devices, setupApiKey
+│   ├── types/                     # api, auth, dashboard, device
+│   └── utils/                     # error, storage
 └── pages/                         # Login, Register, ForgotPassword, SetupApiKey,
                                    # Dashboard, Activity, Devices, Settings
 ```
@@ -153,18 +153,28 @@ Semua pesan error user-facing dalam **Bahasa Indonesia**.
 
 ## Design Tokens
 
+Defined in `resources/css/app.css` via Tailwind v4 `@theme`, available as utility classes (e.g. `bg-primary`, `text-text-secondary`, `border-border/20`).
+
 ### Warna
 
 | Token | Value | Penggunaan |
 |-------|-------|-----------|
 | `primary` | `#005bbf` | Tombol, link, active state |
-| `bgSidebar` | `#f1f4fa` | Background sidebar |
-| `bgPage` | `#f7f9ff` | Background halaman |
-| `bgCard` | `#ffffff` | Background kartu |
+| `primary-light` | `rgba(26, 115, 232, 0.1)` | Background active nav item |
+| `bg-page` | `#f7f9ff` | Background halaman utama |
+| `bg-sidebar` | `#f1f4fa` | Background sidebar |
+| `bg-card` | `#ffffff` | Background kartu |
+| `bg-card-inner` | `#f7f9ff` | Background toggle row dalam card |
+| `bg-tag` | `#ebeef4` | Background pill/badge netral |
+| `text-primary` | `#181c20` | Judul, angka |
+| `text-secondary` | `#414754` | Subtitle, label, body |
+| `text-muted` | `#727785` | Placeholder, icon |
 | `success` | `#1b6d24` | Online, toggle ON |
-| `danger` | `#ba1a1a` | Diblokir, danger |
-| `textPrimary` | `#181c20` | Judul |
-| `textSecondary` | `#414754` | Body text |
+| `success-badge` | `#a0f399` | Background badge |
+| `danger` | `#ba1a1a` | Diblokir, angka merah |
+| `danger-bar` | `#dd3635` | Progress bar danger |
+| `inactive` | `#dfe3e8` | Toggle OFF, dot offline |
+| `chart-blue` | `#adc7ff` | Bar chart secondary |
 
 ### Tipografi
 
@@ -209,4 +219,5 @@ setup API key validation, exception handling.
 
 Frontend tests mencakup: component rendering, form states (loading/error/success),
 auth context, route guards, API client interceptors, hooks (useDashboard),
-Dashboard page, Devices page (including CRUD modals, delete confirm, race guard).
+all pages (Dashboard, Devices, Login, Register, ForgotPassword, SetupApiKey),
+shared components (EmptyState, InlineError, Loading).
