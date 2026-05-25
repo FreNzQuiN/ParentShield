@@ -211,16 +211,3 @@ setup API key validation, exception handling.
 
 Frontend tests mencakup: component rendering, form states (loading/error/success),
 auth context, route guards.
-
-## Keputusan Desain
-
-| Keputusan | Alasan |
-|-----------|--------|
-| API key disimpan encrypted (Crypt::encryptString) | Keamanan data pengguna |
-| Axios interceptor untuk ADGUARD_UNAUTHORIZED | Mencegah redirect loop, user dapat penjelasan |
-| `?reason=revoked` URL param | Sederhana, no race condition, bookmarkable |
-| verifyApiKey() rethrow connection errors | Membedakan "key salah" vs "service down" |
-| Optimistic update pada toggle dashboard | UX responsif tanpa lag |
-| Semua pesan error dalam Bahasa Indonesia | Target user non-teknis Indonesia |
-| Cursor pagination untuk activity log | Sesuai spesifikasi AdGuard API |
-| Font body distandarisasi ke 14px | Figma spec, hindari teks terlalu besar |
