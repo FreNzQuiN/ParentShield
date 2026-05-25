@@ -19,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
+
         $middleware->api(prepend: [
             \App\Http\Middleware\AddCorrelationId::class,
         ]);
@@ -33,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (ValidationException $e, Request $request) {
-            if ($request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
                     'code' => 'VALIDATION_ERROR',
@@ -44,7 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (AuthenticationException $e, Request $request) {
-            if ($request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
                     'code' => 'UNAUTHENTICATED',
@@ -54,7 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (AdGuardApiException $e, Request $request) {
-            if ($request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
                     'code' => $e->getErrorCode() ?: 'ADGUARD_ERROR',
@@ -64,7 +66,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (HttpException $e, Request $request) {
-            if ($request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*')) {
                 $message = match ($e->getStatusCode()) {
                     403 => 'Akses ditolak.',
                     404 => 'Halaman tidak ditemukan.',
@@ -87,7 +89,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (QueryException $e, Request $request) {
-            if ($request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*')) {
                 $prev = $e->getPrevious();
                 $sqlState = $prev ? $prev->getCode() : null;
                 [$code, $message, $status] = match (true) {
@@ -104,7 +106,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (ConnectionException $e, Request $request) {
-            if ($request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
                     'code' => 'SERVICE_UNAVAILABLE',
@@ -114,7 +116,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (Throwable $e, Request $request) {
-            if ($request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*')) {
                 $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
 
                 report($e);

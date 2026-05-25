@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('api')->prefix('v1')->group(function () {
+Route::prefix('v1')->group(function () {
     // Health
     Route::get('/health', function () {
         return response()->json([
