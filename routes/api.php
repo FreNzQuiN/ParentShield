@@ -44,5 +44,14 @@ Route::middleware('api')->prefix('v1')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
         Route::put('/dashboard/safebrowsing', [\App\Http\Controllers\Api\DashboardController::class, 'updateSafebrowsing']);
         Route::put('/dashboard/parental-control', [\App\Http\Controllers\Api\DashboardController::class, 'updateParentalControl']);
+
+        Route::prefix('devices')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\DeviceController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\Api\DeviceController::class, 'store']);
+            Route::get('/{device}', [\App\Http\Controllers\Api\DeviceController::class, 'show']);
+            Route::put('/{device}', [\App\Http\Controllers\Api\DeviceController::class, 'update']);
+            Route::delete('/{device}', [\App\Http\Controllers\Api\DeviceController::class, 'destroy']);
+            Route::get('/{device}/doh.mobileconfig', [\App\Http\Controllers\Api\DeviceController::class, 'downloadMobileConfig']);
+        });
     });
 });

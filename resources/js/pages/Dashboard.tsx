@@ -52,7 +52,7 @@ export default function Dashboard() {
       )}
 
       <div className={`flex flex-col gap-5 md:gap-6 ${loading || isRefreshing ? 'pointer-events-none select-none' : ''}`}>
-        <section className="pb-2">
+        <section className="pb-2 pl-1 md:pl-2">
           <h1 className="font-['Roboto',sans-serif] text-[20px] font-bold tracking-[-0.5px] text-[#181c20] md:text-[24px]">
             {greeting()}, {user?.name ?? 'Pengguna'}.
           </h1>

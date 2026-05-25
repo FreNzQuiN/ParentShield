@@ -187,3 +187,72 @@ export function CloseIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function AndroidIcon(props: IconProps) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" {...props}>
+      <path d="M7 15.5a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5zm10 0a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5zm-10.43 1.08l-2.07 3.59a.5.5 0 00.43.75.5.5 0 00.43-.25l2.12-3.67a6.5 6.5 0 004.52 0l2.12 3.67a.5.5 0 00.43.25.5.5 0 00.43-.75l-2.07-3.59A6.47 6.47 0 0018 10.5H6a6.47 6.47 0 003.57 6.08zM17.35 9.5H6.65a.65.65 0 01-.65-.65V6.15a.65.65 0 01.65-.65h10.7a.65.65 0 01.65.65v2.7a.65.65 0 01-.65.65z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function AppleIcon(props: IconProps) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" {...props}>
+      <path d="M17.05 12.57c-.01-2.2 1.57-3.4 1.64-3.46-.9-1.3-2.28-1.48-2.76-1.5-1.14-.12-2.26.68-2.84.68-.6 0-1.48-.67-2.45-.65-1.25.02-2.42.73-3.07 1.85-1.32 2.29-.34 5.67.94 7.53.63.9 1.37 1.92 2.34 1.88.94-.04 1.3-.61 2.44-.61s1.46.61 2.46.59c1.02-.02 1.66-.92 2.28-1.82.43-.63.76-1.3 1.02-2.02-.54-.21-2.02-.78-2.02-2.76z" fill="currentColor" />
+      <path d="M15.07 7.19c.5-.6.83-1.43.74-2.26-.72.03-1.58.48-2.1 1.08-.46.53-.86 1.38-.75 2.19.79.06 1.57-.41 2.11-1.01z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function WindowsIcon(props: IconProps) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" {...props}>
+      <path d="M3 5.09l7.35-1.02v6.97H3V5.09zm8.35-1.13L21 3v7.94h-9.65V3.96zM21 13.06v7.94l-9.65-1.35v-6.59H21zM10.35 19.39L3 18.37v-6.28h7.35v6.28v1.02z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function DotsIcon(props: IconProps) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" {...props}>
+      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
+      <circle cx="4" cy="10" r="1.5" fill="currentColor" />
+      <circle cx="16" cy="10" r="1.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function InfoIcon(props: IconProps) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" {...props}>
+      <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <path d="M10 9v6M10 6.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function CopyIcon(props: IconProps) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...props}>
+      <rect x="4" y="6" width="10" height="10" rx="1" stroke="currentColor" strokeWidth="1.2" fill="none" />
+      <path d="M2 10V2h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
+export function DownloadIcon(props: IconProps) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...props}>
+      <path d="M8 1v10M4 7l4 4 4-4M2 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
+export function TrashIcon(props: IconProps) {
+  return (
+    <svg width="16" height="18" viewBox="0 0 16 18" fill="none" {...props}>
+      <path d="M1 4h14M5 4V2a1 1 0 011-1h4a1 1 0 011 1v2M3 4l1 11a2 2 0 002 2h4a2 2 0 002-2l1-11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}

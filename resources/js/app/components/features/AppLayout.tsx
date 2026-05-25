@@ -22,7 +22,7 @@ export default function AppLayout() {
           </button>
           <span className="font-['Roboto',sans-serif] text-sm font-medium text-[#414754]">Menu</span>
         </div>
-        <div className="px-4 pt-3 pb-4 lg:p-6">
+        <div className="flex min-h-[calc(100vh-48px)] flex-col px-4 pt-3 pb-4 lg:p-6">
           <Outlet />
         </div>
       </div>

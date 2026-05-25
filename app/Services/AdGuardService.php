@@ -374,6 +374,68 @@ class AdGuardService
         return $response->json() ?? [];
     }
 
+    public function getDevice(string $deviceId): ?array
+    {
+        $response = $this->get("/devices/{$deviceId}");
+        $data = $response->json();
+        return is_array($data) ? $data : null;
+    }
+
+    public function createDevice(string $name, string $deviceType, string $dnsServerId): array
+    {
+        $response = $this->send('post', '/devices', [
+            'name' => $name,
+            'device_type' => $deviceType,
+            'dns_server_id' => $dnsServerId,
+        ]);
+        return $response->json() ?? [];
+    }
+
+    public function updateDevice(string $deviceId, array $data): bool
+    {
+        $response = $this->send('put', "/devices/{$deviceId}", $data);
+        return $response->successful();
+    }
+
+    public function deleteDevice(string $deviceId): bool
+    {
+        $response = $this->send('delete', "/devices/{$deviceId}");
+        return $response->successful();
+    }
+
+    public function getDefaultDnsServerId(): ?string
+    {
+        $server = $this->getDefaultDnsServer();
+        return $server['id'] ?? null;
+    }
+
+    public function getMobileConfigRaw(string $deviceId): \Illuminate\Http\Client\Response
+    {
+        $url = $this->baseUrl . "/devices/{$deviceId}/doh.mobileconfig";
+
+        if (!$this->apiKey) {
+            throw new AdGuardApiException('Kunci API tidak ditemukan.', 'API_KEY_MISSING', 401);
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => 'ApiKey ' . $this->apiKey,
+            ])->timeout(15)->get($url);
+
+            if ($response->failed()) {
+                $this->handleError($response, $url);
+            }
+
+            return $response;
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            throw new AdGuardApiException(
+                'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
+                'ADGUARD_CONNECTION_ERROR',
+                503
+            );
+        }
+    }
+
     public function getDeviceStats(int $timeFrom, int $timeTo): array
     {
         $response = $this->get('/stats/devices', [
