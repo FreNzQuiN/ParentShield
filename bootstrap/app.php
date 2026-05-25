@@ -86,11 +86,18 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (QueryException $e, Request $request) {
             if ($request->is('api/*')) {
+                $prev = $e->getPrevious();
+                $sqlState = $prev ? $prev->getCode() : null;
+                [$code, $message, $status] = match (true) {
+                    is_string($sqlState) && str_starts_with($sqlState, '23') => ['DB_CONSTRAINT_ERROR', 'Operasi tidak dapat diproses karena data terkait masih digunakan.', 409],
+                    is_string($sqlState) && str_starts_with($sqlState, '42') => ['DB_QUERY_ERROR', 'Kesalahan sistem, silakan hubungi dukungan.', 500],
+                    default => ['DB_CONNECTION_ERROR', 'Layanan sedang sibuk, silakan coba lagi.', 503],
+                };
                 return response()->json([
                     'success' => false,
-                    'code' => 'DB_CONNECTION_ERROR',
-                    'message' => 'Layanan sedang sibuk, silakan coba lagi.',
-                ], 503);
+                    'code' => $code,
+                    'message' => $message,
+                ], $status);
             }
         });
 

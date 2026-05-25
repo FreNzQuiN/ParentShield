@@ -92,6 +92,7 @@ class SetupApiKeyTest extends TestCase
     public function test_me_endpoint_includes_has_api_key(): void
     {
         $user = User::factory()->create([
+            'adguard_api_key_encrypted' => Crypt::encryptString('ag_test_key'),
             'adguard_api_key_verified_at' => now(),
         ]);
         $token = $user->createToken('auth_token')->plainTextToken;

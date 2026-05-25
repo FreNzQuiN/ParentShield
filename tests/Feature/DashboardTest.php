@@ -65,7 +65,10 @@ class DashboardTest extends TestCase
         $response->assertStatus(422)
             ->assertJson([
                 'success' => false,
-                'code' => 'INVALID_KEY',
+                'code' => 'VALIDATION_ERROR',
+                'errors' => [
+                    'key' => ['Pengaturan tidak valid.'],
+                ],
             ]);
     }
 

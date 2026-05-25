@@ -36,6 +36,8 @@ export default function ProteksiGlobal({ settings, onToggle }: ProteksiGlobalPro
   const [optimistic, setOptimistic] = useState<SafebrowsingSettings>(settings);
   const [toggling, setToggling] = useState<keyof SafebrowsingSettings | null>(null);
   const syncingRef = useRef(false);
+  const optimisticRef = useRef(optimistic);
+  optimisticRef.current = optimistic;
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -49,19 +51,16 @@ export default function ProteksiGlobal({ settings, onToggle }: ProteksiGlobalPro
       setToggling(key);
       syncingRef.current = true;
 
-      let newValue: boolean;
-      setOptimistic((prev) => {
-        newValue = !prev[key];
-        return { ...prev, [key]: newValue };
-      });
+      const newValue = !optimisticRef.current[key];
+      setOptimistic((prev) => ({ ...prev, [key]: newValue }));
 
       const label = toggles.find((t) => t.key === key)?.label ?? key;
 
       try {
-        await onToggle(key, newValue!);
-        addToast({ type: 'success', message: `${label} berhasil ${newValue! ? 'diaktifkan' : 'dinonaktifkan'}.` });
+        await onToggle(key, newValue);
+        addToast({ type: 'success', message: `${label} berhasil ${newValue ? 'diaktifkan' : 'dinonaktifkan'}.` });
       } catch {
-        setOptimistic((prev) => ({ ...prev, [key]: !newValue! }));
+        setOptimistic((prev) => ({ ...prev, [key]: !newValue }));
         addToast({ type: 'error', message: `Gagal memperbarui ${label.toLowerCase()}.` });
       } finally {
         setToggling(null);

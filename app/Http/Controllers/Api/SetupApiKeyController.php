@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\SetupApiKeyRequest;
 use App\Models\User;
 use App\Services\AdGuardService;
 use Illuminate\Http\JsonResponse;
@@ -16,14 +17,8 @@ class SetupApiKeyController extends Controller
         private readonly AdGuardService $adGuard
     ) {}
 
-    public function store(Request $request): JsonResponse
+    public function store(SetupApiKeyRequest $request): JsonResponse
     {
-        $request->validate([
-            'api_key' => ['required', 'string'],
-        ], [
-            'api_key.required' => 'Kunci API wajib diisi.',
-        ]);
-
         $apiKey = $request->input('api_key');
         $this->adGuard->setApiKey($apiKey);
 
@@ -65,7 +60,7 @@ class SetupApiKeyController extends Controller
         $user = $request->user();
 
         return $this->success([
-            'has_api_key' => $user->adguard_api_key_verified_at !== null,
+            'has_api_key' => $user->has_api_key,
         ]);
     }
 }

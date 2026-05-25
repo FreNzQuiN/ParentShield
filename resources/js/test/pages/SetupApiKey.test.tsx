@@ -44,10 +44,10 @@ describe('SetupApiKey page', () => {
 
   it('renders form elements', () => {
     renderSetupApiKey();
-    expect(screen.getByText('Masukkan Kunci API')).toBeTruthy();
-    expect(screen.getByPlaceholderText('Masukkan kunci API Anda')).toBeTruthy();
-    expect(screen.getByText('Simpan & Lanjutkan')).toBeTruthy();
-    expect(screen.getByText('Di mana menemukan API KEY?')).toBeTruthy();
+    expect(screen.getByText('Masukkan Kunci API')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Masukkan kunci API Anda')).toBeInTheDocument();
+    expect(screen.getByText('Simpan & Lanjutkan')).toBeInTheDocument();
+    expect(screen.getByText('Di mana menemukan API KEY?')).toBeInTheDocument();
   });
 
   it('shows error for empty key', async () => {
@@ -57,7 +57,7 @@ describe('SetupApiKey page', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText('Kunci API wajib diisi.')).toBeTruthy();
+      expect(screen.getByText('Kunci API wajib diisi.')).toBeInTheDocument();
     });
   });
 
@@ -88,7 +88,7 @@ describe('SetupApiKey page', () => {
     fireEvent.click(screen.getByText('Simpan & Lanjutkan'));
 
     await waitFor(() => {
-      expect(screen.getByText('Kunci API tidak valid.')).toBeTruthy();
+      expect(screen.getByText('Kunci API tidak valid.')).toBeInTheDocument();
     });
   });
 });

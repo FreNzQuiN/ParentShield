@@ -45,7 +45,7 @@ class AdGuardService
 
     private function dashboardCacheKey(): string
     {
-        return 'adguard_dashboard_' . md5($this->apiKey ?? '');
+        return 'adguard_dashboard_' . hash('sha256', $this->apiKey ?? '');
     }
 
     private function fetchDashboardData(): array
@@ -56,20 +56,21 @@ class AdGuardService
         $timeFrom = $twentyFourHoursAgo->valueOf();
         $timeTo = $now->valueOf();
 
-        $timeStats = $this->getTimeStats($timeFrom, $timeTo);
-        $categoryStats = $this->getCategoryStats($timeFrom, $timeTo);
-        $devices = $this->getDevices();
-        $limits = $this->getAccountLimits();
-        $dnsServers = $this->getDnsServers();
-        $deviceStats = $this->getDeviceStats($timeFrom, $timeTo);
+        $timeStats = $this->safeGet(fn() => $this->getTimeStats($timeFrom, $timeTo));
+        $categoryStats = $this->safeGet(fn() => $this->getCategoryStats($timeFrom, $timeTo));
+        $devices = $this->safeGet(fn() => $this->getDevices(), []);
+        $limits = $this->safeGet(fn() => $this->getAccountLimits(), []);
+        $deviceStats = $this->safeGet(fn() => $this->getDeviceStats($timeFrom, $timeTo), []);
 
-        $dnsServer = $dnsServers[0] ?? null;
+        $dnsServer = $this->getDefaultDnsServer();
         $settings = $dnsServer['settings'] ?? null;
 
         $aggregated = $this->aggregateTimeStats($timeStats);
         $blockedCategories = $this->aggregateCategoryStats($categoryStats);
         $deviceList = $this->buildDeviceList($devices, $deviceStats, $now);
         $safebrowsing = $this->extractSafebrowsingSettings($settings);
+
+        $deviceCount = count($devices);
 
         return [
             'stats' => [
@@ -85,11 +86,26 @@ class AdGuardService
             'devices' => $deviceList['list'],
             'account_limits' => [
                 'devices' => [
-                    'used' => count($devices),
+                    'used' => $deviceCount,
                     'max' => $limits['devices']['max'] ?? 5,
                 ],
             ],
         ];
+    }
+
+    private function safeGet(callable $callback, mixed $default = null): mixed
+    {
+        try {
+            return $callback();
+        } catch (AdGuardApiException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            Log::warning('AdGuard API partial failure', [
+                'error' => $e->getMessage(),
+            ]);
+            report($e);
+            return $default;
+        }
     }
 
     private function aggregateTimeStats(?array $timeStats): array
@@ -106,11 +122,11 @@ class AdGuardService
             $value = $hour['value'] ?? [];
             $q = $value['queries'] ?? 0;
             $b = $value['blocked'] ?? 0;
-            $total += $q + $b;
+            $total += $q;
             $blocked += $b;
             $series[] = [
                 'hour' => $hour['time_millis'] ?? 0,
-                'allowed' => $q,
+                'allowed' => $q - $b,
                 'blocked' => $b,
             ];
         }
@@ -137,7 +153,7 @@ class AdGuardService
             ];
         }
 
-        usort($categories, fn($a, $b) => $b['count'] - $a['count']);
+        usort($categories, fn($a, $b) => $b['count'] <=> $a['count']);
 
         return $categories;
     }
@@ -221,6 +237,20 @@ class AdGuardService
         return $response->json() ?? [];
     }
 
+    public function getDefaultDnsServer(): ?array
+    {
+        $dnsServers = $this->safeGet(fn() => $this->getDnsServers(), []);
+        if (empty($dnsServers)) {
+            return null;
+        }
+        foreach ($dnsServers as $server) {
+            if (!empty($server['default'])) {
+                return $server;
+            }
+        }
+        return $dnsServers[0];
+    }
+
     public function getDnsServer(string $dnsServerId): ?array
     {
         $response = $this->get("/dns_servers/{$dnsServerId}");
@@ -291,7 +321,7 @@ class AdGuardService
         $stats = $this->getDomainStats($timeFrom, $timeTo);
         $domains = $stats['stats'] ?? [];
         $total = array_sum(array_map(fn($d) => $d['value']['queries'] ?? 0, $domains)) ?: 1;
-        usort($domains, fn($a, $b) => ($b['value']['queries'] ?? 0) - ($a['value']['queries'] ?? 0));
+        usort($domains, fn($a, $b) => ($b['value']['queries'] ?? 0) <=> ($a['value']['queries'] ?? 0));
         return array_map(fn($d) => [
             'domain' => $d['domain'] ?? 'Unknown',
             'count' => $d['value']['queries'] ?? 0,

@@ -37,6 +37,7 @@ export function useDashboard(): UseDashboardResult {
 
   const softRefresh = useCallback(async () => {
     setIsRefreshing(true);
+    setError(null);
     try {
       const result = await fetchDashboard();
       setData(result);

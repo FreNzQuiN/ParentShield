@@ -29,6 +29,7 @@ Route::middleware(['api', AddCorrelationId::class])->prefix('v1')->group(functio
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
             Route::get('/me', [\App\Http\Controllers\Api\AuthController::class, 'me']);
+            Route::post('/refresh', [\App\Http\Controllers\Api\AuthController::class, 'refresh']);
         });
     });
 

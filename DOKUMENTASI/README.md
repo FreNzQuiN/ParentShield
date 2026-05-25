@@ -8,7 +8,7 @@ Aplikasi monitoring orang tua untuk aktivitas internet anak, menggunakan API AdG
 |-------|-----------|
 | Backend | Laravel 12, PHP 8.2+ |
 | Frontend | React 19, TypeScript, Tailwind CSS |
-| Auth | Laravel Sanctum (SPA) |
+| Auth | Laravel Sanctum (token) |
 | CI/CD | Vite, PHPUnit, Vitest |
 
 ## Arsitektur
@@ -31,7 +31,9 @@ app/
 │   ├── Middleware/
 │   │   ├── AddCorrelationId.php   # X-Correlation-Id header
 │   │   └── CheckApiKey.php        # Middleware verifikasi API key
-│   └── Requests/Auth/             # Register, Login, ForgotPassword requests
+│   └── Requests/
+│       ├── Api/                   # SetupApiKey, UpdateSafebrowsing
+│       └── Auth/                  # Register, Login, ForgotPassword requests
 ├── Models/User.php                # + adguard_api_key_encrypted, verified_at
 └── Services/
     └── AdGuardService.php         # HTTP client AdGuard API
@@ -60,10 +62,8 @@ Login/Register
 Setup API Key AdGuard
   ↓ (key valid)
 Dashboard (statistik, proteksi global)
-  ↓ (popup jika belum ada device)
-Add Device (Android / Windows / iOS)
-  ↓ (device terdaftar)
-Monitoring penuh
+  ↓
+Monitoring (fitur device/activity/settings bertahap)
 ```
 
 ### Auth Guard (urutan)
@@ -71,11 +71,11 @@ Monitoring penuh
 1. Belum login → `/login`
 2. Login, API key kosong/revoked → `/setup-api-key`
 3. Login + API key valid → halaman tujuan
-4. Login + API key valid + belum ada device → halaman tujuan + popup add device
+4. Login + API key valid → halaman tujuan (dashboard/protected route)
 
 ### API Key Revoked
 
-Backend set `adguard_api_key_verified_at = null`, return 401 `ADGUARD_UNAUTHORIZED`.
+Backend set `adguard_api_key_verified_at = null` dan `adguard_api_key_encrypted = null`, return 401 `ADGUARD_UNAUTHORIZED`.
 Axios interceptor menangkap kode ini sebelum 401 handler umum, redirect ke `/setup-api-key?reason=revoked`.
 Halaman setup menampilkan banner merah: *"Kunci API sebelumnya tidak valid atau telah dicabut."*
 
@@ -95,6 +95,7 @@ dan return 503: *"Tidak dapat terhubung ke AdGuard DNS. Periksa koneksi Anda."*
 | POST | `/api/v1/auth/logout` | sanctum | Logout |
 | POST | `/api/v1/auth/forgot-password` | - | Kirim link reset |
 | GET | `/api/v1/auth/me` | sanctum | User + has_api_key |
+| POST | `/api/v1/auth/refresh` | sanctum | Perbarui token |
 | POST | `/api/v1/setup-api-key` | sanctum | Verifikasi & simpan API key |
 | GET | `/api/v1/setup-api-key/status` | sanctum | Cek status API key |
 | GET | `/api/v1/dashboard` | sanctum+key | Data aggregated dashboard |
@@ -127,8 +128,10 @@ Semua pesan error user-facing dalam **Bahasa Indonesia**.
 
 | Exception | Status | Pesan |
 |-----------|--------|-------|
-| QueryException | 503 | Layanan sedang sibuk... |
-| ConnectionException | 503 | Layanan sedang sibuk... |
+| QueryException (constraint 23*) | 409 | Operasi tidak dapat diproses... |
+| QueryException (syntax 42*) | 500 | Kesalahan sistem... |
+| QueryException (lain) | 500 | Kesalahan sistem... |
+| ConnectionException | 502 | Layanan eksternal tidak dapat dijangkau... |
 | TooManyRequestsHttpException | 429 | Terlalu banyak permintaan... |
 | ValidationException | 422 | (pesan validasi per field) |
 | AuthenticationException | 401 | Sesi Anda telah berakhir... |

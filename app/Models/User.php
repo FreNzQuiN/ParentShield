@@ -18,7 +18,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'adguard_api_key_encrypted',
         'adguard_api_key_verified_at',
     ];
 
@@ -51,7 +50,22 @@ class User extends Authenticatable
                 'error' => $e->getMessage(),
             ]);
 
+            $this->clearAdguardApiKey();
+
             return null;
         }
+    }
+
+    public function clearAdguardApiKey(): void
+    {
+        $this->adguard_api_key_verified_at = null;
+        $this->adguard_api_key_encrypted = null;
+        $this->save();
+    }
+
+    public function getHasApiKeyAttribute(): bool
+    {
+        return $this->adguard_api_key_verified_at !== null
+            && $this->adguard_api_key_encrypted !== null;
     }
 }

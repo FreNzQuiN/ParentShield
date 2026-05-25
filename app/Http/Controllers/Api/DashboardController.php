@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\UpdateSafebrowsingRequest;
 use App\Services\AdGuardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -40,8 +41,7 @@ class DashboardController extends Controller
             ]);
 
             if ($e->getErrorCode() === 'ADGUARD_UNAUTHORIZED') {
-                $user->adguard_api_key_verified_at = null;
-                $user->save();
+                $user->clearAdguardApiKey();
             }
 
             return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
@@ -59,7 +59,7 @@ class DashboardController extends Controller
         }
     }
 
-    public function updateSafebrowsing(Request $request): JsonResponse
+    public function updateSafebrowsing(UpdateSafebrowsingRequest $request): JsonResponse
     {
         $user = $request->user();
         $apiKey = $user->getDecryptedAdguardKey();
@@ -72,29 +72,20 @@ class DashboardController extends Controller
             );
         }
 
-        $validKeys = ['safe_search_enabled', 'block_dangerous_enabled', 'block_nrd_enabled'];
         $key = $request->input('key');
-        $value = $request->input('value');
-
-        if (!in_array($key, $validKeys, true)) {
-            return $this->error('Pengaturan tidak valid.', 'INVALID_KEY', 422);
-        }
-
-        if (!is_bool($value)) {
-            return $this->error('Nilai harus berupa boolean.', 'INVALID_VALUE', 422);
-        }
+        $value = $request->boolean('value');
 
         $this->adGuard->setApiKey($apiKey);
 
         try {
-            $dnsServers = $this->adGuard->getDnsServers();
-            $dnsServerId = $dnsServers[0]['id'] ?? null;
+            $dnsServer = $this->adGuard->getDefaultDnsServer();
 
-            if (!$dnsServerId) {
+            if (!$dnsServer || !isset($dnsServer['id'])) {
                 return $this->error('Tidak ditemukan server DNS.', 'DNS_SERVER_MISSING', 404);
             }
 
-            $currentSettings = $dnsServers[0]['settings'] ?? [];
+            $dnsServerId = $dnsServer['id'];
+            $currentSettings = $dnsServer['settings'] ?? [];
 
             $updatePayload = match ($key) {
                 'safe_search_enabled' => [
@@ -142,8 +133,7 @@ class DashboardController extends Controller
             ]);
 
             if ($e->getErrorCode() === 'ADGUARD_UNAUTHORIZED') {
-                $user->adguard_api_key_verified_at = null;
-                $user->save();
+                $user->clearAdguardApiKey();
             }
 
             return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());

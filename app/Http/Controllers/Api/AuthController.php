@@ -39,7 +39,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->success([
-            'user' => $user->only(['id', 'name', 'email']) + ['has_api_key' => $user->adguard_api_key_verified_at !== null],
+            'user' => $user->only(['id', 'name', 'email']) + ['has_api_key' => $user->has_api_key],
             'token' => $token,
         ], 'Berhasil masuk.');
     }
@@ -56,8 +56,20 @@ class AuthController extends Controller
         $user = $request->user();
 
         return $this->success([
-            'user' => $user->only(['id', 'name', 'email']) + ['has_api_key' => $user->adguard_api_key_verified_at !== null],
+            'user' => $user->only(['id', 'name', 'email']) + ['has_api_key' => $user->has_api_key],
         ]);
+    }
+
+    public function refresh(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return $this->success([
+            'user' => $user->only(['id', 'name', 'email']) + ['has_api_key' => $user->has_api_key],
+            'token' => $token,
+        ], 'Token berhasil diperbarui.');
     }
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse

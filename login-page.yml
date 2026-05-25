@@ -1,0 +1,37 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e8]:
+        - img [ref=e10]
+        - generic [ref=e12]: ParentShield
+      - heading "Masuk" [level=1] [ref=e13]
+      - paragraph [ref=e14]: Masuk untuk mengelola profil perlindungan keluarga Anda.
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e19]: Alamat Email
+        - textbox "Alamat Email" [ref=e21]:
+          - /placeholder: Masukkan email Anda
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: Kata Sandi
+          - link "Lupa kata sandi?" [ref=e25] [cursor=pointer]:
+            - /url: /forgot-password
+        - generic [ref=e26]:
+          - textbox "Kata Sandi" [ref=e27]:
+            - /placeholder: Masukkan kata sandi Anda
+          - button [ref=e29]:
+            - img [ref=e30]
+      - button "Masuk" [ref=e33]
+    - paragraph [ref=e35]:
+      - text: Belum memiliki akun?
+      - link "Buat Akun" [ref=e36] [cursor=pointer]:
+        - /url: /register
+  - contentinfo [ref=e37]:
+    - paragraph [ref=e38]: © 2026 ParentShield. Digital Stewardship for Every Family.
+    - generic [ref=e39]:
+      - link "Privacy Policy" [ref=e40] [cursor=pointer]:
+        - /url: "#"
+      - link "Terms of Service" [ref=e41] [cursor=pointer]:
+        - /url: "#"
+      - link "Help Center" [ref=e42] [cursor=pointer]:
+        - /url: "#"
