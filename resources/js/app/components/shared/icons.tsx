@@ -128,7 +128,7 @@ export function PlusIcon(props: IconProps) {
   );
 }
 
-export function DashboardQueryIcon(props: IconProps) {
+export function DashboardQueryIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
       <path d="M9 1C4.58 1 1 4.58 1 9s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm1-9H8v5h2V6zm0 6H8v2h2v-2z" fill="#005bbf" />
@@ -136,7 +136,7 @@ export function DashboardQueryIcon(props: IconProps) {
   );
 }
 
-export function DashboardBlockIcon(props: IconProps) {
+export function DashboardBlockIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
       <path d="M9 1L2 4v5c0 4.5 3 8.5 7 9 4-.5 7-4.5 7-9V4L9 1zm0 2.5L14 5.7v3.3c0 3.3-2.1 6.4-5 7.3V3.5z" fill="#ba1a1a" />
@@ -144,7 +144,7 @@ export function DashboardBlockIcon(props: IconProps) {
   );
 }
 
-export function DashboardDeviceIcon(props: IconProps) {
+export function DashboardDeviceIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
       <rect x="2" y="1" width="14" height="16" rx="2" stroke="#1b6d24" strokeWidth="1.5" fill="none" />

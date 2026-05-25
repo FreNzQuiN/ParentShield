@@ -12,10 +12,12 @@ function createWrapper(authOverrides: Partial<AuthContextType> = {}) {
     loading: false,
     loginError: null,
     isAuthenticated: false,
+    hasApiKey: false,
     onLogin: vi.fn(),
     onRegister: vi.fn().mockResolvedValue(undefined),
     onLogout: vi.fn(),
     clearError: vi.fn(),
+    refreshUser: vi.fn().mockResolvedValue(undefined),
     ...authOverrides,
   };
 

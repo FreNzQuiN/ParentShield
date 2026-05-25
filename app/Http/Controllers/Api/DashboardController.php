@@ -94,7 +94,7 @@ class DashboardController extends Controller
                 return $this->error('Tidak ditemukan server DNS.', 'DNS_SERVER_MISSING', 404);
             }
 
-            $currentSettings = $this->adGuard->getDnsServerSettings($dnsServerId);
+            $currentSettings = $dnsServers[0]['settings'] ?? [];
 
             $updatePayload = match ($key) {
                 'safe_search_enabled' => [
@@ -126,6 +126,8 @@ class DashboardController extends Controller
 
             $merged = array_merge($currentSettings, $updatePayload);
             $this->adGuard->updateDnsServerSettings($dnsServerId, $merged);
+
+            $this->adGuard->forgetDashboardCache();
 
             return $this->success([
                 'key' => $key,

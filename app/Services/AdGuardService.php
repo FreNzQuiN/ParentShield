@@ -31,11 +31,21 @@ class AdGuardService
 
     public function getDashboardData(): array
     {
-        $cacheKey = 'adguard_dashboard_' . md5($this->apiKey ?? '');
+        $cacheKey = $this->dashboardCacheKey();
 
         return Cache::remember($cacheKey, self::DASHBOARD_CACHE_TTL_SECONDS, function () {
             return $this->fetchDashboardData();
         });
+    }
+
+    public function forgetDashboardCache(): void
+    {
+        Cache::forget($this->dashboardCacheKey());
+    }
+
+    private function dashboardCacheKey(): string
+    {
+        return 'adguard_dashboard_' . md5($this->apiKey ?? '');
     }
 
     private function fetchDashboardData(): array
@@ -53,108 +63,142 @@ class AdGuardService
         $dnsServers = $this->getDnsServers();
         $deviceStats = $this->getDeviceStats($timeFrom, $timeTo);
 
-        $dnsServerId = $dnsServers[0]['id'] ?? null;
-        $settings = $dnsServerId ? $this->getDnsServerSettings($dnsServerId) : null;
+        $dnsServer = $dnsServers[0] ?? null;
+        $settings = $dnsServer['settings'] ?? null;
 
-        $totalQueries = 0;
-        $blockedCount = 0;
-        $timeSeries = [];
-        $blockedCategories = [];
-
-        if ($timeStats) {
-            $statsList = $timeStats['stats'] ?? [];
-            foreach ($statsList as $hour) {
-                $value = $hour['value'] ?? [];
-                $totalQueries += ($value['queries'] ?? 0) + ($value['blocked'] ?? 0);
-                $blockedCount += $value['blocked'] ?? 0;
-                $timeSeries[] = [
-                    'hour' => $hour['time_millis'] ?? 0,
-                    'allowed' => $value['queries'] ?? 0,
-                    'blocked' => $value['blocked'] ?? 0,
-                ];
-            }
-        }
-
-        if ($categoryStats) {
-            $statsList = $categoryStats['stats'] ?? [];
-            $totalCats = array_sum(array_column($statsList, 'queries')) ?: 1;
-            foreach ($statsList as $cat) {
-                $count = $cat['queries'] ?? 0;
-                $blockedCategories[] = [
-                    'name' => $cat['category_type'] ?? 'Unknown',
-                    'count' => $count,
-                    'percentage' => round(($count / $totalCats) * 100, 1),
-                ];
-            }
-            usort($blockedCategories, fn($a, $b) => $b['count'] - $a['count']);
-        }
-
-        $activeDevices = 0;
-        $deviceList = [];
-        if ($devices) {
-            $deviceLastSeen = [];
-            foreach (($deviceStats['stats'] ?? []) as $ds) {
-                if (isset($ds['device_id']) && isset($ds['last_activity_time_millis'])) {
-                    $deviceLastSeen[$ds['device_id']] = $ds['last_activity_time_millis'];
-                }
-            }
-
-            foreach ($devices as $device) {
-                $deviceId = $device['id'] ?? '';
-                $lastSeen = $deviceLastSeen[$deviceId] ?? null;
-                $isOnline = $lastSeen && ($now->valueOf() - $lastSeen) < self::DEVICE_ONLINE_THRESHOLD_MS;
-
-                if ($isOnline) {
-                    $activeDevices++;
-                }
-
-                $deviceList[] = [
-                    'id' => $deviceId,
-                    'name' => $device['name'] ?? 'Unknown',
-                    'device_type' => $device['device_type'] ?? 'unknown',
-                    'is_online' => $isOnline,
-                    'last_seen' => $lastSeen,
-                    'protection_enabled' => $device['settings']['protection_enabled'] ?? true,
-                ];
-            }
-        }
-
-        $safeSearchEnabled = false;
-        $blockDangerousEnabled = false;
-        $blockNrdEnabled = false;
-
-        if ($settings) {
-            $parentalSettings = $settings['parental_control_settings'] ?? [];
-            $safebrowsingSettings = $settings['safebrowsing_settings'] ?? [];
-            $safeSearchEnabled = !empty($parentalSettings['engines_safe_search_enabled'])
-                || !empty($parentalSettings['youtube_safe_search_enabled']);
-            $blockDangerousEnabled = !empty($safebrowsingSettings['block_dangerous_domains'])
-                || !empty($safebrowsingSettings['enabled']);
-            $blockNrdEnabled = !empty($safebrowsingSettings['block_nrd']);
-        }
+        $aggregated = $this->aggregateTimeStats($timeStats);
+        $blockedCategories = $this->aggregateCategoryStats($categoryStats);
+        $deviceList = $this->buildDeviceList($devices, $deviceStats, $now);
+        $safebrowsing = $this->extractSafebrowsingSettings($settings);
 
         return [
             'stats' => [
-                'total_queries' => $totalQueries,
-                'blocked_count' => $blockedCount,
+                'total_queries' => $aggregated['total'],
+                'blocked_count' => $aggregated['blocked'],
                 'blocked_categories' => array_slice(array_map(fn($c) => $c['name'], $blockedCategories), 0, 3),
-                'active_devices' => $activeDevices,
+                'active_devices' => $deviceList['active_count'],
             ],
-            'time_series' => $timeSeries,
+            'time_series' => $aggregated['series'],
             'top_activities' => array_slice($this->getTopDomains($timeFrom, $timeTo), 0, 5),
             'categories_blocked' => array_slice($blockedCategories, 0, 5),
-            'safebrowsing' => [
-                'safe_search_enabled' => $safeSearchEnabled,
-                'block_dangerous_enabled' => $blockDangerousEnabled,
-                'block_nrd_enabled' => $blockNrdEnabled,
-            ],
-            'devices' => $deviceList,
+            'safebrowsing' => $safebrowsing,
+            'devices' => $deviceList['list'],
             'account_limits' => [
                 'devices' => [
                     'used' => count($devices),
                     'max' => $limits['devices']['max'] ?? 5,
                 ],
             ],
+        ];
+    }
+
+    private function aggregateTimeStats(?array $timeStats): array
+    {
+        $total = 0;
+        $blocked = 0;
+        $series = [];
+
+        if (!$timeStats) {
+            return ['total' => $total, 'blocked' => $blocked, 'series' => $series];
+        }
+
+        foreach (($timeStats['stats'] ?? []) as $hour) {
+            $value = $hour['value'] ?? [];
+            $q = $value['queries'] ?? 0;
+            $b = $value['blocked'] ?? 0;
+            $total += $q + $b;
+            $blocked += $b;
+            $series[] = [
+                'hour' => $hour['time_millis'] ?? 0,
+                'allowed' => $q,
+                'blocked' => $b,
+            ];
+        }
+
+        return ['total' => $total, 'blocked' => $blocked, 'series' => $series];
+    }
+
+    private function aggregateCategoryStats(?array $categoryStats): array
+    {
+        if (!$categoryStats) {
+            return [];
+        }
+
+        $statsList = $categoryStats['stats'] ?? [];
+        $total = array_sum(array_column($statsList, 'queries')) ?: 1;
+        $categories = [];
+
+        foreach ($statsList as $cat) {
+            $count = $cat['queries'] ?? 0;
+            $categories[] = [
+                'name' => $cat['category_type'] ?? 'Unknown',
+                'count' => $count,
+                'percentage' => round(($count / $total) * 100, 1),
+            ];
+        }
+
+        usort($categories, fn($a, $b) => $b['count'] - $a['count']);
+
+        return $categories;
+    }
+
+    private function buildDeviceList(array $devices, array $deviceStats, \Illuminate\Support\Carbon $now): array
+    {
+        $activeCount = 0;
+        $list = [];
+
+        if (!$devices) {
+            return ['active_count' => $activeCount, 'list' => $list];
+        }
+
+        $deviceLastSeen = [];
+        foreach (($deviceStats['stats'] ?? []) as $ds) {
+            if (isset($ds['device_id']) && isset($ds['last_activity_time_millis'])) {
+                $deviceLastSeen[$ds['device_id']] = $ds['last_activity_time_millis'];
+            }
+        }
+
+        foreach ($devices as $device) {
+            $deviceId = $device['id'] ?? '';
+            $lastSeen = $deviceLastSeen[$deviceId] ?? null;
+            $isOnline = $lastSeen && ($now->valueOf() - $lastSeen) < self::DEVICE_ONLINE_THRESHOLD_MS;
+
+            if ($isOnline) {
+                $activeCount++;
+            }
+
+            $list[] = [
+                'id' => $deviceId,
+                'name' => $device['name'] ?? 'Unknown',
+                'device_type' => $device['device_type'] ?? 'unknown',
+                'is_online' => $isOnline,
+                'last_seen' => $lastSeen,
+                'protection_enabled' => $device['settings']['protection_enabled'] ?? true,
+            ];
+        }
+
+        return ['active_count' => $activeCount, 'list' => $list];
+    }
+
+    private function extractSafebrowsingSettings(?array $settings): array
+    {
+        if (!$settings) {
+            return [
+                'safe_search_enabled' => false,
+                'block_dangerous_enabled' => false,
+                'block_nrd_enabled' => false,
+            ];
+        }
+
+        $parental = $settings['parental_control_settings'] ?? [];
+        $safebrowsing = $settings['safebrowsing_settings'] ?? [];
+
+        return [
+            'safe_search_enabled' => !empty($parental['engines_safe_search_enabled'])
+                || !empty($parental['youtube_safe_search_enabled']),
+            'block_dangerous_enabled' => !empty($safebrowsing['block_dangerous_domains'])
+                || !empty($safebrowsing['enabled']),
+            'block_nrd_enabled' => !empty($safebrowsing['block_nrd']),
         ];
     }
 
@@ -182,13 +226,6 @@ class AdGuardService
         $response = $this->get("/dns_servers/{$dnsServerId}");
         $data = $response->json();
         return is_array($data) ? $data : null;
-    }
-
-    public function getDnsServerSettings(string $dnsServerId): ?array
-    {
-        $server = $this->getDnsServer($dnsServerId);
-
-        return $server['settings'] ?? null;
     }
 
     public function updateDnsServerSettings(string $dnsServerId, array $settings): bool

@@ -5,7 +5,6 @@ import { AuthContext } from '../../app/contexts/AuthContext';
 import { ToastProvider } from '../../app/contexts/ToastProvider';
 import SetupApiKey from '../../pages/SetupApiKey';
 import * as setupApiKeyService from '../../app/services/api/setupApiKey';
-import type { ReactNode } from 'react';
 
 vi.mock('../../app/services/api/setupApiKey');
 vi.mock('react-router-dom', async (orig) => ({
@@ -28,6 +27,7 @@ function renderSetupApiKey() {
             onRegister: async () => {},
             onLogout: async () => {},
             clearError: () => {},
+            refreshUser: async () => {},
           }}
         >
           <SetupApiKey />

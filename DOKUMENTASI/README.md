@@ -6,7 +6,7 @@ Aplikasi monitoring orang tua untuk aktivitas internet anak, menggunakan API AdG
 
 | Layer | Teknologi |
 |-------|-----------|
-| Backend | Laravel 11, PHP 8.3 |
+| Backend | Laravel 12, PHP 8.2+ |
 | Frontend | React 18, TypeScript, Tailwind CSS |
 | Auth | Laravel Sanctum (SPA) |
 | CI/CD | Vite, PHPUnit, Vitest |

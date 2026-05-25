@@ -9,11 +9,6 @@ export interface ApiErrorResponse {
   code: string;
   message: string;
   errors?: Record<string, string[]>;
-  debug?: {
-    file: string;
-    line: number;
-    trace: unknown[];
-  };
   correlation_id?: string;
 }
 

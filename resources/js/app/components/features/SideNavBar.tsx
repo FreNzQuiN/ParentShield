@@ -84,12 +84,12 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
         <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={onClose} />
       )}
 
-      {/* Sidebar desktop (lg+) */}
-      <aside className="hidden lg:flex lg:h-screen lg:w-[256px] lg:flex-col lg:bg-[#f1f4fa] lg:shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]">
+      {/* Sidebar desktop (lg+) — fixed, full viewport height */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[256px] flex-col bg-[#f1f4fa] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] lg:flex">
         {sidebarContent}
       </aside>
 
-      {/* Sidebar mobile/tablet */}
+      {/* Sidebar mobile/tablet — overlay + slide-in */}
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-[256px] flex-col bg-[#f1f4fa] shadow-lg transition-transform lg:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {sidebarContent}
       </aside>

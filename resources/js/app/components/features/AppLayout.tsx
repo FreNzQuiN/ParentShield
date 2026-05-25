@@ -6,10 +6,10 @@ export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <>
       <SideNavBar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
-      <main className="relative flex flex-1 flex-col bg-[#f7f9ff] overflow-auto">
+      <div className="min-h-screen bg-[#f7f9ff] lg:ml-[256px]">
         <div className="sticky top-0 z-20 flex items-center gap-2 bg-[#f7f9ff] px-4 pt-4 pb-2 border-b border-[rgba(193,198,214,0.3)] lg:hidden">
           <button
             onClick={() => setMobileOpen(true)}
@@ -22,10 +22,10 @@ export default function AppLayout() {
           </button>
           <span className="font-['Roboto',sans-serif] text-sm font-medium text-[#414754]">Menu</span>
         </div>
-        <div className="flex-1 px-4 pt-3 pb-4 lg:p-6">
+        <div className="px-4 pt-3 pb-4 lg:p-6">
           <Outlet />
         </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
 }

@@ -7,7 +7,7 @@ import { useToast } from '../app/contexts/ToastContext';
 import { storeApiKey } from '../app/services/api/setupApiKey';
 
 export default function SetupApiKey() {
-  const { user, refreshUser } = useAuth();
+  const { refreshUser } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

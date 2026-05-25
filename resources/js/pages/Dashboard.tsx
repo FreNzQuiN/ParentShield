@@ -46,7 +46,7 @@ export default function Dashboard() {
   return (
     <div className="relative flex flex-col gap-5 md:gap-6">
       {(loading || isRefreshing) && data && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-white/60 lg:inset-y-0 lg:left-[256px] lg:right-0">
+        <div className="fixed inset-0 z-20 flex items-center justify-center bg-white/60">
           <Loading message="Memuat..." size="sm" />
         </div>
       )}

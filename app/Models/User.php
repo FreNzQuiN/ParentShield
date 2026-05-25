@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -44,7 +45,12 @@ class User extends Authenticatable
 
         try {
             return Crypt::decryptString($this->adguard_api_key_encrypted);
-        } catch (\Exception) {
+        } catch (\Exception $e) {
+            Log::warning('Gagal mendekripsi kunci API AdGuard', [
+                'user_id' => $this->id,
+                'error' => $e->getMessage(),
+            ]);
+
             return null;
         }
     }
