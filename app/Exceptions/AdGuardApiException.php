@@ -9,7 +9,7 @@ class AdGuardApiException extends RuntimeException
     protected int $statusCode;
 
     public function __construct(
-        string $message = 'AdGuard API error.',
+        string $message = 'Terjadi kesalahan pada layanan AdGuard.',
         string $code = 'ADGUARD_ERROR',
         int $statusCode = 502,
         ?\Throwable $previous = null

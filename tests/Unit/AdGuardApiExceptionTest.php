@@ -25,7 +25,7 @@ class AdGuardApiExceptionTest extends TestCase
         $exception = new AdGuardApiException();
 
         $this->assertEquals(502, $exception->getStatusCode());
-        $this->assertEquals('AdGuard API error.', $exception->getMessage());
+        $this->assertEquals('Terjadi kesalahan pada layanan AdGuard.', $exception->getMessage());
         $this->assertEquals('ADGUARD_ERROR', $exception->getCode());
     }
 }

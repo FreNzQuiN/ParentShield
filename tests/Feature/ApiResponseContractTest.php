@@ -18,7 +18,7 @@ class ApiResponseContractTest extends TestCase
             ])
             ->assertJson([
                 'success' => true,
-                'message' => 'API is healthy.',
+                'message' => 'API tersedia.',
             ]);
     }
 

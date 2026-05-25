@@ -56,7 +56,7 @@ export default function DeviceAnakList({ devices }: DeviceAnakListProps) {
                 />
               </div>
               <p className="font-['Roboto',sans-serif] text-xs text-[#727785]">
-                {device.is_online ? 'Online' : 'Offline'} &middot; {getDeviceLabel(device.device_type)}
+                {device.is_online ? 'Daring' : 'Luring'} &middot; {getDeviceLabel(device.device_type)}
               </p>
             </div>
             <ChevronRightIcon />

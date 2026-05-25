@@ -50,6 +50,13 @@ export function useDashboard(): UseDashboardResult {
   const toggleSafebrowsing = useCallback(
     async (key: keyof SafebrowsingSettings, value: boolean) => {
       await updateSafebrowsing(key, value);
+      setData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          safebrowsing: { ...prev.safebrowsing, [key]: value },
+        };
+      });
     },
     []
   );

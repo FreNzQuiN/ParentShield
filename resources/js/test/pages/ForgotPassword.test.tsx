@@ -24,7 +24,7 @@ describe('ForgotPassword', () => {
 
   it('renders email form', () => {
     render(<ForgotPassword />, { wrapper: Wrapper });
-    expect(screen.getByText('Atur ulang kata sandi')).toBeInTheDocument();
+    expect(screen.getByText('Atur Ulang Kata Sandi')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /kirim link reset/i })).toBeInTheDocument();
   });
@@ -45,7 +45,7 @@ describe('ForgotPassword', () => {
     fireEvent.click(screen.getByRole('button', { name: /kirim link reset/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Periksa email Anda untuk link reset.')).toBeInTheDocument();
+      expect(screen.getByText('Periksa email Anda untuk link reset kata sandi.')).toBeInTheDocument();
     });
     expect(screen.getByText('Kembali ke Masuk')).toHaveAttribute('href', '/login');
   });

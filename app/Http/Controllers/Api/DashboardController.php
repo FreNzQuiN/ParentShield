@@ -6,50 +6,53 @@ use App\Http\Controllers\Controller;
 use App\Services\AdGuardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private readonly AdGuardService $adGuard
+    ) {}
+
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
+        $apiKey = $user->getDecryptedAdguardKey();
 
-        $encryptedKey = $user->adguard_api_key_encrypted;
-        if (!$encryptedKey) {
+        if (!$apiKey) {
             return $this->error(
-                'API key not configured. Please set up your AdGuard API key.',
+                'Kunci API tidak ditemukan. Silakan atur ulang kunci API AdGuard Anda.',
                 'API_KEY_REQUIRED',
                 403
             );
         }
 
-        try {
-            $apiKey = Crypt::decryptString($encryptedKey);
-        } catch (\Exception $e) {
-            return $this->error(
-                'Failed to decrypt API key. Please reconfigure your API key.',
-                'API_KEY_DECRYPT_ERROR',
-                500
-            );
-        }
-
-        $adGuard = new AdGuardService($apiKey);
+        $this->adGuard->setApiKey($apiKey);
 
         try {
-            $data = $adGuard->getDashboardData();
-            return $this->success($data, 'Dashboard data retrieved.');
+            $data = $this->adGuard->getDashboardData();
+            return $this->success($data, 'Data dashboard berhasil dimuat.');
         } catch (\App\Exceptions\AdGuardApiException $e) {
-            $errorCode = $e->getCode();
+            Log::warning('Dashboard API error', [
+                'user_id' => $user->id,
+                'code' => $e->getCode(),
+                'message' => $e->getMessage(),
+            ]);
 
-            if ($errorCode === 'ADGUARD_UNAUTHORIZED') {
+            if ($e->getCode() === 'ADGUARD_UNAUTHORIZED') {
                 $user->adguard_api_key_verified_at = null;
                 $user->save();
             }
 
-            return $this->error($e->getMessage(), $errorCode, $e->getStatusCode());
+            return $this->error($e->getMessage(), $e->getCode(), $e->getStatusCode());
         } catch (\Exception $e) {
+            Log::error('Dashboard unexpected error', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
             return $this->error(
-                'Failed to fetch dashboard data: ' . $e->getMessage(),
+                'Gagal memuat data dashboard. Silakan coba lagi.',
                 'DASHBOARD_ERROR',
                 500
             );
@@ -59,11 +62,11 @@ class DashboardController extends Controller
     public function updateSafebrowsing(Request $request): JsonResponse
     {
         $user = $request->user();
+        $apiKey = $user->getDecryptedAdguardKey();
 
-        $encryptedKey = $user->adguard_api_key_encrypted;
-        if (!$encryptedKey) {
+        if (!$apiKey) {
             return $this->error(
-                'API key not configured.',
+                'Kunci API tidak ditemukan.',
                 'API_KEY_REQUIRED',
                 403
             );
@@ -71,33 +74,27 @@ class DashboardController extends Controller
 
         $validKeys = ['safe_search_enabled', 'block_dangerous_enabled', 'block_nrd_enabled'];
         $key = $request->input('key');
-        $value = $request->boolean('value');
+        $value = $request->input('value');
 
         if (!in_array($key, $validKeys, true)) {
-            return $this->error('Invalid setting key.', 'INVALID_KEY', 422);
+            return $this->error('Pengaturan tidak valid.', 'INVALID_KEY', 422);
         }
 
-        try {
-            $apiKey = Crypt::decryptString($encryptedKey);
-        } catch (\Exception $e) {
-            return $this->error(
-                'Failed to decrypt API key.',
-                'API_KEY_DECRYPT_ERROR',
-                500
-            );
+        if (!is_bool($value)) {
+            return $this->error('Nilai harus berupa boolean.', 'INVALID_VALUE', 422);
         }
 
-        $adGuard = new AdGuardService($apiKey);
+        $this->adGuard->setApiKey($apiKey);
 
         try {
-            $dnsServers = $adGuard->getDnsServers();
+            $dnsServers = $this->adGuard->getDnsServers();
             $dnsServerId = $dnsServers[0]['id'] ?? null;
 
             if (!$dnsServerId) {
-                return $this->error('No DNS server found.', 'DNS_SERVER_MISSING', 404);
+                return $this->error('Tidak ditemukan server DNS.', 'DNS_SERVER_MISSING', 404);
             }
 
-            $currentSettings = $adGuard->getDnsServerSettings($dnsServerId);
+            $currentSettings = $this->adGuard->getDnsServerSettings($dnsServerId);
 
             $updatePayload = match ($key) {
                 'safe_search_enabled' => [
@@ -127,27 +124,36 @@ class DashboardController extends Controller
                 default => [],
             };
 
-            // Merge with existing settings to preserve others
             $merged = array_merge($currentSettings, $updatePayload);
-
-            $adGuard->updateDnsServerSettings($dnsServerId, $merged);
+            $this->adGuard->updateDnsServerSettings($dnsServerId, $merged);
 
             return $this->success([
                 'key' => $key,
                 'value' => $value,
-            ], 'Setting updated successfully.');
+            ], 'Pengaturan berhasil diperbarui.');
         } catch (\App\Exceptions\AdGuardApiException $e) {
-            $errorCode = $e->getCode();
+            Log::warning('Safebrowsing update error', [
+                'user_id' => $user->id,
+                'key' => $key,
+                'code' => $e->getCode(),
+                'message' => $e->getMessage(),
+            ]);
 
-            if ($errorCode === 'ADGUARD_UNAUTHORIZED') {
+            if ($e->getCode() === 'ADGUARD_UNAUTHORIZED') {
                 $user->adguard_api_key_verified_at = null;
                 $user->save();
             }
 
-            return $this->error($e->getMessage(), $errorCode, $e->getStatusCode());
+            return $this->error($e->getMessage(), $e->getCode(), $e->getStatusCode());
         } catch (\Exception $e) {
+            Log::error('Safebrowsing unexpected error', [
+                'user_id' => $user->id,
+                'key' => $key,
+                'error' => $e->getMessage(),
+            ]);
+
             return $this->error(
-                'Failed to fetch dashboard data: ' . $e->getMessage(),
+                'Gagal memperbarui pengaturan. Silakan coba lagi.',
                 'DASHBOARD_ERROR',
                 500
             );

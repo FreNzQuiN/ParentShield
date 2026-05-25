@@ -27,7 +27,7 @@ class AuthTest extends TestCase
             ])
             ->assertJson([
                 'success' => true,
-                'message' => 'Registration successful.',
+                'message' => 'Registrasi berhasil.',
             ]);
 
         $this->assertDatabaseHas('users', ['email' => 'test@example.com']);
@@ -88,7 +88,7 @@ class AuthTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'Login successful.',
+                'message' => 'Berhasil masuk.',
             ])
             ->assertJsonStructure(['data' => ['user', 'token']]);
     }
@@ -162,7 +162,7 @@ class AuthTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'Logged out successfully.',
+                'message' => 'Berhasil keluar.',
             ]);
 
         $this->assertDatabaseCount('personal_access_tokens', 0);
@@ -186,7 +186,7 @@ class AuthTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'If the email exists, a reset link has been sent.',
+                'message' => 'Jika email terdaftar, tautan reset telah dikirim.',
             ]);
     }
 
@@ -196,8 +196,8 @@ class AuthTest extends TestCase
             'email' => 'nonexistent@example.com',
         ]);
 
-        $response->assertStatus(422)
-            ->assertJson(['success' => false]);
+        $response->assertStatus(200)
+            ->assertJson(['success' => true]);
     }
 
     public function test_forgot_password_validates_required_fields(): void

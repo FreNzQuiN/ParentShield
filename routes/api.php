@@ -8,7 +8,7 @@ Route::middleware(['api', AddCorrelationId::class])->prefix('v1')->group(functio
     Route::get('/health', function () {
         return response()->json([
             'success' => true,
-            'message' => 'API is healthy.',
+                'message' => 'API tersedia.',
             'data' => [
                 'app' => config('app.name'),
                 'env' => config('app.env'),
@@ -39,7 +39,7 @@ Route::middleware(['api', AddCorrelationId::class])->prefix('v1')->group(functio
     });
 
     // Protected — requires auth + API key
-    Route::middleware(['auth:sanctum'])->group(function () {
+    Route::middleware(['auth:sanctum', 'check.api-key'])->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
         Route::put('/dashboard/safebrowsing', [\App\Http\Controllers\Api\DashboardController::class, 'updateSafebrowsing']);
     });

@@ -1,8 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../contexts/ToastContext';
-import { ShieldCheckIcon, GlobeIcon } from '../../shared/icons';
+import { GlobeIcon } from '../../shared/icons';
 import type { SafebrowsingSettings } from '../../../types/dashboard';
-import api from '../../../services/api/client';
 
 interface ProteksiGlobalProps {
   settings: SafebrowsingSettings;

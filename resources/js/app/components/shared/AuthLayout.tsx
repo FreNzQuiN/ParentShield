@@ -20,9 +20,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           &copy; 2024 ParentShield. Digital Stewardship for Every Family.
         </p>
         <div className="flex gap-3">
-          <span className="text-center font-['Roboto',sans-serif] text-[12px] font-medium text-[#414754]">Privacy Policy</span>
-          <span className="text-center font-['Roboto',sans-serif] text-[12px] font-medium text-[#414754]">Terms of Service</span>
-          <span className="text-center font-['Roboto',sans-serif] text-[12px] font-medium text-[#414754]">Help Center</span>
+          <a href="#" className="text-center font-['Roboto',sans-serif] text-[12px] font-medium text-[#414754] no-underline hover:text-[#005bbf]">Privacy Policy</a>
+          <a href="#" className="text-center font-['Roboto',sans-serif] text-[12px] font-medium text-[#414754] no-underline hover:text-[#005bbf]">Terms of Service</a>
+          <a href="#" className="text-center font-['Roboto',sans-serif] text-[12px] font-medium text-[#414754] no-underline hover:text-[#005bbf]">Help Center</a>
         </div>
       </footer>
     </div>

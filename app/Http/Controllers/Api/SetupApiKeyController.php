@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Log;
 
 class SetupApiKeyController extends Controller
 {
+    public function __construct(
+        private readonly AdGuardService $adGuard
+    ) {}
+
     public function store(Request $request): JsonResponse
     {
         $request->validate([
@@ -21,10 +25,10 @@ class SetupApiKeyController extends Controller
         ]);
 
         $apiKey = $request->input('api_key');
+        $this->adGuard->setApiKey($apiKey);
 
         try {
-            $adGuard = new AdGuardService($apiKey);
-            $isValid = $adGuard->verifyApiKey();
+            $isValid = $this->adGuard->verifyApiKey();
         } catch (\Exception $e) {
             Log::error('Setup API key verification failed', [
                 'user_id' => $request->user()->id,

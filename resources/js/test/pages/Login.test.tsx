@@ -71,9 +71,9 @@ describe('Login', () => {
 
   it('displays login error from context', () => {
     render(<Login />, {
-      wrapper: createWrapper({ loginError: 'Invalid credentials.' }),
+      wrapper: createWrapper({ loginError: 'Email atau kata sandi salah. Silakan periksa kembali.' }),
     });
-    expect(screen.getByText('Invalid credentials.')).toBeInTheDocument();
+    expect(screen.getByText('Email atau kata sandi salah. Silakan periksa kembali.')).toBeInTheDocument();
   });
 
   it('disables form when loading', () => {

@@ -26,13 +26,13 @@ class AuthController extends Controller
         return $this->created([
             'user' => $user->only(['id', 'name', 'email']) + ['has_api_key' => false],
             'token' => $token,
-        ], 'Registration successful.');
+        ], 'Registrasi berhasil.');
     }
 
     public function login(LoginRequest $request): JsonResponse
     {
         if (!Auth::attempt($request->only('email', 'password'))) {
-            return $this->error('Invalid credentials.', 'INVALID_CREDENTIALS', 401);
+            return $this->error('Email atau kata sandi salah. Silakan periksa kembali.', 'INVALID_CREDENTIALS', 401);
         }
 
         $user = $request->user();
@@ -41,14 +41,14 @@ class AuthController extends Controller
         return $this->success([
             'user' => $user->only(['id', 'name', 'email']) + ['has_api_key' => $user->adguard_api_key_verified_at !== null],
             'token' => $token,
-        ], 'Login successful.');
+        ], 'Berhasil masuk.');
     }
 
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
 
-        return $this->success(null, 'Logged out successfully.');
+        return $this->success(null, 'Berhasil keluar.');
     }
 
     public function me(Request $request): JsonResponse
@@ -67,6 +67,6 @@ class AuthController extends Controller
         } catch (\Exception) {
         }
 
-        return $this->success(null, 'If the email exists, a reset link has been sent.');
+        return $this->success(null, 'Jika email terdaftar, tautan reset telah dikirim.');
     }
 }

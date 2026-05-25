@@ -163,12 +163,17 @@ class AdGuardService
         return $response->json() ?? [];
     }
 
-    public function getDnsServerSettings(string $dnsServerId): ?array
+    public function getDnsServer(string $dnsServerId): ?array
     {
         $response = $this->get("/dns_servers/{$dnsServerId}");
-        $data = $response->json();
+        return $response->json();
+    }
 
-        return $data['settings'] ?? null;
+    public function getDnsServerSettings(string $dnsServerId): ?array
+    {
+        $server = $this->getDnsServer($dnsServerId);
+
+        return $server['settings'] ?? null;
     }
 
     public function updateDnsServerSettings(string $dnsServerId, array $settings): bool
@@ -241,7 +246,7 @@ class AdGuardService
     private function get(string $endpoint, array $query = []): Response
     {
         if (!$this->apiKey) {
-            throw new AdGuardApiException('API key not configured.', 'API_KEY_MISSING', 401);
+            throw new AdGuardApiException('Kunci API tidak ditemukan.', 'API_KEY_MISSING', 401);
         }
 
         $url = $this->baseUrl . $endpoint;
@@ -255,7 +260,7 @@ class AdGuardService
             ])->timeout(15)->get($url, $query);
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
             throw new AdGuardApiException(
-                'Cannot connect to AdGuard DNS API.',
+                'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
                 'ADGUARD_CONNECTION_ERROR',
                 503
             );
@@ -271,7 +276,7 @@ class AdGuardService
     private function put(string $endpoint, array $data = []): Response
     {
         if (!$this->apiKey) {
-            throw new AdGuardApiException('API key not configured.', 'API_KEY_MISSING', 401);
+            throw new AdGuardApiException('Kunci API tidak ditemukan.', 'API_KEY_MISSING', 401);
         }
 
         $url = $this->baseUrl . $endpoint;
@@ -285,7 +290,7 @@ class AdGuardService
             ])->timeout(15)->put($url, $data);
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
             throw new AdGuardApiException(
-                'Cannot connect to AdGuard DNS API.',
+                'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
                 'ADGUARD_CONNECTION_ERROR',
                 503
             );
@@ -310,20 +315,13 @@ class AdGuardService
             'response' => $errorMsg,
         ]);
 
-        $errorCode = match ($status) {
-            401 => 'ADGUARD_UNAUTHORIZED',
-            405 => 'ADGUARD_METHOD_NOT_ALLOWED',
-            429 => 'ADGUARD_RATE_LIMITED',
-            default => 'ADGUARD_API_ERROR',
+        [$errorCode, $message, $httpStatus] = match ($status) {
+            401 => ['ADGUARD_UNAUTHORIZED', 'Kunci API tidak valid atau telah kedaluwarsa. Silakan perbarui kunci API.', 401],
+            405 => ['ADGUARD_METHOD_NOT_ALLOWED', 'Layanan AdGuard sedang sibuk.', 502],
+            429 => ['ADGUARD_RATE_LIMITED', 'Terlalu banyak permintaan ke layanan AdGuard. Silakan tunggu beberapa saat.', 429],
+            default => ['ADGUARD_API_ERROR', 'Layanan sedang sibuk, silakan coba beberapa saat lagi.', $status],
         };
 
-        // Normalize 405 to 502 — server error, not client
-        $httpStatus = $status === 405 ? 502 : $status;
-
-        throw new AdGuardApiException(
-            'AdGuard API: ' . $errorMsg,
-            $errorCode,
-            $httpStatus
-        );
+        throw new AdGuardApiException($message, $errorCode, $httpStatus);
     }
 }

@@ -41,4 +41,12 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function withApiKey(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'adguard_api_key_encrypted' => \Illuminate\Support\Facades\Crypt::encryptString('ag_test_key'),
+            'adguard_api_key_verified_at' => now(),
+        ]);
+    }
 }
