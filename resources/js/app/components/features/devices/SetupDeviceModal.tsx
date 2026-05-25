@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../../shared/Modal';
 import CreateDeviceForm from './CreateDeviceForm';
 import AndroidSetupInstructions from './AndroidSetupInstructions';
@@ -12,7 +12,6 @@ interface SetupDeviceModalProps {
   onClose: () => void;
   onSuccess: () => void;
   initialDevice?: DeviceDetail | null;
-  initialDeviceType?: SetupDeviceType | null;
 }
 
 export default function SetupDeviceModal({
@@ -20,14 +19,27 @@ export default function SetupDeviceModal({
   onClose,
   onSuccess,
   initialDevice,
-  initialDeviceType,
 }: SetupDeviceModalProps) {
-  const initialType = initialDeviceType ?? (initialDevice?.device_type as SetupDeviceType) ?? null;
-  const [step, setStep] = useState<1 | 2>(initialDevice ? 2 : 1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [device, setDevice] = useState<DeviceDetail | null>(initialDevice ?? null);
-  const [deviceType, setDeviceType] = useState<SetupDeviceType | null>(initialType);
+  const [device, setDevice] = useState<DeviceDetail | null>(null);
+  const [deviceType, setDeviceType] = useState<SetupDeviceType | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    if (initialDevice) {
+      setStep(2);
+      setDevice(initialDevice);
+      setDeviceType((initialDevice.device_type as SetupDeviceType) ?? null);
+    } else {
+      setStep(1);
+      setDevice(null);
+      setDeviceType(null);
+    }
+    setError(null);
+    setLoading(false);
+  }, [open, initialDevice]);
 
   const getTitle = () => {
     if (step === 1) return 'Tambah Perangkat Baru';

@@ -17,15 +17,16 @@ export default function EditDeviceModal({ open, device, onClose, onSuccess }: Ed
   const [fieldError, setFieldError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (device) {
+    if (device && open) {
       setName(device.name);
       setError(null);
       setFieldError(null);
     }
-  }, [device]);
+  }, [device, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError(null);
     setFieldError(null);
 
@@ -38,8 +39,8 @@ export default function EditDeviceModal({ open, device, onClose, onSuccess }: Ed
     setLoading(true);
     try {
       await updateDevice(device.id, name.trim());
-      onSuccess();
       onClose();
+      onSuccess();
     } catch (err: unknown) {
       const msg = (err as { message?: string }).message || 'Gagal memperbarui nama perangkat.';
       setError(msg);

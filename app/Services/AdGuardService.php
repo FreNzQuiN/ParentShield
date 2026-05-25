@@ -557,24 +557,19 @@ class AdGuardService
             });
 
             foreach ($responses as $key => $response) {
-                if ($response instanceof \Exception) {
-                    if ($response instanceof ConnectionException) {
-                        throw new AdGuardApiException(
-                            'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
-                            'ADGUARD_CONNECTION_ERROR',
-                            503
-                        );
+                if ($response instanceof Response) {
+                    if ($response->failed()) {
+                        try {
+                            $this->handleError($response, $this->baseUrl . $requests[$key]['endpoint']);
+                        } catch (AdGuardApiException $e) {
+                            if ($e->getErrorCode() === 'ADGUARD_UNAUTHORIZED') {
+                                throw $e;
+                            }
+                            $responses[$key] = null;
+                        }
                     }
-                    if ($response instanceof RequestException && $response->hasResponse()) {
-                        $this->handleError(
-                            new Response($response->getResponse()),
-                            $this->baseUrl . $requests[$key]['endpoint']
-                        );
-                    }
-                    throw $response;
-                }
-                if ($response instanceof Response && $response->failed()) {
-                    $this->handleError($response, $this->baseUrl . $requests[$key]['endpoint']);
+                } else {
+                    $responses[$key] = null;
                 }
             }
 
@@ -590,10 +585,10 @@ class AdGuardService
         }
     }
 
-    private function parsePoolJson(Response|\Exception $response): ?array
+    private function parsePoolJson(Response|\Exception|null $response): ?array
     {
-        if ($response instanceof \Exception) {
-            throw $response;
+        if ($response instanceof \Exception || $response === null) {
+            return null;
         }
         $data = $response->json();
         return is_array($data) ? $data : null;
@@ -615,7 +610,7 @@ class AdGuardService
     private function handleError(Response $response, string $url): never
     {
         $status = $response->status();
-        $body = $response->json();
+        $body = $response->json() ?? [];
         $errorMsg = $body['error_description'] ?? $body['message'] ?? $response->body();
 
         Log::error('AdGuard API error', [

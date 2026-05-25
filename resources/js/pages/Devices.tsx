@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchDevices, deleteDevice } from '../app/services/api/devices';
 import type { DeviceDetail, DeviceLimits } from '../app/types/device';
 import { useToast } from '../app/contexts/ToastContext';
@@ -47,7 +47,9 @@ export default function Devices() {
   const [deleteTarget, setDeleteTarget] = useState<DeviceDetail | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const loadCounterRef = useRef(0);
   const loadDevices = useCallback(async (isRefresh = false) => {
+    const loadId = ++loadCounterRef.current;
     if (isRefresh) {
       setRefreshing(true);
     } else {
@@ -56,9 +58,11 @@ export default function Devices() {
     setError(null);
     try {
       const data = await fetchDevices();
+      if (loadId !== loadCounterRef.current) return;
       setDevices(data.devices);
       setLimits(data.account_limits);
     } catch (err: unknown) {
+      if (loadId !== loadCounterRef.current) return;
       const resp = err as { message?: string };
       if (isRefresh) {
         addToast({ type: 'error', message: resp.message || 'Gagal memuat ulang perangkat.' });
@@ -66,8 +70,10 @@ export default function Devices() {
         setError(resp.message || 'Gagal memuat daftar perangkat.');
       }
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (loadId === loadCounterRef.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [addToast]);
 
@@ -144,7 +150,14 @@ export default function Devices() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-[48px]">
+    <div className="relative flex flex-1 flex-col gap-[48px]">
+      {refreshing && devices.length > 0 && (
+        <div className="fixed inset-0 z-20 flex items-center justify-center bg-white/60">
+          <Loading message="Memuat..." size="sm" />
+        </div>
+      )}
+
+      <div className={`flex flex-col gap-[48px] ${refreshing ? 'pointer-events-none select-none' : ''}`}>
       <div>
         <h1 className="font-['Roboto',sans-serif] text-[24px] font-medium text-[#181c20]">
           Perangkat Dilindungi
@@ -222,6 +235,7 @@ export default function Devices() {
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
       />
+      </div>
     </div>
   );
 }

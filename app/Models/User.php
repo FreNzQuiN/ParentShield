@@ -18,7 +18,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'adguard_api_key_verified_at',
     ];
 
     protected $hidden = [
@@ -49,8 +48,6 @@ class User extends Authenticatable
                 'user_id' => $this->id,
                 'error' => $e->getMessage(),
             ]);
-
-            $this->clearAdguardApiKey();
 
             return null;
         }

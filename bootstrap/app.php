@@ -10,7 +10,6 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -55,11 +54,13 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (AdGuardApiException $e, Request $request) {
-            return response()->json([
-                'success' => false,
-                'code' => $e->getErrorCode() ?: 'ADGUARD_ERROR',
-                'message' => $e->getMessage(),
-            ], $e->getStatusCode());
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'code' => $e->getErrorCode() ?: 'ADGUARD_ERROR',
+                    'message' => $e->getMessage(),
+                ], $e->getStatusCode());
+            }
         });
 
         $exceptions->render(function (HttpException $e, Request $request) {
@@ -67,6 +68,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 $message = match ($e->getStatusCode()) {
                     403 => 'Akses ditolak.',
                     404 => 'Halaman tidak ditemukan.',
+                    429 => 'Terlalu banyak permintaan. Silakan tunggu beberapa saat.',
                     default => $e->getMessage() ?: 'Terjadi kesalahan.',
                 };
 
@@ -108,16 +110,6 @@ return Application::configure(basePath: dirname(__DIR__))
                     'code' => 'SERVICE_UNAVAILABLE',
                     'message' => 'Layanan eksternal tidak dapat dijangkau. Silakan coba lagi.',
                 ], 502);
-            }
-        });
-
-        $exceptions->render(function (TooManyRequestsHttpException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'code' => 'RATE_LIMIT_EXCEEDED',
-                    'message' => 'Terlalu banyak permintaan. Silakan tunggu beberapa saat.',
-                ], 429);
             }
         });
 

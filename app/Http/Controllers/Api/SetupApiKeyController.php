@@ -32,7 +32,11 @@ class SetupApiKeyController extends Controller
                 'code' => $e->getErrorCode(),
             ]);
 
-            throw $e;
+            return $this->error(
+                $e->getMessage(),
+                $e->getErrorCode() ?: 'ADGUARD_ERROR',
+                $e->getStatusCode()
+            );
         } catch (\Exception $e) {
             Log::error('Setup API key verification failed (unexpected)', [
                 'user_id' => $request->user()->id,

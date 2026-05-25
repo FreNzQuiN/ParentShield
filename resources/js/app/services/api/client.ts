@@ -21,9 +21,13 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-const AUTH_ROUTES = ['/auth/login', '/auth/register', '/auth/forgot-password'];
+const AUTH_ROUTES = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/logout'];
+
+let navigateTimeout: ReturnType<typeof setTimeout> | null = null;
 
 function navigateApp(path: string): void {
+  if (navigateTimeout) return;
+  navigateTimeout = setTimeout(() => { navigateTimeout = null; }, 2000);
   window.dispatchEvent(new CustomEvent('app:navigate', { detail: { path } }));
 }
 
@@ -36,17 +40,29 @@ api.interceptors.response.use(
 
       if (status === 401 && data?.code === 'ADGUARD_UNAUTHORIZED') {
         navigateApp('/setup-api-key?reason=revoked');
-        return new Promise(() => {}) as never;
+        return Promise.reject({
+          success: false,
+          code: 'ADGUARD_UNAUTHORIZED',
+          message: 'Kunci API tidak valid atau telah kedaluwarsa.',
+        } as ApiErrorResponse);
       }
 
       if (status === 401 && !AUTH_ROUTES.some((r) => requestUrl.startsWith(r))) {
         navigateApp('/login');
-        return new Promise(() => {}) as never;
+        return Promise.reject({
+          success: false,
+          code: 'SESSION_EXPIRED',
+          message: 'Sesi Anda telah berakhir.',
+        } as ApiErrorResponse);
       }
 
       if (status === 403 && data?.code === 'API_KEY_REQUIRED') {
         navigateApp('/setup-api-key');
-        return new Promise(() => {}) as never;
+        return Promise.reject({
+          success: false,
+          code: 'API_KEY_REQUIRED',
+          message: 'Kunci API diperlukan.',
+        } as ApiErrorResponse);
       }
 
       return Promise.reject({

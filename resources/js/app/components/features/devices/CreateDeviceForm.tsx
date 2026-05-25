@@ -21,6 +21,7 @@ export default function CreateDeviceForm({ loading, error, onSubmit }: CreateDev
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setNameError(null);
 
     if (!name.trim()) {
