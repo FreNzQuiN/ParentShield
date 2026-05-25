@@ -189,7 +189,9 @@ class DeviceController extends Controller
                 $device = $this->adGuard->getDevice($deviceId);
                 $updated['name'] = $device['name'] ?? $validated['name'];
                 $updated['device_type'] = $device['device_type'] ?? 'unknown';
-            } catch (\Exception $e) {
+            } catch (\App\Exceptions\AdGuardApiException $e) {
+                throw $e;
+            } catch (\Throwable $e) {
                 Log::warning('Device re-fetch after update failed', ['device_id' => $deviceId]);
             }
 

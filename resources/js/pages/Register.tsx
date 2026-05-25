@@ -38,11 +38,13 @@ export default function Register() {
       await onRegister(name, email, password, passwordConfirmation);
       addToast({ type: 'success', message: 'Akun berhasil dibuat!' });
     } catch (err: unknown) {
-      const e = err as { errors?: Record<string, string[]> };
+      const e = err as { errors?: Record<string, string[]>; message?: string };
       if (e?.errors) {
         const flat: Record<string, string> = {};
         for (const [key, msgs] of Object.entries(e.errors)) flat[key] = msgs[0];
         setErrors(flat);
+      } else {
+        addToast({ type: 'error', message: e?.message ?? 'Terjadi kesalahan. Silakan coba lagi.' });
       }
     }
   };

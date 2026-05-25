@@ -69,12 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [removeAuthToken]);
 
   const refreshUser = useCallback(async () => {
-    try {
-      const { user: userData } = await authApi.me();
-      setUser(userData);
-    } catch {
-      // ignore — user stays logged in with stale data
-    }
+    const { user: userData } = await authApi.me();
+    setUser(userData);
   }, []);
 
   const clearError = useCallback(() => setLoginError(null), []);
@@ -83,9 +79,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { user: userData } = await authApi.me();
       setUser(userData);
-    } catch {
-      clearStoredToken();
-      setUser(null);
+    } catch (err: unknown) {
+      const e = err as { code?: string };
+      if (e?.code === 'SESSION_EXPIRED' || e?.code === 'UNAUTHENTICATED') {
+        clearStoredToken();
+        setUser(null);
+      }
     }
   }, []);
 
