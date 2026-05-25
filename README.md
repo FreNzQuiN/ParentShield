@@ -1,1 +1,1 @@
-Baca "./DOKUMENTASI/DOCUMENTATION.md" dan "./DOKUMENTASI/ParentShield.md".
+Baca dokumentasi: `DOKUMENTASI/README.md` dan `DOKUMENTASI/DOCUMENTATION.json` (spesifikasi API AdGuard resmi).
