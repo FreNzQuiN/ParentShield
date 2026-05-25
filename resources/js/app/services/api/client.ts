@@ -29,6 +29,11 @@ api.interceptors.response.use(
       const { status, data } = error.response;
       const requestUrl = error.config?.url ?? '';
 
+      if (status === 401 && data?.code === 'ADGUARD_UNAUTHORIZED') {
+        window.location.href = '/setup-api-key?reason=revoked';
+        return Promise.reject(error);
+      }
+
       if (status === 401 && !AUTH_ROUTES.some((r) => requestUrl.startsWith(r))) {
         window.location.href = '/login';
         return Promise.reject(error);

@@ -149,8 +149,11 @@ class AdGuardService
         try {
             $response = $this->get('/dns_servers');
             return $response->successful();
-        } catch (\Exception $e) {
-            return false;
+        } catch (AdGuardApiException $e) {
+            if ($e->getCode() === 'ADGUARD_UNAUTHORIZED') {
+                return false;
+            }
+            throw $e;
         }
     }
 

@@ -1,16 +1,17 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../app/contexts/AuthContext';
 import { Loading, InlineError, AuthLayout, FormInput } from '../app/components/shared';
 import { ShieldIcon, KeyIcon, EyeIcon, EyeOffIcon } from '../app/components/shared/icons';
 import { useToast } from '../app/contexts/ToastContext';
 import { storeApiKey } from '../app/services/api/setupApiKey';
-import { useNavigate } from 'react-router-dom';
 
 export default function SetupApiKey() {
   const { user, refreshUser } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const keyRevoked = searchParams.get('reason') === 'revoked';
 
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
@@ -72,6 +73,12 @@ export default function SetupApiKey() {
       </div>
 
       <div className="mt-6 flex flex-col gap-3 pb-4">
+        {keyRevoked && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            Kunci API sebelumnya tidak valid atau telah dicabut.
+            Silakan masukkan kunci API yang baru.
+          </div>
+        )}
         {error && <InlineError message={error} />}
 
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
@@ -111,7 +118,7 @@ export default function SetupApiKey() {
       <div className="border-t border-[#e5e8ee] pt-3">
         <p className="text-center font-['Roboto',sans-serif] text-sm text-[#414754]">
           <Link
-            to="https://adguard-dns.io/kb/general/api/"
+            to="https://adguard-dns.io/dashboard/user-settings/api-keys"
             target="_blank"
             className="font-medium text-[#005bbf]"
           >
