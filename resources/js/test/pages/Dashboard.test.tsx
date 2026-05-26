@@ -109,7 +109,7 @@ describe('Dashboard page', () => {
     expect(screen.getByText('4')).toBeInTheDocument();
   });
 
-  it('shows overlay loading when background refresh', () => {
+  it('shows LoadingOverlay when loading with existing data', () => {
     vi.mocked(useDashboard).mockReturnValue({
       data: mockDashboardData, loading: true, error: null,
       refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
@@ -117,8 +117,7 @@ describe('Dashboard page', () => {
     });
 
     renderDashboard();
-    const overlays = screen.getAllByText('Memuat...');
-    expect(overlays.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('renders KontrolParental when parental_control exists', () => {

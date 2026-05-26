@@ -56,8 +56,9 @@ describe('ForgotPassword', () => {
   });
 
   it('disables form when loading', async () => {
-    vi.mocked(authApi.forgotPassword).mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 1000)),
+    let resolvePromise: (v: undefined) => void;
+    vi.mocked(authApi.forgotPassword).mockReturnValue(
+      new Promise((resolve) => { resolvePromise = resolve; }),
     );
     render(<ForgotPassword />, { wrapper: Wrapper });
 
@@ -69,5 +70,7 @@ describe('ForgotPassword', () => {
     await waitFor(() => {
       expect(screen.getByLabelText('Email')).toBeDisabled();
     });
+
+    resolvePromise!(undefined);
   });
 });

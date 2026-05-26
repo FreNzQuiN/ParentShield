@@ -13,16 +13,16 @@ interface EmptyStateProps {
 
 export default function EmptyState({ icon, title, description, action, className = '' }: EmptyStateProps) {
   return (
-    <div className={`flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-12 text-center ${className}`}>
-      {icon && <div className="text-neutral-400">{icon}</div>}
+    <div className={`flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-border bg-bg-card-inner p-12 text-center ${className}`}>
+      {icon && <div className="text-text-muted">{icon}</div>}
       <div>
-        <h3 className="text-lg font-semibold text-neutral-700">{title}</h3>
-        {description && <p className="mt-1 text-sm text-neutral-500">{description}</p>}
+        <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
+        {description && <p className="mt-1 text-sm text-text-secondary">{description}</p>}
       </div>
       {action && (
         <button
           onClick={action.onClick}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors"
         >
           {action.label}
         </button>

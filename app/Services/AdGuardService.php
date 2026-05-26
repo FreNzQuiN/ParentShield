@@ -73,7 +73,10 @@ class AdGuardService
 
     private function dashboardCacheKey(): string
     {
-        return 'adguard_dashboard_' . hash('sha256', $this->apiKey ?? '');
+        if (empty($this->apiKey)) {
+            return 'adguard_dashboard_noop_' . uniqid('', true);
+        }
+        return 'adguard_dashboard_' . hash('sha256', $this->apiKey);
     }
 
     private function fetchDashboardData(): array
@@ -427,12 +430,8 @@ class AdGuardService
             }
 
             return $response;
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            throw new AdGuardApiException(
-                'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
-                'ADGUARD_CONNECTION_ERROR',
-                503
-            );
+        } catch (ConnectionException $e) {
+            $this->handleConnectionException();
         }
     }
 
@@ -517,11 +516,7 @@ class AdGuardService
                 'Accept' => 'application/json',
             ])->timeout(15)->{$method}($url, $data);
         } catch (ConnectionException $e) {
-            throw new AdGuardApiException(
-                'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
-                'ADGUARD_CONNECTION_ERROR',
-                503
-            );
+            $this->handleConnectionException();
         }
 
         if ($response->failed()) {
@@ -577,11 +572,7 @@ class AdGuardService
         } catch (AdGuardApiException $e) {
             throw $e;
         } catch (ConnectionException $e) {
-            throw new AdGuardApiException(
-                'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
-                'ADGUARD_CONNECTION_ERROR',
-                503
-            );
+            $this->handleConnectionException();
         } catch (\Exception $e) {
             throw new AdGuardApiException(
                 'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
@@ -611,6 +602,15 @@ class AdGuardService
             }
         }
         return $dnsServers[0];
+    }
+
+    private function handleConnectionException(): never
+    {
+        throw new AdGuardApiException(
+            'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
+            'ADGUARD_CONNECTION_ERROR',
+            503
+        );
     }
 
     private function handleError(Response $response, string $url): never

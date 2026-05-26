@@ -23,11 +23,11 @@ api.interceptors.request.use((config) => {
 
 const AUTH_ROUTES = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/logout'];
 
-let navigateTimeout: ReturnType<typeof setTimeout> | null = null;
+const navigateTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
 
 function navigateApp(path: string): void {
-  if (navigateTimeout) return;
-  navigateTimeout = setTimeout(() => { navigateTimeout = null; }, 2000);
+  if (navigateTimeouts.has(path)) return;
+  navigateTimeouts.set(path, setTimeout(() => { navigateTimeouts.delete(path); }, 2000));
   window.dispatchEvent(new CustomEvent('app:navigate', { detail: { path } }));
 }
 

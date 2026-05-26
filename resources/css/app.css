@@ -12,6 +12,7 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
     --font-roboto: 'Roboto', sans-serif;
+    --font-serif: 'Liberation Serif', serif;
     --color-primary: #005bbf;
     --color-primary-light: rgba(26, 115, 232, 0.1);
     --color-bg-page: #f7f9ff;
@@ -30,6 +31,8 @@
     --color-border: #c1c6d6;
     --color-inactive: #dfe3e8;
     --color-chart-blue: #adc7ff;
+    --color-warning-bg: #ffedd5;
+    --color-warning-text: #c2410c;
     --color-primary-hover: #004d9e;
     --color-danger-hover: #a01515;
     --color-error: #ef4444;

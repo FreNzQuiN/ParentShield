@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '../../app/contexts/AuthProvider';
 import { AuthContext } from '../../app/contexts/AuthContext';
@@ -16,9 +16,10 @@ function TestConsumer() {
       <span data-testid="authenticated">{String(auth.isAuthenticated)}</span>
       <span data-testid="has-api-key">{String(auth.hasApiKey)}</span>
       <span data-testid="user">{auth.user ? `${auth.user.email}|${auth.user.has_api_key}` : 'none'}</span>
-      <button data-testid="login-btn" onClick={() => auth.onLogin('a@b.com', 'pass')}>Login</button>
-      <button data-testid="register-btn" onClick={() => auth.onRegister('Name', 'a@b.com', 'pass', 'pass')}>Register</button>
+      <button data-testid="login-btn" onClick={() => { auth.onLogin('a@b.com', 'pass').catch(() => {}); }}>Login</button>
+      <button data-testid="register-btn" onClick={() => { auth.onRegister('Name', 'a@b.com', 'pass', 'pass').catch(() => {}); }}>Register</button>
       <button data-testid="logout-btn" onClick={() => auth.onLogout()}>Logout</button>
+      <button data-testid="refresh-btn" onClick={() => auth.refreshUser()}>Refresh User</button>
     </div>
   );
 }
@@ -130,5 +131,55 @@ describe('AuthProvider', () => {
       expect(screen.getByTestId('authenticated').textContent).toBe('false');
     });
     expect(localStorage.getItem('auth_token')).toBeNull();
+  });
+
+  it('refreshUser clears state on API failure', async () => {
+    vi.mocked(authApi.me)
+      .mockResolvedValueOnce({ user: { id: 1, name: 'Test', email: 'a@b.com', has_api_key: true } })
+      .mockRejectedValueOnce({ message: 'Gagal' });
+    localStorage.setItem('auth_token', 'fake-token');
+
+    renderAuthProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('authenticated').textContent).toBe('true');
+    });
+
+    fireEvent.click(screen.getByTestId('refresh-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('user').textContent).toBe('none');
+    });
+    expect(localStorage.getItem('auth_token')).toBeNull();
+  });
+
+  it('checkAuth clears state on non-auth errors (e.g. NETWORK_ERROR)', async () => {
+    vi.mocked(authApi.me).mockRejectedValue({ success: false, code: 'NETWORK_ERROR', message: 'Gagal' });
+    localStorage.setItem('auth_token', 'fake-token');
+
+    renderAuthProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('user').textContent).toBe('none');
+    });
+    expect(localStorage.getItem('auth_token')).toBeNull();
+  });
+
+  it('login failure does not clear user state incorrectly', async () => {
+    vi.mocked(authApi.me).mockRejectedValue(new Error());
+    vi.mocked(authApi.login).mockRejectedValue({
+      success: false,
+      code: 'INVALID_CREDENTIALS',
+      message: 'Email atau kata sandi salah.',
+    });
+
+    renderAuthProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').textContent).toBe('false');
+    });
+
+    fireEvent.click(screen.getByTestId('login-btn'));
+    await waitFor(() => expect(authApi.login).toHaveBeenCalled());
   });
 });

@@ -16,8 +16,8 @@ export default function AppLayout() {
             className="rounded-lg p-2 -ml-1 hover:bg-primary-light active:bg-primary/15 transition-colors"
             aria-label="Buka menu"
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M3 5h14M3 10h14M3 15h14" stroke="#181c20" strokeWidth="1.5" strokeLinecap="round" />
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-text-primary">
+              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
           <span className="text-sm font-medium text-text-secondary">Menu</span>

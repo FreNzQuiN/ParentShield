@@ -80,7 +80,7 @@ class DashboardController extends Controller
 
         $this->adGuard->setApiKey($apiKey);
 
-        $lock = Cache::lock("dns_settings:{$user->id}", 5);
+        $lock = Cache::lock("dns_settings:{$user->id}", 20);
         if (!$lock->get()) {
             return $this->error('Mohon tunggu, pengaturan sedang diperbarui.', 'LOCK_TIMEOUT', 429);
         }
@@ -177,7 +177,7 @@ class DashboardController extends Controller
 
         $this->adGuard->setApiKey($apiKey);
 
-        $lock = Cache::lock("dns_settings:{$user->id}", 5);
+        $lock = Cache::lock("dns_settings:{$user->id}", 20);
         if (!$lock->get()) {
             return $this->error('Mohon tunggu, pengaturan sedang diperbarui.', 'LOCK_TIMEOUT', 429);
         }

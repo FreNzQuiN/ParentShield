@@ -51,8 +51,8 @@ export default function FormInput({
             (icon ? 'pl-[41px]' : 'px-[18px]') +
             ' ' +
             (rightElement ? 'pr-[44px]' : 'pr-3') +
-            " text-sm text-text-muted " +
-            (error ? 'border-red-500' : 'border-border') +
+            " text-sm text-text-primary " +
+            (error ? 'border-error' : 'border-border') +
             ' ' + className
           }
           {...props}
@@ -69,7 +69,7 @@ export default function FormInput({
         </p>
       )}
       {error && (
-        <p className="text-xs text-red-600">{error}</p>
+        <p className="text-xs text-error">{error}</p>
       )}
     </div>
   );

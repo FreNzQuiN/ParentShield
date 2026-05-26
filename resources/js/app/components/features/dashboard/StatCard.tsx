@@ -12,8 +12,7 @@ interface StatCardProps {
 
 const BADGE_STYLES: Record<string, string> = {
   success: 'bg-success-badge text-success',
-  // TODO: #ffedd5, #c2410c — no tokens available
-  warning: 'bg-[#ffedd5] text-[#c2410c]',
+  warning: 'bg-warning-bg text-warning-text',
 };
 
 export default function StatCard({ icon, label, value, badge, badgeVariant = 'success', valueColor, caption }: StatCardProps) {

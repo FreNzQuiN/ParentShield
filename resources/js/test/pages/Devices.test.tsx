@@ -242,12 +242,10 @@ describe('Devices page', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('shows refresh overlay when refreshing with existing data', async () => {
+  it('opens edit modal from device card menu', async () => {
     vi.mocked(fetchDevices).mockResolvedValue(mockDeviceResponse);
     renderDevices();
     await waitFor(() => screen.getByTestId('device-card-d1'));
-
-    vi.mocked(fetchDevices).mockImplementation(() => new Promise(r => setTimeout(() => r({ devices: mockDevices, account_limits: mockLimits }), 100)));
     fireEvent.click(screen.getByTestId('edit-d1'));
     expect(screen.getByTestId('edit-modal')).toBeInTheDocument();
   });
@@ -270,13 +268,15 @@ describe('Devices page', () => {
     await waitFor(() => expect(screen.getByText('Gagal memuat daftar perangkat.')).toBeInTheDocument());
   });
 
-  it('shows refresh toast on error during refresh', async () => {
+  it('shows refresh toast on error during background refresh', async () => {
     vi.mocked(fetchDevices).mockResolvedValueOnce(mockDeviceResponse);
     renderDevices();
     await waitFor(() => screen.getByTestId('device-card-d1'));
 
-    vi.mocked(fetchDevices).mockRejectedValueOnce({ message: 'Network fail' });
-    fireEvent.click(screen.getByTestId('edit-d1'));
-    expect(screen.getByTestId('edit-modal')).toBeInTheDocument();
+    vi.mocked(fetchDevices).mockRejectedValueOnce({ message: 'Gagal refresh' });
+    fireEvent.click(screen.getByTestId('delete-d1'));
+    fireEvent.click(screen.getByTestId('confirm-delete-btn'));
+    await vi.waitFor(() => expect(deleteDevice).toHaveBeenCalled());
+    expect(addToast).toHaveBeenCalledWith({ type: 'error', message: 'Gagal menghapus perangkat.' });
   });
 });

@@ -1,5 +1,5 @@
 function SkeletonBar({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded bg-[#eef0f4] ${className ?? ''}`} />;
+  return <div className={`animate-pulse rounded bg-bg-tag ${className ?? ''}`} />;
 }
 
 export default function DashboardSkeleton() {
@@ -12,7 +12,7 @@ export default function DashboardSkeleton() {
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-4 md:p-5">
+          <div key={i} className="rounded-xl border border-[rgba(193,198,214,0.2)] bg-bg-card p-4 md:p-5">
             <div className="flex items-start gap-3 md:gap-4">
               <SkeletonBar className="h-9 w-9 shrink-0 rounded-lg md:h-10 md:w-10" />
               <div className="min-w-0 flex-1 text-right">
@@ -27,12 +27,12 @@ export default function DashboardSkeleton() {
 
       <section className="flex flex-col gap-5 md:grid md:grid-cols-3 md:gap-6">
         <div className="flex flex-col gap-5 md:col-span-2 md:gap-6">
-          <div className="rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
+          <div className="rounded-xl border border-[rgba(193,198,214,0.2)] bg-bg-card p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
             <SkeletonBar className="mb-3 h-5 w-32" />
             <SkeletonBar className="h-[200px] w-full rounded-lg" />
           </div>
           <div className="flex flex-col gap-4 md:flex-row md:gap-4">
-            <div className="flex-1 rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
+            <div className="flex-1 rounded-xl border border-[rgba(193,198,214,0.2)] bg-bg-card p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
               <SkeletonBar className="mb-4 h-4 w-36" />
               {[1, 2, 3].map((j) => (
                 <div key={j} className="mb-3 flex items-center gap-2">
@@ -41,7 +41,7 @@ export default function DashboardSkeleton() {
                 </div>
               ))}
             </div>
-            <div className="flex-1 rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
+            <div className="flex-1 rounded-xl border border-[rgba(193,198,214,0.2)] bg-bg-card p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
               <SkeletonBar className="mb-4 h-4 w-36" />
               {[1, 2, 3].map((j) => (
                 <div key={j} className="mb-3 flex items-center gap-2">

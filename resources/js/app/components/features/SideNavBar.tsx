@@ -23,8 +23,8 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
       <div className="px-5 py-5 lg:px-6 lg:py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldIconSmall />
-            <span className="text-[22px] font-bold text-primary lg:text-2xl">
+            <ShieldIconSmall className="text-primary" />
+            <span className="font-serif text-[22px] font-bold text-primary lg:text-2xl">
               ParentShield
             </span>
           </div>
@@ -32,7 +32,7 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
             <CloseIcon />
           </button>
         </div>
-        <p className="text-[12px] text-text-secondary">
+        <p className="font-serif text-[12px] text-text-secondary">
           Dashboard Keluarga
         </p>
       </div>

@@ -27,12 +27,13 @@ app/
 │   └── AdGuardApiException.php    # Domain exception AdGuard
 ├── Http/
 │   ├── Controllers/Api/           # AuthController, DashboardController,
-│   │                              # SetupApiKeyController
+│   │                              # SetupApiKeyController, DeviceController
 │   ├── Middleware/
 │   │   ├── AddCorrelationId.php   # X-Correlation-Id header
 │   │   └── CheckApiKey.php        # Middleware verifikasi API key
 │   └── Requests/
-│       ├── Api/                   # SetupApiKey, UpdateSafebrowsing
+│       ├── Api/                   # SetupApiKey, UpdateSafebrowsing,
+│       │                         # UpdateParentalControl, StoreDevice, UpdateDevice
 │       └── Auth/                  # Register, Login, ForgotPassword requests
 ├── Models/User.php                # + adguard_api_key_encrypted, verified_at
 └── Services/
@@ -181,6 +182,8 @@ Defined in `resources/css/app.css` via Tailwind v4 `@theme`, available as utilit
 | `inactive` | `#dfe3e8` | Toggle OFF, dot offline |
 | `border` | `#c1c6d6` | Border input, separator |
 | `chart-blue` | `#adc7ff` | Bar chart secondary |
+| `warning-bg` | `#ffedd5` | Background warning card |
+| `warning-text` | `#c2410c` | Text warning card |
 
 ### Tipografi
 
@@ -191,7 +194,7 @@ Defined in `resources/css/app.css` via Tailwind v4 `@theme`, available as utilit
 | Body / label | 14px | `text-sm` | Input, placeholder, subtitle, button |
 | Caption | 12px | `text-xs` | Helper text, footer |
 
-Font: **Roboto** (UI), **Liberation Serif** (brand name).
+Font: **Roboto** (UI via `font-sans`), **Liberation Serif** (brand name via `font-serif` token).
 
 Font body **wajib 14px** — jangan gunakan `text-base` (16px) untuk body.
 
@@ -215,15 +218,16 @@ PROTECTED:    /dashboard, /activity, /devices, /settings
 ## Testing
 
 ```bash
-php artisan test          # PHPUnit (36 tests)
-npx vitest run            # Vitest (95 tests)
+php artisan test          # PHPUnit (43 tests)
+npx vitest run            # Vitest (99 tests)
 npm run build             # Vite build check
 ```
 
-Backend tests mencakup: auth flow, API response contract, dashboard access control,
-setup API key validation, exception handling.
+Backend tests mencakup: auth flow, API response contract, dashboard access control & data retrieval,
+safebrowsing/parental control updates, cache lock behavior, API key revocation, setup API key validation, exception handling.
 
 Frontend tests mencakup: component rendering, form states (loading/error/success),
-auth context, route guards, API client interceptors, hooks (useDashboard),
-all pages (Dashboard, Devices, Login, Register, ForgotPassword, SetupApiKey),
+auth context (login/register/logout, refreshUser, checkAuth all-error cleanup),
+route guards, per-path navigation debounce, API client interceptors (auth retry, redirect),
+hooks (useDashboard), all pages (Dashboard, Devices, Login, Register, ForgotPassword, SetupApiKey),
 shared components (EmptyState, InlineError, Loading).

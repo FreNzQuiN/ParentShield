@@ -48,7 +48,7 @@ function LogoutHandler() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    onLogout().then(() => navigate('/login', { replace: true }));
+    onLogout().finally(() => navigate('/login', { replace: true }));
   }, [onLogout, navigate]);
 
   return null;

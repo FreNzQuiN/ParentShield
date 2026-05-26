@@ -82,7 +82,7 @@ export default function Dashboard() {
             icon={<DashboardDeviceIcon />}
             label="Device"
             value={data?.stats.active_devices ?? 0}
-            valueColor={data?.stats.suspicious_devices ? '#c2410c' : 'var(--color-success)'}
+            valueColor={data?.stats.suspicious_devices ? 'var(--color-warning-text)' : 'var(--color-success)'}
             badge={data?.stats.suspicious_devices ? `${data.stats.suspicious_devices} Mencurigakan` : undefined}
             badgeVariant={data?.stats.suspicious_devices ? 'warning' : undefined}
             caption={

@@ -204,5 +204,28 @@ describe('API Client interceptors', () => {
       await responseErrorHandler!(error).catch(() => {});
       expect(navSpy).toHaveBeenCalledTimes(2);
     });
+
+    it('dispatches different redirect paths within throttle window', async () => {
+      await import('../../../app/services/api/client');
+
+      const navSpy = vi.fn();
+      window.addEventListener('app:navigate', navSpy);
+
+      const adguardError = {
+        response: { status: 401, data: { code: 'ADGUARD_UNAUTHORIZED' } },
+        config: { url: '/dashboard' },
+      };
+
+      const sessionError = {
+        response: { status: 401, data: { code: 'SESSION_EXPIRED' } },
+        config: { url: '/settings' },
+      };
+
+      await responseErrorHandler!(adguardError).catch(() => {});
+      expect(navSpy).toHaveBeenCalledTimes(1);
+
+      await responseErrorHandler!(sessionError).catch(() => {});
+      expect(navSpy).toHaveBeenCalledTimes(2);
+    });
   });
 });

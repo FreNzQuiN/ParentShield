@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, type ReactNode } from 'react';
 import { AuthContext } from './AuthContext';
 import { getStoredToken, setStoredToken, clearStoredToken } from '../utils/storage';
 import type { User } from '../types/auth';
+import type { ApiErrorResponse } from '../types/api';
 import * as authApi from '../services/api/auth';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -28,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthToken(token);
       setUser(userData);
     } catch (err: unknown) {
-      const e = err as { message?: string };
+      const e = err as ApiErrorResponse;
       setLoginError(e?.message ?? 'Login gagal. Silakan coba lagi.');
       throw err;
     } finally {
@@ -51,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthToken(token);
       setUser(userData);
     } catch (err: unknown) {
-      const e = err as { message?: string };
+      const e = err as ApiErrorResponse;
       setLoginError(e?.message ?? 'Registrasi gagal. Silakan coba lagi.');
       throw err;
     } finally {
@@ -69,8 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [removeAuthToken]);
 
   const refreshUser = useCallback(async () => {
-    const { user: userData } = await authApi.me();
-    setUser(userData);
+    try {
+      const { user: userData } = await authApi.me();
+      setUser(userData);
+    } catch {
+      clearStoredToken();
+      setUser(null);
+    }
   }, []);
 
   const clearError = useCallback(() => setLoginError(null), []);
@@ -79,12 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { user: userData } = await authApi.me();
       setUser(userData);
-    } catch (err: unknown) {
-      const e = err as { code?: string };
-      if (e?.code === 'SESSION_EXPIRED' || e?.code === 'UNAUTHENTICATED') {
-        clearStoredToken();
-        setUser(null);
-      }
+    } catch {
+      clearStoredToken();
+      setUser(null);
     }
   }, []);
 

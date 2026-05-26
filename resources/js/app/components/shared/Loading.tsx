@@ -14,10 +14,10 @@ export default function Loading({ message = 'Memuat...', size = 'md', className 
   return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`} role="status">
       <div
-        className={`${sizeClasses[size]} animate-spin rounded-full border-2 border-neutral-200 border-t-blue-600`}
+        className={`${sizeClasses[size]} animate-spin rounded-full border-2 border-border border-t-primary`}
         aria-hidden="true"
       />
-      <span className="text-sm text-neutral-500">{message}</span>
+      <span className="text-sm text-text-secondary">{message}</span>
     </div>
   );
 }

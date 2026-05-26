@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreDeviceRequest;
+use App\Http\Requests\Api\UpdateDeviceRequest;
 use App\Services\AdGuardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -66,7 +68,7 @@ class DeviceController extends Controller
         }
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreDeviceRequest $request): JsonResponse
     {
         $user = $request->user();
         $apiKey = $user->getDecryptedAdguardKey();
@@ -75,10 +77,7 @@ class DeviceController extends Controller
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:64',
-            'device_type' => 'required|string|in:ANDROID,IOS,WINDOWS',
-        ]);
+        $validated = $request->validated();
 
         $this->adGuard->setApiKey($apiKey);
 
@@ -157,7 +156,7 @@ class DeviceController extends Controller
         }
     }
 
-    public function update(Request $request, string $deviceId): JsonResponse
+    public function update(UpdateDeviceRequest $request, string $deviceId): JsonResponse
     {
         $user = $request->user();
         $apiKey = $user->getDecryptedAdguardKey();
@@ -166,9 +165,7 @@ class DeviceController extends Controller
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:64',
-        ]);
+        $validated = $request->validated();
 
         $this->adGuard->setApiKey($apiKey);
 
@@ -247,11 +244,7 @@ class DeviceController extends Controller
         $apiKey = $user->getDecryptedAdguardKey();
 
         if (!$apiKey) {
-            return response()->json([
-                'success' => false,
-                'code' => 'API_KEY_REQUIRED',
-                'message' => 'Kunci API tidak ditemukan.',
-            ], 403);
+            return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
 
         $this->adGuard->setApiKey($apiKey);
@@ -260,11 +253,7 @@ class DeviceController extends Controller
             $device = $this->adGuard->getDevice($deviceId);
 
             if (!$device) {
-                return response()->json([
-                    'success' => false,
-                    'code' => 'DEVICE_NOT_FOUND',
-                    'message' => 'Perangkat tidak ditemukan.',
-                ], 404);
+                return $this->error('Perangkat tidak ditemukan.', 'DEVICE_NOT_FOUND', 404);
             }
 
             $adguardResponse = $this->adGuard->getMobileConfigRaw($deviceId);
@@ -281,11 +270,7 @@ class DeviceController extends Controller
                 $user->clearAdguardApiKey();
             }
 
-            return response()->json([
-                'success' => false,
-                'code' => $e->getErrorCode(),
-                'message' => $e->getMessage(),
-            ], $e->getStatusCode());
+            return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
         }
     }
 }

@@ -20,7 +20,6 @@ export {
   DeviceIcon,
   SettingsIcon,
   LogoutIcon,
-  ChevronRightIcon,
   PlusIcon,
   ShieldCheckIcon,
   GlobeIcon,

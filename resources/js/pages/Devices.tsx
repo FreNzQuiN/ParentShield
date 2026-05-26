@@ -194,7 +194,7 @@ export default function Devices() {
           <p className="text-sm text-text-muted">Tambahkan perangkat untuk mulai memantau aktivitas internet anak.</p>
           <button
             onClick={handleOpenSetup}
-            className="rounded-lg bg-primary px-6 py-3 text-sm tracking-[0.5px] text-white transition-colors hover:bg-primary-hover"
+            className="rounded-full bg-primary px-6 py-3 text-sm tracking-[0.5px] text-white transition-colors hover:bg-primary-hover"
           >
             Tambah Perangkat
           </button>

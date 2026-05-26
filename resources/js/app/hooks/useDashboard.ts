@@ -153,13 +153,16 @@ export function useDashboard(): UseDashboardResult {
               },
             };
           }
-          return {
-            ...prev,
-            parental_control: {
-              ...prev.parental_control,
-              [key as string]: !(value as boolean),
-            },
-          };
+          if (typeof value === 'boolean') {
+            return {
+              ...prev,
+              parental_control: {
+                ...prev.parental_control,
+                [key]: !value,
+              },
+            };
+          }
+          return prev;
         });
         throw err;
       }
