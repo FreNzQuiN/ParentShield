@@ -65,7 +65,7 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
 
       <div className="px-3 pb-4 lg:px-4">
         <button
-          onClick={() => { onClose(); onLogout(); }}
+          onClick={() => { onClose(); onLogout().catch(() => console.warn('Logout gagal, state lokal telah dibersihkan.')); }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-text-secondary transition-colors hover:bg-primary/5 lg:px-4 lg:py-3"
         >
           <LogoutIcon />

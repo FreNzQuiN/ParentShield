@@ -73,9 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { user: userData } = await authApi.me();
       setUser(userData);
-    } catch {
-      clearStoredToken();
-      setUser(null);
+    } catch (err) {
+      const e = err as ApiErrorResponse;
+      if (e?.code === 'SESSION_EXPIRED' || e?.code === 'ADGUARD_UNAUTHORIZED' || e?.code === 'API_KEY_REQUIRED') {
+        clearStoredToken();
+        setUser(null);
+      }
     }
   }, []);
 

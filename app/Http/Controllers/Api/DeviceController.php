@@ -65,6 +65,13 @@ class DeviceController extends Controller
             }
 
             return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
+        } catch (\Throwable $e) {
+            Log::error('Device list unexpected error', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->error('Terjadi kesalahan yang tidak terduga.', 'INTERNAL_ERROR', 500);
         }
     }
 
@@ -114,6 +121,13 @@ class DeviceController extends Controller
             }
 
             return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
+        } catch (\Throwable $e) {
+            Log::error('Device create unexpected error', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->error('Terjadi kesalahan yang tidak terduga.', 'INTERNAL_ERROR', 500);
         }
     }
 
@@ -153,6 +167,13 @@ class DeviceController extends Controller
             }
 
             return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
+        } catch (\Throwable $e) {
+            Log::error('Device detail unexpected error', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->error('Terjadi kesalahan yang tidak terduga.', 'INTERNAL_ERROR', 500);
         }
     }
 
@@ -180,19 +201,11 @@ class DeviceController extends Controller
 
             $this->adGuard->forgetDashboardCache();
 
-            $updated = ['id' => $deviceId, 'name' => $validated['name'], 'device_type' => 'unknown'];
-
-            try {
-                $device = $this->adGuard->getDevice($deviceId);
-                $updated['name'] = $device['name'] ?? $validated['name'];
-                $updated['device_type'] = $device['device_type'] ?? 'unknown';
-            } catch (\App\Exceptions\AdGuardApiException $e) {
-                throw $e;
-            } catch (\Throwable $e) {
-                Log::warning('Device re-fetch after update failed', ['device_id' => $deviceId]);
-            }
-
-            return $this->success($updated, 'Nama perangkat berhasil diperbarui.');
+            return $this->success([
+                'id' => $deviceId,
+                'name' => $validated['name'],
+                'device_type' => 'unknown',
+            ], 'Nama perangkat berhasil diperbarui.');
         } catch (\App\Exceptions\AdGuardApiException $e) {
             Log::warning('Device update error', ['user_id' => $user->id, 'code' => $e->getErrorCode()]);
 
@@ -202,6 +215,13 @@ class DeviceController extends Controller
             }
 
             return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
+        } catch (\Throwable $e) {
+            Log::error('Device update unexpected error', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->error('Terjadi kesalahan yang tidak terduga.', 'INTERNAL_ERROR', 500);
         }
     }
 
@@ -235,6 +255,13 @@ class DeviceController extends Controller
             }
 
             return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
+        } catch (\Throwable $e) {
+            Log::error('Device delete unexpected error', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->error('Terjadi kesalahan yang tidak terduga.', 'INTERNAL_ERROR', 500);
         }
     }
 
@@ -256,10 +283,10 @@ class DeviceController extends Controller
                 return $this->error('Perangkat tidak ditemukan.', 'DEVICE_NOT_FOUND', 404);
             }
 
-            $adguardResponse = $this->adGuard->getMobileConfigRaw($deviceId);
+            $mobileConfig = $this->adGuard->getMobileConfigRaw($deviceId);
             $deviceName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $device['name']);
 
-            return response($adguardResponse->body(), 200, [
+            return response($mobileConfig, 200, [
                 'Content-Type' => 'application/x-apple-aspen-config',
                 'Content-Disposition' => 'attachment; filename="adguard-dns-' . $deviceName . '.mobileconfig"',
             ]);
@@ -271,6 +298,13 @@ class DeviceController extends Controller
             }
 
             return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
+        } catch (\Throwable $e) {
+            Log::error('Device mobileconfig unexpected error', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->error('Terjadi kesalahan saat mengunduh konfigurasi.', 'INTERNAL_ERROR', 500);
         }
     }
 }

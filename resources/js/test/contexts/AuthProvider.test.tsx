@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '../../app/contexts/AuthProvider';
 import { AuthContext } from '../../app/contexts/AuthContext';
@@ -133,10 +133,10 @@ describe('AuthProvider', () => {
     expect(localStorage.getItem('auth_token')).toBeNull();
   });
 
-  it('refreshUser clears state on API failure', async () => {
+  it('refreshUser preserves state on non-auth errors', async () => {
     vi.mocked(authApi.me)
       .mockResolvedValueOnce({ user: { id: 1, name: 'Test', email: 'a@b.com', has_api_key: true } })
-      .mockRejectedValueOnce({ message: 'Gagal' });
+      .mockRejectedValueOnce({ success: false, code: 'NETWORK_ERROR', message: 'Gagal' });
     localStorage.setItem('auth_token', 'fake-token');
 
     renderAuthProvider();
@@ -148,12 +148,12 @@ describe('AuthProvider', () => {
     fireEvent.click(screen.getByTestId('refresh-btn'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('user').textContent).toBe('none');
+      expect(screen.getByTestId('user').textContent).toBe('a@b.com|true');
     });
-    expect(localStorage.getItem('auth_token')).toBeNull();
+    expect(localStorage.getItem('auth_token')).toBe('fake-token');
   });
 
-  it('checkAuth clears state on non-auth errors (e.g. NETWORK_ERROR)', async () => {
+  it('checkAuth clears token on any error (including NETWORK_ERROR)', async () => {
     vi.mocked(authApi.me).mockRejectedValue({ success: false, code: 'NETWORK_ERROR', message: 'Gagal' });
     localStorage.setItem('auth_token', 'fake-token');
 

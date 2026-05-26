@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Exceptions\AdGuardApiException;
-use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
@@ -88,7 +87,7 @@ class AdGuardService
         $timeTo = $now->valueOf();
 
         $responses = $this->sendMany([
-            'timeStats'      => ['method' => 'get', 'endpoint' => '/stats/time',       'data' => ['time_from_millis' => $timeFrom, 'time_to_millis' => $timeTo]],
+            'timeStats'      => ['method' => 'get', 'endpoint' => '/stats/time',       'data' => ['time_from_millis' => $timeFrom, 'time_to_millis' => $timeTo, 'tz' => config('app.timezone')]],
             'categoryStats'  => ['method' => 'get', 'endpoint' => '/stats/categories',  'data' => ['time_from_millis' => $timeFrom, 'time_to_millis' => $timeTo]],
             'devices'        => ['method' => 'get', 'endpoint' => '/devices',           'data' => []],
             'limits'         => ['method' => 'get', 'endpoint' => '/account/limits',    'data' => []],
@@ -347,15 +346,7 @@ class AdGuardService
     public function getDefaultDnsServer(): ?array
     {
         $dnsServers = $this->safeGet(fn() => $this->getDnsServers(), []);
-        if (empty($dnsServers)) {
-            return null;
-        }
-        foreach ($dnsServers as $server) {
-            if (!empty($server['default'])) {
-                return $server;
-            }
-        }
-        return $dnsServers[0];
+        return $this->findDefaultDnsServer($dnsServers);
     }
 
     public function getDnsServer(string $dnsServerId): ?array
@@ -412,27 +403,10 @@ class AdGuardService
         return $server['id'] ?? null;
     }
 
-    public function getMobileConfigRaw(string $deviceId): \Illuminate\Http\Client\Response
+    public function getMobileConfigRaw(string $deviceId): string
     {
-        $url = $this->baseUrl . "/devices/{$deviceId}/doh.mobileconfig";
-
-        if (!$this->apiKey) {
-            throw new AdGuardApiException('Kunci API tidak ditemukan.', 'API_KEY_MISSING', 401);
-        }
-
-        try {
-            $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'Authorization' => 'ApiKey ' . $this->apiKey,
-            ])->timeout(15)->get($url);
-
-            if ($response->failed()) {
-                $this->handleError($response, $url);
-            }
-
-            return $response;
-        } catch (ConnectionException $e) {
-            $this->handleConnectionException();
-        }
+        $response = $this->send('get', "/devices/{$deviceId}/doh.mobileconfig");
+        return $response->body();
     }
 
     public function getDeviceStats(int $timeFrom, int $timeTo): array
@@ -449,6 +423,7 @@ class AdGuardService
         $response = $this->get('/stats/time', [
             'time_from_millis' => $timeFrom,
             'time_to_millis' => $timeTo,
+            'tz' => config('app.timezone'),
         ]);
         $data = $response->json();
         return is_array($data) ? $data : null;
@@ -510,6 +485,8 @@ class AdGuardService
 
         Log::debug("AdGuard API {$method}", ['url' => $url, 'data' => $data]);
 
+        $response = null;
+
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'ApiKey ' . $this->apiKey,
@@ -517,6 +494,13 @@ class AdGuardService
             ])->timeout(15)->{$method}($url, $data);
         } catch (ConnectionException $e) {
             $this->handleConnectionException();
+        } catch (\Throwable $e) {
+            throw new AdGuardApiException(
+                'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
+                'ADGUARD_CONNECTION_ERROR',
+                503,
+                $e
+            );
         }
 
         if ($response->failed()) {
@@ -560,10 +544,12 @@ class AdGuardService
                             if ($e->getErrorCode() === 'ADGUARD_UNAUTHORIZED') {
                                 throw $e;
                             }
+                            Log::warning('AdGuard pool request failed', ['key' => $key, 'error_code' => $e->getErrorCode()]);
                             $responses[$key] = null;
                         }
                     }
                 } else {
+                    Log::warning('AdGuard pool request returned non-response', ['key' => $key, 'type' => gettype($response)]);
                     $responses[$key] = null;
                 }
             }
@@ -577,7 +563,8 @@ class AdGuardService
             throw new AdGuardApiException(
                 'Layanan sedang sibuk, silakan coba beberapa saat lagi.',
                 'ADGUARD_API_ERROR',
-                502
+                502,
+                $e
             );
         }
     }

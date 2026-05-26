@@ -81,7 +81,7 @@ describe('useDashboard', () => {
 
       await waitFor(() => expect(result.current.isRefreshing).toBe(false));
       expect(result.current.data).toEqual(mockDashboardData);
-      expect(result.current.error).toBeNull();
+      expect(result.current.error).toBe('Gagal memuat ulang data. Menampilkan data sebelumnya.');
     });
   });
 

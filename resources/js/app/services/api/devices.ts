@@ -32,12 +32,15 @@ export async function downloadMobileConfig(id: string, deviceName: string): Prom
   });
 
   const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  const safeName = deviceName.replace(/[^a-zA-Z0-9_-]/g, '_');
-  link.setAttribute('download', `adguard-dns-${safeName}.mobileconfig`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
+  try {
+    const link = document.createElement('a');
+    link.href = url;
+    const safeName = deviceName.replace(/[^a-zA-Z0-9_-]/g, '_');
+    link.setAttribute('download', `adguard-dns-${safeName}.mobileconfig`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } finally {
+    window.URL.revokeObjectURL(url);
+  }
 }

@@ -45,6 +45,8 @@ class UpdateParentalControlRequest extends FormRequest
                     if ($key === 'service_group' && (empty($value['group']) || !is_string($value['group']))) {
                         $validator->errors()->add('value.group', 'Grup layanan tidak valid.');
                     }
+                } elseif (!is_bool($value) && !in_array($value, [0, 1, '0', '1', 'true', 'false'], true)) {
+                    $validator->errors()->add('value', 'Nilai harus berupa boolean (true/false).');
                 }
             },
         ];

@@ -5,6 +5,7 @@ import AndroidSetupInstructions from './AndroidSetupInstructions';
 import IosSetupInstructions from './IosSetupInstructions';
 import WindowsSetupInstructions from './WindowsSetupInstructions';
 import { createDevice } from '../../../services/api/devices';
+import type { ApiErrorResponse } from '../../../types/api';
 import type { DeviceDetail, DnsAddresses, SetupDeviceType } from '../../../types/device';
 
 interface SetupDeviceModalProps {
@@ -59,8 +60,8 @@ export default function SetupDeviceModal({
       setStep(2);
       onSuccess();
     } catch (err: unknown) {
-      const resp = err as { message?: string };
-      setError(resp.message || 'Gagal membuat perangkat. Silakan coba lagi.');
+      const resp = err as ApiErrorResponse;
+      setError(resp.errors ? Object.values(resp.errors).flat().join(', ') : resp.message || 'Gagal membuat perangkat. Silakan coba lagi.');
     } finally {
       setLoading(false);
     }

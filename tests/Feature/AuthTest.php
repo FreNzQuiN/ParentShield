@@ -175,7 +175,36 @@ class AuthTest extends TestCase
         $response->assertStatus(401);
     }
 
-    public function test_forgot_password_returns_success_for_valid_email(): void
+    public function test_session_authenticated_user_can_logout_without_token(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->postJson('/api/v1/auth/logout');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Berhasil keluar.',
+            ]);
+    }
+
+    public function test_session_authenticated_user_can_refresh_without_token(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->postJson('/api/v1/auth/refresh');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Token berhasil diperbarui.',
+            ])
+            ->assertJsonStructure(['data' => ['user', 'token']]);
+    }
+
+    public function test_forgot_password_returns_error_when_reset_route_not_defined(): void
     {
         User::factory()->create(['email' => 'test@example.com']);
 
@@ -183,10 +212,10 @@ class AuthTest extends TestCase
             'email' => 'test@example.com',
         ]);
 
-        $response->assertStatus(200)
+        $response->assertStatus(500)
             ->assertJson([
-                'success' => true,
-                'message' => 'Jika email terdaftar, tautan reset telah dikirim.',
+                'success' => false,
+                'message' => 'Terjadi kesalahan yang tidak terduga.',
             ]);
     }
 

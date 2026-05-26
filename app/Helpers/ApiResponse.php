@@ -13,9 +13,7 @@ trait ApiResponse
             'message' => $message,
         ];
 
-        if ($data !== null) {
-            $body['data'] = $data;
-        }
+        $body['data'] = $data;
 
         return response()->json($body, $status);
     }

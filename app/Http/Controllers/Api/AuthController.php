@@ -44,7 +44,10 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $token = $request->user()->currentAccessToken();
+        if ($token && method_exists($token, 'delete')) {
+            $token->delete();
+        }
 
         return $this->success(null, 'Berhasil keluar.');
     }
@@ -61,7 +64,10 @@ class AuthController extends Controller
     public function refresh(Request $request): JsonResponse
     {
         $user = $request->user();
-        $user->currentAccessToken()->delete();
+        $token = $user->currentAccessToken();
+        if ($token && method_exists($token, 'delete')) {
+            $token->delete();
+        }
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->success([
@@ -72,18 +78,11 @@ class AuthController extends Controller
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
-        try {
-            $status = Password::sendResetLink($request->only('email'));
+        $status = Password::sendResetLink($request->only('email'));
 
-            if ($status !== Password::RESET_LINK_SENT) {
-                Log::info('Password reset requested for non-existent or invalid email', [
-                    'email' => $request->input('email'),
-                ]);
-            }
-        } catch (\Throwable $e) {
-            Log::error('Password reset failed unexpectedly', [
+        if ($status !== Password::RESET_LINK_SENT) {
+            Log::info('Password reset requested for non-existent or invalid email', [
                 'email' => $request->input('email'),
-                'error' => $e->getMessage(),
             ]);
         }
 

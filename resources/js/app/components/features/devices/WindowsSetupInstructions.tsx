@@ -27,6 +27,8 @@ export default function WindowsSetupInstructions({ dnsAddresses }: WindowsSetupI
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text).then(() => {
       addToast({ type: 'success', message: `${label} tersalin ke clipboard.` });
+    }).catch(() => {
+      addToast({ type: 'error', message: `Gagal menyalin ${label}.` });
     });
   };
 
@@ -94,7 +96,7 @@ function Windows11Content() {
       <CopyField
         label="IP DNS"
         value={WINDOWS_IP}
-        onCopy={() => navigator.clipboard.writeText(WINDOWS_IP).then(() => addToast({ type: 'success', message: 'IP DNS tersalin ke clipboard.' }))}
+        onCopy={() => navigator.clipboard.writeText(WINDOWS_IP).then(() => addToast({ type: 'success', message: 'IP DNS tersalin ke clipboard.' })).catch(() => addToast({ type: 'error', message: 'Gagal menyalin IP DNS.' }))}
       />
 
       <div className="flex flex-col gap-3">

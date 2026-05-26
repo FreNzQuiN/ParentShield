@@ -14,6 +14,8 @@ export default function AndroidSetupInstructions({ dnsAddresses }: AndroidSetupI
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text).then(() => {
       addToast({ type: 'success', message: `${label} tersalin ke clipboard.` });
+    }).catch(() => {
+      addToast({ type: 'error', message: `Gagal menyalin ${label}.` });
     });
   };
 

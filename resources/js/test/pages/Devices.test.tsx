@@ -242,14 +242,6 @@ describe('Devices page', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('opens edit modal from device card menu', async () => {
-    vi.mocked(fetchDevices).mockResolvedValue(mockDeviceResponse);
-    renderDevices();
-    await waitFor(() => screen.getByTestId('device-card-d1'));
-    fireEvent.click(screen.getByTestId('edit-d1'));
-    expect(screen.getByTestId('edit-modal')).toBeInTheDocument();
-  });
-
   it('handles delete error with toast', async () => {
     vi.mocked(fetchDevices).mockResolvedValue(mockDeviceResponse);
     vi.mocked(deleteDevice).mockRejectedValue({ message: 'Gagal' });

@@ -63,6 +63,7 @@ class User extends Authenticatable
     public function getHasApiKeyAttribute(): bool
     {
         return $this->adguard_api_key_verified_at !== null
-            && $this->adguard_api_key_encrypted !== null;
+            && $this->adguard_api_key_encrypted !== null
+            && $this->getDecryptedAdguardKey() !== null;
     }
 }

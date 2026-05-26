@@ -34,3 +34,8 @@ export async function me(): Promise<MeData> {
 export async function forgotPassword(email: string): Promise<void> {
   await api.post('/auth/forgot-password', { email });
 }
+
+export async function refresh(): Promise<AuthData> {
+  const { data } = await api.post<ApiSuccessResponse<AuthData>>('/auth/refresh');
+  return data.data;
+}

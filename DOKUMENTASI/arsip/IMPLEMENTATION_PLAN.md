@@ -22,7 +22,7 @@ Dokumen ini adalah rencana implementasi final untuk membangun ParentShield secar
 
 ## 2) Referensi Sumber (Wajib)
 
-- **Integrasi AdGuard API:** `DOKUMENTASI/DOCUMENTATION.json`
+- **Integrasi AdGuard API:** `DOKUMENTASI/ADGUARD_DNS_API.json`
   - Auth header: `components.securitySchemes.ApiKey`
   - Create device: `paths./oapi/v1/devices.post` → schema `DeviceCreate`
   - Device settings: `paths./oapi/v1/devices/{device_id}/settings.put` → schema `DeviceSettingsUpdate`
@@ -40,7 +40,7 @@ Dokumen ini adalah rencana implementasi final untuk membangun ParentShield secar
 - **Popup global add device:** `DOKUMENTASI/ParentShield_UI.md` → section Global Popup
 - **State management wajib:** `DOKUMENTASI/ParentShield_UI.md` → section State Management
 - **Cursor pagination query log:** `DOKUMENTASI/ParentShield_UI.md` → section Activity History;
-  `DOKUMENTASI/DOCUMENTATION.json` → schema `QueryLogResponse.pages[]`, `Page.page_cursor`
+  `DOKUMENTASI/ADGUARD_DNS_API.json` → schema `QueryLogResponse.pages[]`, `Page.page_cursor`
 
 > Catatan scope: **Tidak mengimplementasikan scheduler/jam malam** pada plan ini.
 

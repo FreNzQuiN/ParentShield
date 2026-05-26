@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (isset($_ENV['APP_URL']) && str_starts_with($_ENV['APP_URL'], 'https')) {
+        if (str_starts_with((string) env('APP_URL', 'http://localhost'), 'https')) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
     }

@@ -33,37 +33,40 @@ export function useDashboard(): UseDashboardResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const dataRef = useRef(data);
-  dataRef.current = data;
+  const mountedRef = useRef(true);
 
   const refresh = useCallback(async () => {
+    if (!mountedRef.current) return;
     setLoading(true);
     setError(null);
     try {
       const result = await fetchDashboard();
-      setData(result);
+      if (mountedRef.current) setData(result);
     } catch (err: unknown) {
       const msg =
         err && typeof err === 'object' && 'message' in err
           ? (err as { message: string }).message
           : 'Gagal memuat data dashboard.';
-      setError(msg);
+      if (mountedRef.current) setError(msg);
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   }, []);
 
   const softRefresh = useCallback(async () => {
+    if (!mountedRef.current) return;
     setIsRefreshing(true);
     setError(null);
     try {
       const result = await fetchDashboard();
-      setData(result);
-    } catch {
-      // silent – keep current data
+      if (mountedRef.current) setData(result);
+    } catch (err) {
+      if (mountedRef.current) {
+        console.warn('[useDashboard] softRefresh failed, keeping current data', err);
+        setError('Gagal memuat ulang data. Menampilkan data sebelumnya.');
+      }
     } finally {
-      setIsRefreshing(false);
+      if (mountedRef.current) setIsRefreshing(false);
     }
   }, []);
 
@@ -98,11 +101,6 @@ export function useDashboard(): UseDashboardResult {
       key: keyof ParentalControlSettings | 'blocked_service' | 'service_group',
       value: boolean | { id: string; enabled: boolean } | { group: string; enabled: boolean }
     ) => {
-      const snapshot =
-        key === 'blocked_service' || key === 'service_group'
-          ? [...(dataRef.current?.parental_control?.blocked_services ?? [])]
-          : null;
-
       setData((prev) => {
         if (!prev) return prev;
         if (key === 'blocked_service') {
@@ -142,18 +140,11 @@ export function useDashboard(): UseDashboardResult {
       try {
         await updateParentalControl(key, value);
       } catch (err) {
-        setData((prev) => {
-          if (!prev) return prev;
-          if (snapshot) {
-            return {
-              ...prev,
-              parental_control: {
-                ...prev.parental_control,
-                blocked_services: snapshot,
-              },
-            };
-          }
-          if (typeof value === 'boolean') {
+        if (key === 'blocked_service' || key === 'service_group') {
+          softRefresh();
+        } else if (typeof value === 'boolean') {
+          setData((prev) => {
+            if (!prev) return prev;
             return {
               ...prev,
               parental_control: {
@@ -161,17 +152,20 @@ export function useDashboard(): UseDashboardResult {
                 [key]: !value,
               },
             };
-          }
-          return prev;
-        });
+          });
+        }
         throw err;
       }
     },
-    []
+    [softRefresh]
   );
 
   useEffect(() => {
+    mountedRef.current = true;
     refresh();
+    return () => {
+      mountedRef.current = false;
+    };
   }, [refresh]);
 
   return { data, loading, error, refresh, softRefresh, isRefreshing, toggleSafebrowsing, toggleParentalControl };

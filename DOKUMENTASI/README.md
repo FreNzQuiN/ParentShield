@@ -218,8 +218,8 @@ PROTECTED:    /dashboard, /activity, /devices, /settings
 ## Testing
 
 ```bash
-php artisan test          # PHPUnit (43 tests)
-npx vitest run            # Vitest (99 tests)
+php artisan test          # PHPUnit (38 tests)
+npx vitest run            # Vitest (98 tests)
 npm run build             # Vite build check
 ```
 
