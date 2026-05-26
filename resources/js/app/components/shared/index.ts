@@ -5,6 +5,7 @@ export { default as ToastContainer } from './Toast';
 export { default as EmptyState } from './EmptyState';
 export { default as AuthLayout } from './AuthLayout';
 export { default as FormInput } from './FormInput';
+export { default as SettingsCard } from './SettingsCard';
 
 export {
   ShieldIcon,

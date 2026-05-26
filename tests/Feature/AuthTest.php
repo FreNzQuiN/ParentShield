@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -235,5 +236,127 @@ class AuthTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJson(['success' => false, 'code' => 'VALIDATION_ERROR']);
+    }
+
+    public function test_authenticated_user_can_update_profile(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->putJson('/api/v1/auth/profile', [
+                'name' => 'New Name',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Profil berhasil diperbarui.',
+                'data' => [
+                    'user' => [
+                        'name' => 'New Name',
+                    ],
+                ],
+            ])
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => ['user' => ['id', 'name', 'email', 'has_api_key']],
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'New Name',
+        ]);
+    }
+
+    public function test_update_profile_validates_required_fields(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->putJson('/api/v1/auth/profile', []);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+                'code' => 'VALIDATION_ERROR',
+            ])
+            ->assertJsonStructure(['errors' => ['name']]);
+    }
+
+    public function test_unauthenticated_user_cannot_update_profile(): void
+    {
+        $response = $this->putJson('/api/v1/auth/profile', [
+            'name' => 'test',
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    public function test_authenticated_user_can_change_password(): void
+    {
+        $user = User::factory()->create([
+            'password' => bcrypt('oldpassword'),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->putJson('/api/v1/auth/password', [
+                'current_password' => 'oldpassword',
+                'password' => 'newpassword123',
+                'password_confirmation' => 'newpassword123',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Kata sandi berhasil diperbarui.',
+            ]);
+
+        $user->refresh();
+
+        $this->assertTrue(Hash::check('newpassword123', $user->password));
+    }
+
+    public function test_change_password_rejects_wrong_current_password(): void
+    {
+        $user = User::factory()->create([
+            'password' => bcrypt('oldpassword'),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->putJson('/api/v1/auth/password', [
+                'current_password' => 'wrongpassword',
+                'password' => 'newpassword123',
+                'password_confirmation' => 'newpassword123',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+                'code' => 'INVALID_PASSWORD',
+                'message' => 'Kata sandi saat ini tidak sesuai.',
+            ]);
+    }
+
+    public function test_change_password_validates_required_fields(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->putJson('/api/v1/auth/password', []);
+
+        $response->assertStatus(422)
+            ->assertJson(['success' => false, 'code' => 'VALIDATION_ERROR']);
+    }
+
+    public function test_unauthenticated_user_cannot_change_password(): void
+    {
+        $response = $this->putJson('/api/v1/auth/password', [
+            'current_password' => 'oldpassword',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+
+        $response->assertStatus(401);
     }
 }

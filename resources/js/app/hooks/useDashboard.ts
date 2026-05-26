@@ -70,6 +70,26 @@ export function useDashboard(): UseDashboardResult {
     }
   }, []);
 
+  const retryCountRef = useRef(0);
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  function isStaleCache(data: DashboardData): boolean {
+    return data.stats.total_queries === 0 && data.time_series.length === 0 && data.top_activities.length > 0;
+  }
+
+  useEffect(() => {
+    if (!data || retryCountRef.current >= 3 || !isStaleCache(data)) return;
+
+    retryCountRef.current++;
+    pollTimerRef.current = setTimeout(() => {
+      softRefresh();
+    }, 4000);
+
+    return () => {
+      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+    };
+  }, [data, softRefresh]);
+
   const toggleSafebrowsing = useCallback(
     async (key: keyof SafebrowsingSettings, value: boolean) => {
       setData((prev) => {

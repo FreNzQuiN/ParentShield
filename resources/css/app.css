@@ -36,6 +36,7 @@
     --color-primary-hover: #004d9e;
     --color-danger-hover: #a01515;
     --color-error: #ef4444;
+    --shadow-card: 0px 4px 20px -2px rgba(0, 91, 192, 0.15);
 }
 
 @keyframes fadeIn {
