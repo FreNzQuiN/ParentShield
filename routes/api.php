@@ -29,6 +29,8 @@ Route::prefix('v1')->group(function () {
             Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
             Route::get('/me', [\App\Http\Controllers\Api\AuthController::class, 'me']);
             Route::post('/refresh', [\App\Http\Controllers\Api\AuthController::class, 'refresh']);
+            Route::put('/profile', [\App\Http\Controllers\Api\AuthController::class, 'updateProfile']);
+            Route::put('/password', [\App\Http\Controllers\Api\AuthController::class, 'changePassword']);
         });
     });
 

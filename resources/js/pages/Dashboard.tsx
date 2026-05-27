@@ -3,7 +3,7 @@ import { useAuth } from '../app/contexts/AuthContext';
 import { ShieldIconSmall, DashboardQueryIcon, DashboardBlockIcon, DashboardDeviceIcon } from '../app/components/shared/icons';
 import { useDashboard } from '../app/hooks/useDashboard';
 import { StatCard, BarChart, ProgressBarList, KontrolParental, DashboardSkeleton } from '../app/components/features/dashboard';
-import { LoadingOverlay, InlineError } from '../app/components/shared';
+import { LoadingOverlay, InlineError, RefreshBar } from '../app/components/shared';
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -31,7 +31,7 @@ function GreetingHeader({ userName }: { userName: string | undefined }) {
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { data, loading, error, refresh, softRefresh, isRefreshing, toggleParentalControl } = useDashboard();
+  const { data, loading, error, lastRefresh, refresh, isRefreshing, toggleParentalControl } = useDashboard();
 
   const topActivities = useMemo(() =>
     (data?.top_activities ?? []).slice(0, 5).map((a) => ({
@@ -46,6 +46,19 @@ export default function Dashboard() {
       value: s.count,
       percentage: s.percentage,
     })), [data]);
+
+  const deviceCounts = useMemo(() => {
+    const all = data?.devices ?? [];
+    const sixHoursAgo = Date.now() - 6 * 3600000;
+    const active = all.filter((d) => d.is_online).length;
+    const inactive = all.filter((d) => !d.is_online && d.last_seen !== null && d.last_seen < sixHoursAgo).length;
+    return {
+      total: all.length,
+      active,
+      inactive,
+      needsSetup: all.length - active - inactive,
+    };
+  }, [data]);
 
   if (loading && !data) {
     return <DashboardSkeleton />;
@@ -66,6 +79,14 @@ export default function Dashboard() {
       <div className={`flex flex-col gap-5 md:gap-6 ${loading || isRefreshing ? 'pointer-events-none select-none' : ''}`}>
         <GreetingHeader userName={user?.name} />
 
+        <RefreshBar
+          onRefresh={refresh}
+          isRefreshing={isRefreshing}
+          lastRefresh={lastRefresh}
+          disabled={loading}
+          error={error}
+        />
+
         <section className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
           <StatCard
             icon={<DashboardQueryIcon />}
@@ -80,15 +101,25 @@ export default function Dashboard() {
           />
           <StatCard
             icon={<DashboardDeviceIcon />}
-            label="Device"
-            value={data?.stats.active_devices ?? 0}
-            valueColor={data?.stats.suspicious_devices ? 'var(--color-warning-text)' : 'var(--color-success)'}
-            badge={data?.stats.suspicious_devices ? `${data.stats.suspicious_devices} Mencurigakan` : undefined}
-            badgeVariant={data?.stats.suspicious_devices ? 'warning' : undefined}
+            label="Perangkat"
+            value={deviceCounts.total}
+            valueColor={deviceCounts.total === 0 ? 'var(--color-text-muted)' : deviceCounts.needsSetup > 0 || deviceCounts.inactive > 0 ? 'var(--color-warning-text)' : 'var(--color-success)'}
             caption={
-              data?.stats.suspicious_devices
-                ? `${data.stats.suspicious_devices} device tidak aktif >6 jam`
-                : undefined
+              deviceCounts.total > 0 && (deviceCounts.needsSetup > 0 || deviceCounts.inactive > 0)
+                ? (
+                  <span>
+                    {deviceCounts.needsSetup > 0 && (
+                      <span style={{ color: 'var(--color-primary)' }}>{deviceCounts.needsSetup} Perlu Setup</span>
+                    )}
+                    {deviceCounts.needsSetup > 0 && deviceCounts.inactive > 0 && <span>, </span>}
+                    {deviceCounts.inactive > 0 && (
+                      <span style={{ color: 'var(--color-warning-text)' }}>{deviceCounts.inactive} Tidak Aktif</span>
+                    )}
+                  </span>
+                )
+                : deviceCounts.total === 0
+                  ? 'Belum ada perangkat. Selesaikan setup untuk memulai.'
+                  : undefined
             }
           />
         </section>
@@ -100,32 +131,9 @@ export default function Dashboard() {
                 <h2 className="text-[16px] font-medium text-text-primary md:text-xl">
                   Aktivitas Harian
                 </h2>
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-bg-tag px-2 py-0.5 text-[10px] text-text-muted md:px-3 md:py-1 md:text-xs">
-                    24 Jam Terakhir
-                  </span>
-                  <button
-                    onClick={softRefresh}
-                    disabled={isRefreshing}
-                    className="flex size-6 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-bg-tag disabled:opacity-50 md:size-7"
-                    aria-label="Muat ulang"
-                  >
-                    <svg
-                      className={`size-3.5 md:size-4 ${isRefreshing ? 'animate-spin' : ''}`}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 2v6h-6" />
-                      <path d="M3 12a9 9 0 0115.36-6.36L21 8" />
-                      <path d="M3 22v-6h6" />
-                      <path d="M21 12a9 9 0 01-15.36 6.36L3 16" />
-                    </svg>
-                  </button>
-                </div>
+                <span className="rounded-full bg-bg-tag px-2 py-0.5 text-[10px] text-text-muted md:px-3 md:py-1 md:text-xs">
+                  24 Jam Terakhir
+                </span>
               </div>
               <BarChart data={data?.time_series ?? []} />
             </div>

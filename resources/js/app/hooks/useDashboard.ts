@@ -7,6 +7,8 @@ interface UseDashboardResult {
   data: DashboardData | null;
   loading: boolean;
   error: string | null;
+  lastRefresh: number | null;
+  retryCount: number;
   refresh: () => Promise<void>;
   softRefresh: () => Promise<void>;
   isRefreshing: boolean;
@@ -33,15 +35,21 @@ export function useDashboard(): UseDashboardResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<number | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const mountedRef = useRef(true);
 
   const refresh = useCallback(async () => {
     if (!mountedRef.current) return;
     setLoading(true);
     setError(null);
+    setRetryCount(0);
     try {
       const result = await fetchDashboard();
-      if (mountedRef.current) setData(result);
+      if (mountedRef.current) {
+        setData(result);
+        setLastRefresh(Date.now());
+      }
     } catch (err: unknown) {
       const msg =
         err && typeof err === 'object' && 'message' in err
@@ -59,7 +67,10 @@ export function useDashboard(): UseDashboardResult {
     setError(null);
     try {
       const result = await fetchDashboard();
-      if (mountedRef.current) setData(result);
+      if (mountedRef.current) {
+        setData(result);
+        setLastRefresh(Date.now());
+      }
     } catch (err) {
       if (mountedRef.current) {
         console.warn('[useDashboard] softRefresh failed, keeping current data', err);
@@ -69,6 +80,27 @@ export function useDashboard(): UseDashboardResult {
       if (mountedRef.current) setIsRefreshing(false);
     }
   }, []);
+
+  const retryCountRef = useRef(0);
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  function isStaleCache(data: DashboardData): boolean {
+    return data.stats.total_queries === 0 && data.time_series.length === 0 && data.top_activities.length > 0;
+  }
+
+  useEffect(() => {
+    if (!data || retryCountRef.current >= 3 || !isStaleCache(data)) return;
+
+    retryCountRef.current++;
+    setRetryCount(retryCountRef.current);
+    pollTimerRef.current = setTimeout(() => {
+      softRefresh();
+    }, 4000);
+
+    return () => {
+      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+    };
+  }, [data, softRefresh]);
 
   const toggleSafebrowsing = useCallback(
     async (key: keyof SafebrowsingSettings, value: boolean) => {
@@ -168,5 +200,5 @@ export function useDashboard(): UseDashboardResult {
     };
   }, [refresh]);
 
-  return { data, loading, error, refresh, softRefresh, isRefreshing, toggleSafebrowsing, toggleParentalControl };
+  return { data, loading, error, lastRefresh, retryCount, refresh, softRefresh, isRefreshing, toggleSafebrowsing, toggleParentalControl };
 }
