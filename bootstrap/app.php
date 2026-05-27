@@ -17,9 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        apiPrefix: '',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->trustProxies(at: explode(',', env('TRUSTED_PROXIES', '*')));
+        $middleware->trustProxies(at: '*');
+        $middleware->statefulApi();
 
         $middleware->api(prepend: [
             \App\Http\Middleware\AddCorrelationId::class,
@@ -31,11 +33,11 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $e) {
-            return $request->expectsJson() || $request->is('api/*');
+            return $request->expectsJson() || $request->is('api/*') || str_starts_with($request->path(), 'v1/');
         });
 
         $exceptions->render(function (ValidationException $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*') || str_starts_with($request->path(), 'v1/')) {
                 return response()->json([
                     'success' => false,
                     'code' => 'VALIDATION_ERROR',
@@ -46,7 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (AuthenticationException $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*') || str_starts_with($request->path(), 'v1/')) {
                 return response()->json([
                     'success' => false,
                     'code' => 'UNAUTHENTICATED',
@@ -56,7 +58,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (AdGuardApiException $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*') || str_starts_with($request->path(), 'v1/')) {
                 return response()->json([
                     'success' => false,
                     'code' => $e->getErrorCode() ?: 'ADGUARD_ERROR',
@@ -66,7 +68,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (HttpException $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*') || str_starts_with($request->path(), 'v1/')) {
                 $message = match ($e->getStatusCode()) {
                     403 => 'Akses ditolak.',
                     404 => 'Halaman tidak ditemukan.',
@@ -89,7 +91,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (QueryException $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*') || str_starts_with($request->path(), 'v1/')) {
                 $prev = $e->getPrevious();
                 $sqlState = $prev ? $prev->getCode() : null;
                 [$code, $message, $status] = match (true) {
@@ -106,7 +108,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (ConnectionException $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*') || str_starts_with($request->path(), 'v1/')) {
                 return response()->json([
                     'success' => false,
                     'code' => 'SERVICE_UNAVAILABLE',
@@ -116,7 +118,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (Throwable $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
+            if ($request->expectsJson() || $request->is('api/*') || str_starts_with($request->path(), 'v1/')) {
                 $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
 
                 report($e);

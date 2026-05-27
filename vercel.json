@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/index.php": {
+      "runtime": "vercel-php@0.7.4",
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    { "src": "/build/(.*)", "dest": "/build/$1" },
+    { "src": "/(.*)", "dest": "/api/index.php" }
+  ],
+  "buildCommand": "npm ci && npm run build && mkdir -p static/build && cp -r public/build/* static/build/ && rm -rf node_modules",
+  "outputDirectory": "static"
+}
