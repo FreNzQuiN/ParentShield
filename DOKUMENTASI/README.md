@@ -7,7 +7,7 @@ Aplikasi monitoring orang tua untuk aktivitas internet anak, menggunakan API AdG
 | Layer | Teknologi |
 |-------|-----------|
 | Backend | Laravel 12, PHP 8.2+ |
-| Frontend | React 19, TypeScript, Tailwind CSS |
+| Frontend | React 19, TypeScript, Tailwind CSS v4 |
 | Auth | Laravel Sanctum (token) |
 | CI/CD | Vite, PHPUnit, Vitest |
 
@@ -27,7 +27,8 @@ app/
 │   └── AdGuardApiException.php    # Domain exception AdGuard
 ├── Http/
 │   ├── Controllers/Api/           # AuthController, DashboardController,
-│   │                              # SetupApiKeyController, DeviceController
+│   │                              # SetupApiKeyController, DeviceController,
+│   │                              # LogController
 │   ├── Middleware/
 │   │   ├── AddCorrelationId.php   # X-Correlation-Id header
 │   │   └── CheckApiKey.php        # Middleware verifikasi API key
@@ -44,16 +45,18 @@ resources/js/
 ├── app/
 │   ├── components/
 │   │   ├── features/              # SideNavBar, AppLayout, Dashboard/*, devices/*,
-│   │   │                          # parentalControl/*
+│   │   │                          # activity/*, parentalControl/*
 │   │   └── shared/                # AuthLayout, FormInput, Loading, LoadingOverlay,
 │   │                              # InlineError, Toast, EmptyState, Modal, StepList,
 │   │                              # ConfirmDialog, SettingsCard, RefreshBar, icons
-│   ├── constants/                 # serviceGroups (JSON + TS defs)
+│   ├── constants/                 # serviceGroups (JSON + TS defs), time.ts
 │   ├── contexts/                  # AuthContext, ToastContext
-│   ├── hooks/                     # useDashboard, useParentalControlPage, useIsMobile, useDialog
+│   ├── hooks/                     # useDashboard, useActivityLog, useParentalControlPage,
+│   │                              # useIsMobile, useDialog
 │   ├── routes/guards/             # ProtectedRoute, RequireApiKey
-│   ├── services/api/              # client (axios), auth, dashboard, devices, setupApiKey
-│   ├── types/                     # api, auth, dashboard, device
+│   ├── services/api/              # client (axios), auth, dashboard, devices,
+│   │                              # setupApiKey, activity
+│   ├── types/                     # api, auth, dashboard, device, activity
 │   └── utils/                     # error, storage
 └── pages/                         # Login, Register, ForgotPassword, SetupApiKey,
                                    # Dashboard, Activity, Devices, Settings,
@@ -103,6 +106,7 @@ Monitoring (ParentalControl, device/activity/settings bertahap)
 | PUT | `/api/v1/devices/{device}` | sanctum+key | Ubah nama perangkat |
 | DELETE | `/api/v1/devices/{device}` | sanctum+key | Hapus perangkat |
 | GET | `/api/v1/devices/{device}/doh.mobileconfig` | sanctum+key | Unduh mobileconfig |
+| GET | `/api/v1/logs/query` | sanctum+key | Query log aktivitas DNS (filter: time range, devices, statuses, search, limit, cursor) |
 
 ### Response Format
 
@@ -222,13 +226,31 @@ SEMI-PUBLIC:  /setup-api-key (auth required, no API key needed)
 PROTECTED:    /dashboard, /parental-control, /activity, /devices, /settings
 ```
 
-## Halaman Kontrol Parental
+## Halaman Log Aktivitas
+
+Halaman `/activity` menampilkan riwayat permintaan DNS dengan fitur:
+
+| Fitur | Detail |
+|-------|--------|
+| **Filter Periode** | Quick select: 1 Jam, 12 Jam, 24 Jam, 7 Hari; atau Kustom (DateRangePicker dengan kalender, hingga 90 hari ke belakang) |
+| **Filter Status** | Semua, Diizinkan, Diblokir, Dimodifikasi, Tidak Diketahui — dikirim sebagai `statuses[]` ke API |
+| **Filter Perangkat** | Dropdown multi-select perangkat — dikirim sebagai `devices[]` ke API |
+| **Filter Domain** | Input search (debounce 300ms) — dikirim sebagai `search` ke API |
+| **Tabel** | Desktop (table) + Mobile (card). Expandable detail per entri (domain, filtering source, DNS type, category) |
+| **Paginasi** | Client-side slicing dari buffer. Page size: 15/25/50/100 |
+| **Refresh** | RefreshBar dengan last-refresh timestamp |
+| **Truncation Banner** | Muncul jika data melebihi 3 halaman × 1000 item — menampilkan coverage tertua |
+| **Loading Bar** | Inline animated bar di atas tabel saat background refresh |
+
+Server memproses filter (`devices`, `statuses`, `search`) di setiap page request — buffer hanya menyimpan data yang sudah difilter.
+
+## Halaman Kontrol Orang Tua
 
 Halaman `/parental-control` terdiri dari 2 section:
 
 | Section | Posisi | Konten |
 |---------|--------|--------|
-| **Sidebar** | Kiri (sticky) | 4 toggle utama: Kontrol Parental (master), Blokir Konten Dewasa, Pencarian Aman, YouTube Mode Terbatas |
+| **Sidebar** | Kiri (sticky) | 4 toggle utama: Kontrol Orang Tua (master), Blokir Konten Dewasa, Pencarian Aman, YouTube Mode Terbatas |
 | **Pembatasan per Kategori** | Kanan (scrollable) | 9 kategori layanan (Konten Dewasa, Anonymizers, Game, Media Berita, Media Sosial, Keuangan, Mesin Pencari, Toko Online, Video) |
 | **Semua Layanan** | Kanan (scrollable) | Daftar semua layanan web AdGuard dengan pencarian dan toggle individual |
 
@@ -238,11 +260,20 @@ Halaman `/parental-control` terdiri dari 2 section:
 - Dashboard card menampilkan 4 kategori: Anonymizers, Game, Media Sosial, Belanja Online & E-Wallet
 - Service IDs hanya yang valid di registry AdGuard DNS (gunakan `GET /dashboard/services` untuk daftar lengkap)
 
+## Halaman Perangkat Dilindungi
+
+Halaman `/devices` menampilkan daftar perangkat dengan kartu. Setiap kartu menampilkan:
+- Nama, tipe perangkat, status online/Luring, dan waktu terakhir aktif
+- **Warning "Bahaya"** (dengan tooltip hover) muncul di samping status "Luring" jika perangkat offline ≥6 jam (threshold: `LONG_OFFLINE_THRESHOLD_MS`)
+- Tombol: Petunjuk Konfigurasi / Selesaikan Setup, Edit Nama, Hapus
+- Empty slot card untuk sisa kuota perangkat
+- Batas perangkat maksimal sesuai paket akun
+
 ## Testing
 
 ```bash
 php artisan test          # PHPUnit (45 tests)
-npx vitest run            # Vitest (110 tests)
+npx vitest run            # Vitest (129 tests)
 npm run build             # Vite build check
 ```
 
@@ -252,5 +283,5 @@ safebrowsing/parental control updates, web services listing, cache lock behavior
 Frontend tests mencakup: component rendering, form states (loading/error/success),
 auth context (login/register/logout, refreshUser, checkAuth all-error cleanup),
 route guards, per-path navigation debounce, API client interceptors (auth retry, redirect),
-hooks (useDashboard, useParentalControlPage), all pages (Dashboard, ParentalControl, Devices, Login, Register, ForgotPassword, SetupApiKey, Settings),
+hooks (useDashboard, useActivityLog, useParentalControlPage), all pages (Dashboard, ParentalControl, Devices, Login, Register, ForgotPassword, SetupApiKey, Settings, Activity),
 shared components (EmptyState, InlineError, Loading, SettingsCard).

@@ -38,7 +38,7 @@ function ToggleSwitch({
 }
 
 const MAIN_TOGGLES = [
-  { key: 'enabled' as const, label: 'Kontrol Parental', description: 'Aktifkan fitur kontrol parental' },
+  { key: 'enabled' as const, label: 'Kontrol Orang Tua', description: 'Aktifkan fitur kontrol orang tua' },
   { key: 'block_adult_websites_enabled' as const, label: 'Blokir Konten Dewasa', description: 'Blokir situs konten dewasa' },
   { key: 'engines_safe_search_enabled' as const, label: 'Pencarian Aman', description: 'Terapkan pencarian aman di mesin pencari' },
   { key: 'youtube_safe_search_enabled' as const, label: 'YouTube Mode Terbatas', description: 'Batasi konten yang bisa diakses di YouTube' },
@@ -72,7 +72,7 @@ export default function ParentalControlSidebar({
       <div className="rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-5 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
         <div className="mb-4 flex items-center gap-2">
           <GlobeIcon className="text-primary" />
-          <h3 className="text-base font-bold text-text-primary">Kontrol Parental</h3>
+          <h3 className="text-base font-bold text-text-primary">Kontrol Orang Tua</h3>
         </div>
 
         <div className="flex flex-col gap-2">

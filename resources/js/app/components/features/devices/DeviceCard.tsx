@@ -5,6 +5,7 @@ import type { DeviceDetail } from '../../../types/device';
 interface DeviceCardProps {
   device: DeviceDetail;
   isOnline: boolean;
+  longOffline?: boolean;
   lastSeen: string;
   onShowSetup: (device: DeviceDetail) => void;
   onEdit: (device: DeviceDetail) => void;
@@ -24,7 +25,7 @@ function getDeviceLabel(type: string): string {
   return KNOWN_ACRONYMS[type.toLowerCase()] ?? type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 }
 
-export default function DeviceCard({ device, isOnline, lastSeen, onShowSetup, onEdit, onDelete }: DeviceCardProps) {
+export default function DeviceCard({ device, isOnline, longOffline, lastSeen, onShowSetup, onEdit, onDelete }: DeviceCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +70,14 @@ export default function DeviceCard({ device, isOnline, lastSeen, onShowSetup, on
                 }`}>
                   {needsSetup ? 'Perlu Setup' : isOnline ? 'Online' : 'Luring'}
                 </span>
+                {!isOnline && longOffline && !needsSetup && (
+                  <span className="group relative rounded-full bg-warning-bg px-2 py-0.5 text-xs font-medium text-warning-text">
+                    Bahaya
+                    <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded-lg bg-gray-800 px-3 py-2 text-center text-[11px] text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                      Pastikan Aktifitas dan Konfigurasi Jaringan Anak Anda Sekarang
+                    </div>
+                  </span>
+                )}
               </div>
             </div>
           </div>

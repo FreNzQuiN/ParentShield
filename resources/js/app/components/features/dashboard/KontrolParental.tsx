@@ -14,7 +14,7 @@ interface KontrolParentalProps {
 }
 
 const MAIN_TOGGLES = [
-  { key: 'enabled' as const, label: 'Kontrol Parental', description: 'Aktifkan fitur kontrol parental' },
+  { key: 'enabled' as const, label: 'Kontrol Orang Tua', description: 'Aktifkan fitur kontrol orang tua' },
   { key: 'block_adult_websites_enabled' as const, label: 'Blokir Konten Dewasa', description: 'Blokir situs konten dewasa' },
   { key: 'engines_safe_search_enabled' as const, label: 'Pencarian Aman', description: 'Pencarian aman di browser & YouTube' },
 ];
@@ -113,7 +113,7 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
     <div className="rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
       <div className="mb-3 flex items-center gap-2">
         <GlobeIcon className="text-primary" />
-        <h3 className="text-sm font-medium text-text-primary">Kontrol Parental</h3>
+        <h3 className="text-sm font-medium text-text-primary">Kontrol Orang Tua</h3>
         <Link
           to="/parental-control"
           className="ml-auto text-xs font-medium text-primary hover:underline"

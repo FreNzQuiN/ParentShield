@@ -462,6 +462,47 @@ class AdGuardService
         return $response->json() ?? [];
     }
 
+    /**
+     * @param int[] $devices
+     * @param string[] $statuses
+     */
+    public function getQueryLog(
+        int $timeFrom,
+        int $timeTo,
+        ?array $devices = null,
+        ?array $statuses = null,
+        ?string $search = null,
+        int $limit = 100,
+        ?string $cursor = null
+    ): array
+    {
+        $query = [
+            'time_from_millis' => $timeFrom,
+            'time_to_millis' => $timeTo,
+        ];
+
+        if ($devices !== null && $devices !== []) {
+            $query['devices'] = $devices;
+        }
+
+        if ($statuses !== null && $statuses !== []) {
+            $query['statuses'] = $statuses;
+        }
+
+        if ($search !== null && $search !== '') {
+            $query['search'] = $search;
+        }
+
+        $query['limit'] = min($limit, 1000);
+
+        if ($cursor !== null && $cursor !== '') {
+            $query['cursor'] = $cursor;
+        }
+
+        $response = $this->get('/query_log', $query);
+        return $response->json() ?? [];
+    }
+
     private function getTopDomains(int $timeFrom, int $timeTo): array
     {
         $stats = $this->getDomainStats($timeFrom, $timeTo);
@@ -480,6 +521,21 @@ class AdGuardService
         return $this->send('get', $endpoint, $query);
     }
 
+    private function buildQueryString(array $data): string
+    {
+        $parts = [];
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                foreach ($value as $v) {
+                    $parts[] = urlencode($key) . '=' . urlencode((string) $v);
+                }
+            } else {
+                $parts[] = urlencode($key) . '=' . urlencode((string) $value);
+            }
+        }
+        return implode('&', $parts);
+    }
+
     private function send(string $method, string $endpoint, array $data = []): Response
     {
         if (!$this->apiKey) {
@@ -494,10 +550,18 @@ class AdGuardService
         $response = null;
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'ApiKey ' . $this->apiKey,
-                'Accept' => 'application/json',
-            ])->timeout(15)->{$method}($url, $data);
+            if ($method === 'get' && !empty($data)) {
+                $url .= '?' . $this->buildQueryString($data);
+                $response = Http::withHeaders([
+                    'Authorization' => 'ApiKey ' . $this->apiKey,
+                    'Accept' => 'application/json',
+                ])->timeout(15)->get($url);
+            } else {
+                $response = Http::withHeaders([
+                    'Authorization' => 'ApiKey ' . $this->apiKey,
+                    'Accept' => 'application/json',
+                ])->timeout(15)->{$method}($url, $data);
+            }
         } catch (ConnectionException $e) {
             $this->handleConnectionException();
         } catch (\Throwable $e) {
@@ -535,9 +599,14 @@ class AdGuardService
 
                     Log::debug("AdGuard API pool {$method}", ['url' => $url, 'data' => $spec['data']]);
 
-                    $pool->as($key)->withHeaders($headers)
-                        ->timeout($timeout)
-                        ->{$method}($url, $spec['data']);
+                    $req = $pool->as($key)->withHeaders($headers)->timeout($timeout);
+
+                    if ($method === 'get' && !empty($spec['data'])) {
+                        $url .= '?' . $this->buildQueryString($spec['data']);
+                        $req->get($url);
+                    } else {
+                        $req->{$method}($url, $spec['data']);
+                    }
                 }
             });
 

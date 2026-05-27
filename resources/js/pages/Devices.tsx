@@ -2,21 +2,28 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchDevices, deleteDevice } from '../app/services/api/devices';
 import type { DeviceDetail, DeviceLimits } from '../app/types/device';
 import { useToast } from '../app/contexts/ToastContext';
-import Loading from '../app/components/shared/Loading';
 import InlineError from '../app/components/shared/InlineError';
 import LoadingOverlay from '../app/components/shared/LoadingOverlay';
 import DeviceCard from '../app/components/features/devices/DeviceCard';
+import DevicesSkeleton from '../app/components/features/devices/DevicesSkeleton';
 import EmptySlotCard from '../app/components/features/devices/EmptySlotCard';
 import DeviceLimitBanner from '../app/components/features/devices/DeviceLimitBanner';
 import SetupDeviceModal from '../app/components/features/devices/SetupDeviceModal';
 import EditDeviceModal from '../app/components/features/devices/EditDeviceModal';
 import ConfirmDialog from '../app/components/shared/ConfirmDialog';
 
+import { LONG_OFFLINE_THRESHOLD_MS } from '../app/constants/time';
+
 const ONLINE_THRESHOLD_MS = 300000;
 
 function computeIsOnline(lastSeenMillis: number | null | undefined): boolean {
   if (lastSeenMillis == null) return false;
   return Date.now() - lastSeenMillis < ONLINE_THRESHOLD_MS;
+}
+
+function isLongOffline(lastSeenMillis: number | null | undefined): boolean {
+  if (lastSeenMillis == null) return false;
+  return Date.now() - lastSeenMillis >= LONG_OFFLINE_THRESHOLD_MS;
 }
 
 function formatLastSeen(millis: number | null | undefined): string {
@@ -135,11 +142,7 @@ export default function Devices() {
   const slotCount = Math.max(0, max - used);
 
   if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loading message="Memuat perangkat..." />
-      </div>
-    );
+    return <DevicesSkeleton />;
   }
 
   if (error) {
@@ -172,6 +175,7 @@ export default function Devices() {
             key={device.id}
             device={device}
             isOnline={computeIsOnline(device.last_seen)}
+            longOffline={isLongOffline(device.last_seen)}
             lastSeen={formatLastSeen(device.last_seen)}
             onShowSetup={handleShowSetup}
             onEdit={handleEdit}

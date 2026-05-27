@@ -2,6 +2,7 @@ import type { ParentalControlSettings } from '../app/types/dashboard';
 import { useParentalControlPage } from '../app/hooks/useParentalControlPage';
 import { LoadingOverlay, InlineError } from '../app/components/shared';
 import { ParentalControlSidebar, ServiceBlocklistByCategory, ServiceBlocklistProvider } from '../app/components/features/parentalControl';
+import ParentalControlSkeleton from '../app/components/features/parentalControl/ParentalControlSkeleton';
 import { useToast } from '../app/contexts/ToastContext';
 import { useCallback } from 'react';
 import { MAIN_TOGGLES_LABELS } from '../app/components/features/parentalControl/constants';
@@ -41,14 +42,7 @@ export default function ParentalControl() {
   }, [toggleService, addToast, services]);
 
   if (loading && !settings) {
-    return (
-      <div className="flex h-[calc(100vh-128px)] items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-sm text-text-muted">Memuat kontrol orang tua...</p>
-        </div>
-      </div>
-    );
+    return <ParentalControlSkeleton />;
   }
 
   if (error && !settings) {

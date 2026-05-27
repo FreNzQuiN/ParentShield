@@ -119,8 +119,8 @@ function renderDevices() {
 describe('Devices page', () => {
   it('shows loading state on mount', () => {
     vi.mocked(fetchDevices).mockReturnValue(new Promise(() => {}));
-    renderDevices();
-    expect(screen.getByTestId('loading')).toHaveTextContent('Memuat perangkat...');
+    const { container } = renderDevices();
+    expect(container.querySelector('.animate-pulse')).toBeTruthy();
   });
 
   it('shows error state with retry button', async () => {

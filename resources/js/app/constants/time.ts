@@ -1,0 +1,1 @@
+export const LONG_OFFLINE_THRESHOLD_MS = 21600000;

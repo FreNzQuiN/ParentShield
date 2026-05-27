@@ -133,7 +133,7 @@ describe('Dashboard page', () => {
     });
 
     renderDashboard();
-    expect(screen.getAllByText('Kontrol Parental').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Kontrol Orang Tua').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows greeting based on time of day — siang', () => {
@@ -191,7 +191,7 @@ describe('Dashboard page', () => {
 
     renderDashboard();
     expect(screen.getAllByText('0').length).toBe(3);
-    expect(screen.queryByText('Kontrol Parental')).not.toBeInTheDocument();
+    expect(screen.queryByText('Kontrol Orang Tua')).not.toBeInTheDocument();
   });
 
   it('shows device breakdown with inactive and needs-setup indicators', () => {

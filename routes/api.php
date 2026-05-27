@@ -47,6 +47,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/dashboard/services', [\App\Http\Controllers\Api\DashboardController::class, 'listServices']);
         Route::put('/dashboard/safebrowsing', [\App\Http\Controllers\Api\DashboardController::class, 'updateSafebrowsing']);
         Route::put('/dashboard/parental-control', [\App\Http\Controllers\Api\DashboardController::class, 'updateParentalControl']);
+        Route::get('/logs/query', [\App\Http\Controllers\Api\LogController::class, 'queryLog']);
 
         Route::prefix('devices')->group(function () {
             Route::get('/', [\App\Http\Controllers\Api\DeviceController::class, 'index']);
