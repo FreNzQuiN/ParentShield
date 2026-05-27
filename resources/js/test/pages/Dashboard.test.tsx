@@ -28,7 +28,12 @@ const mockDashboardData = {
     youtube_safe_search_enabled: false,
     blocked_services: [{ id: '9gag', enabled: true }],
   },
-  devices: [],
+  devices: [
+    { id: '1', name: 'Laptop', device_type: 'windows', is_online: true, last_seen: Date.now(), protection_enabled: true },
+    { id: '2', name: 'Tablet', device_type: 'android', is_online: true, last_seen: Date.now(), protection_enabled: true },
+    { id: '3', name: 'HP Anak', device_type: 'iphone', is_online: false, last_seen: Date.now() - 8 * 3600000, protection_enabled: true },
+    { id: '4', name: 'PC', device_type: 'windows', is_online: false, last_seen: Date.now() - 300000, protection_enabled: false },
+  ],
   account_limits: { devices: { used: 4, max: 10 } },
 };
 
@@ -64,7 +69,7 @@ describe('Dashboard page', () => {
   it('renders DashboardSkeleton when loading with no data', () => {
     vi.mocked(useDashboard).mockReturnValue({
       data: null, loading: true, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
@@ -75,7 +80,7 @@ describe('Dashboard page', () => {
   it('renders InlineError with retry when error and no data', () => {
     vi.mocked(useDashboard).mockReturnValue({
       data: null, loading: false, error: 'Gagal memuat.',
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
@@ -87,7 +92,7 @@ describe('Dashboard page', () => {
   it('renders greeting with user name', () => {
     vi.mocked(useDashboard).mockReturnValue({
       data: mockDashboardData, loading: false, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
@@ -99,7 +104,7 @@ describe('Dashboard page', () => {
   it('renders stat cards with formatted values', () => {
     vi.mocked(useDashboard).mockReturnValue({
       data: mockDashboardData, loading: false, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
@@ -112,7 +117,7 @@ describe('Dashboard page', () => {
   it('shows LoadingOverlay when loading with existing data', () => {
     vi.mocked(useDashboard).mockReturnValue({
       data: mockDashboardData, loading: true, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
@@ -123,7 +128,7 @@ describe('Dashboard page', () => {
   it('renders KontrolParental when parental_control exists', () => {
     vi.mocked(useDashboard).mockReturnValue({
       data: mockDashboardData, loading: false, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
@@ -135,7 +140,7 @@ describe('Dashboard page', () => {
     vi.setSystemTime(new Date('2026-05-25T13:00:00'));
     vi.mocked(useDashboard).mockReturnValue({
       data: mockDashboardData, loading: false, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
@@ -147,7 +152,7 @@ describe('Dashboard page', () => {
     vi.setSystemTime(new Date('2026-05-25T16:00:00'));
     vi.mocked(useDashboard).mockReturnValue({
       data: mockDashboardData, loading: false, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
@@ -159,7 +164,7 @@ describe('Dashboard page', () => {
     vi.setSystemTime(new Date('2026-05-25T20:00:00'));
     vi.mocked(useDashboard).mockReturnValue({
       data: mockDashboardData, loading: false, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
@@ -175,11 +180,12 @@ describe('Dashboard page', () => {
       top_activities: [],
       sources_blocked: [],
       parental_control: null as any,
+      devices: [],
     };
 
     vi.mocked(useDashboard).mockReturnValue({
       data: emptyData, loading: false, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
@@ -188,38 +194,43 @@ describe('Dashboard page', () => {
     expect(screen.queryByText('Kontrol Parental')).not.toBeInTheDocument();
   });
 
-  it('shows suspicious device badge when suspicious_devices > 0', () => {
-    const dataWithSuspicious = {
-      ...mockDashboardData,
-      stats: { ...mockDashboardData.stats, suspicious_devices: 2 },
-    };
+  it('shows device breakdown with inactive and needs-setup indicators', () => {
+    vi.setSystemTime(new Date('2026-05-25T10:00:00'));
+    const baseTime = new Date('2026-05-25T10:00:00').getTime();
+    const eightHoursMs = 8 * 3600000;
+    const devicesWithMix = [
+      { id: '1', name: 'Online', device_type: 'windows', is_online: true, last_seen: baseTime, protection_enabled: true },
+      { id: '2', name: 'Inactive', device_type: 'android', is_online: false, last_seen: baseTime - eightHoursMs, protection_enabled: true },
+      { id: '3', name: 'Unset', device_type: 'iphone', is_online: false, last_seen: baseTime - 120000, protection_enabled: false },
+    ];
 
     vi.mocked(useDashboard).mockReturnValue({
-      data: dataWithSuspicious, loading: false, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      data: { ...mockDashboardData, devices: devicesWithMix }, loading: false, error: null,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
     renderDashboard();
-    expect(screen.getByText('2 Mencurigakan')).toBeInTheDocument();
+    expect(screen.getByText('1 Perlu Setup')).toBeInTheDocument();
+    expect(screen.getByText('1 Tidak Aktif')).toBeInTheDocument();
   });
 
   it('disables refresh button while isRefreshing', () => {
     vi.mocked(useDashboard).mockReturnValue({
       data: mockDashboardData, loading: false, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: true,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: true, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 
     renderDashboard();
-    expect(screen.getByLabelText('Muat ulang')).toBeDisabled();
+    expect(screen.getByLabelText('Muat ulang dashboard')).toBeDisabled();
   });
 
   it('falls back to "Pengguna" when user name is missing', () => {
     vi.mocked(useAuth).mockReturnValue({ user: null } as any);
     vi.mocked(useDashboard).mockReturnValue({
       data: mockDashboardData, loading: false, error: null,
-      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false,
+      refresh: vi.fn(), softRefresh: vi.fn(), isRefreshing: false, lastRefresh: null, retryCount: 0,
       toggleSafebrowsing: vi.fn(), toggleParentalControl: vi.fn(),
     });
 

@@ -46,7 +46,7 @@ resources/js/
 │   │   ├── features/              # SideNavBar, AppLayout, Dashboard/*, devices/*
 │   │   └── shared/                # AuthLayout, FormInput, Loading, LoadingOverlay,
 │   │                              # InlineError, Toast, EmptyState, Modal, StepList,
-│   │                              # ConfirmDialog, SettingsCard, icons
+│   │                              # ConfirmDialog, SettingsCard, RefreshBar, icons
 │   ├── contexts/                  # AuthContext, ToastContext
 │   ├── hooks/                     # useDashboard, useIsMobile, useDialog
 │   ├── routes/guards/             # ProtectedRoute, RequireApiKey

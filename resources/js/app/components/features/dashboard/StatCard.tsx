@@ -7,7 +7,7 @@ interface StatCardProps {
   badge?: string;
   badgeVariant?: 'success' | 'warning';
   valueColor?: string;
-  caption?: string;
+  caption?: ReactNode;
 }
 
 const BADGE_STYLES: Record<string, string> = {
@@ -39,7 +39,7 @@ export default function StatCard({ icon, label, value, badge, badgeVariant = 'su
           {value}
         </p>
         {caption && (
-          <p className="mt-0.5 truncate text-[10px] text-text-muted md:text-xs">
+          <p className={`mt-0.5 text-[10px] md:text-xs ${typeof caption === 'string' ? 'text-text-muted' : ''}`}>
             {caption}
           </p>
         )}
