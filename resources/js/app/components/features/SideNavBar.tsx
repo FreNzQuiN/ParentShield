@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { ShieldIconSmall, HomeIcon, ActivityIcon, DeviceIcon, SettingsIcon, LogoutIcon, CloseIcon } from '../shared/icons';
+import { ShieldIconSmall, HomeIcon, ActivityIcon, DeviceIcon, SettingsIcon, LogoutIcon, CloseIcon, ParentalControlIcon } from '../shared/icons';
 
 interface SideNavBarProps {
   mobileOpen: boolean;
@@ -11,6 +11,7 @@ const navItems = [
   { label: 'Halaman Utama', route: '/dashboard', icon: HomeIcon },
   { label: 'Aktivitas Lengkap', route: '/activity', icon: ActivityIcon },
   { label: 'Perangkat Dilindungi', route: '/devices', icon: DeviceIcon },
+  { label: 'Kontrol Parental', route: '/parental-control', icon: ParentalControlIcon },
   { label: 'Pengaturan Akun', route: '/settings', icon: SettingsIcon },
 ] as const;
 

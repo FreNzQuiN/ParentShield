@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../../../contexts/ToastContext';
 import { GlobeIcon } from '../../shared/icons';
-import { SERVICE_GROUPS, getGroupState, type ServiceGroupKey } from '../../../constants/serviceGroups';
+import { DASHBOARD_GROUPS, getGroupState, getBlockedCount, getAllowedCount, type DashboardGroupDef } from '../../../constants/serviceGroups';
 import type { ParentalControlSettings } from '../../../types/dashboard';
 
 interface KontrolParentalProps {
@@ -15,14 +15,9 @@ interface KontrolParentalProps {
 
 const MAIN_TOGGLES = [
   { key: 'enabled' as const, label: 'Kontrol Parental', description: 'Aktifkan fitur kontrol parental' },
-  { key: 'block_adult_websites_enabled' as const, label: 'Blokir Konten Dewasa', description: 'Blokir situs konten dewasa (porno)' },
-  { key: 'engines_safe_search_enabled' as const, label: 'Pencarian Aman', description: 'Terapkan pencarian aman di mesin pencari & YouTube' },
+  { key: 'block_adult_websites_enabled' as const, label: 'Blokir Konten Dewasa', description: 'Blokir situs konten dewasa' },
+  { key: 'engines_safe_search_enabled' as const, label: 'Pencarian Aman', description: 'Pencarian aman di browser & YouTube' },
 ];
-
-function groupLabel(key: ServiceGroupKey): string {
-  const def = SERVICE_GROUPS[key];
-  return def ? `${def.label} (${def.services.length})` : key;
-}
 
 function ToggleSwitch({
   active,
@@ -59,11 +54,28 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
   const [toggling, setToggling] = useState<string | null>(null);
   const { addToast } = useToast();
 
+  const isSafeSearchActive = settings.engines_safe_search_enabled && settings.youtube_safe_search_enabled;
+
   const handleMainToggle = useCallback(
     async (key: keyof ParentalControlSettings) => {
       setToggling(key);
-      const newVal = !settings[key];
       const label = MAIN_TOGGLES.find((t) => t.key === key)?.label ?? key;
+
+      if (key === 'engines_safe_search_enabled') {
+        const newVal = !isSafeSearchActive;
+        try {
+          await onToggle('engines_safe_search_enabled', newVal);
+          await onToggle('youtube_safe_search_enabled', newVal);
+          addToast({ type: 'success', message: `Pencarian Aman berhasil ${newVal ? 'diaktifkan' : 'dinonaktifkan'}.` });
+        } catch {
+          addToast({ type: 'error', message: 'Gagal memperbarui Pencarian Aman.' });
+        } finally {
+          setToggling(null);
+        }
+        return;
+      }
+
+      const newVal = !settings[key];
       try {
         await onToggle(key, newVal);
         addToast({ type: 'success', message: `${label} berhasil ${newVal ? 'diaktifkan' : 'dinonaktifkan'}.` });
@@ -73,27 +85,29 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
         setToggling(null);
       }
     },
-    [onToggle, addToast, settings]
+    [onToggle, addToast, settings, isSafeSearchActive]
   );
 
   const handleGroupToggle = useCallback(
-    async (group: string, enabled: boolean) => {
-      const toggleKey = `grp:${group}`;
+    async (group: DashboardGroupDef, enabled: boolean) => {
+      const toggleKey = `grp:${group.key}`;
       setToggling(toggleKey);
-      const label = groupLabel(group as ServiceGroupKey);
       try {
-        await onToggle('service_group', { group, enabled });
-        addToast({ type: 'success', message: `${label} ${enabled ? 'diblokir' : 'diizinkan'}.` });
+        if (group.key === 'belanja_keuangan') {
+          await onToggle('service_group', { group: 'toko_online', enabled });
+          await onToggle('service_group', { group: 'keuangan', enabled });
+        } else {
+          await onToggle('service_group', { group: group.key, enabled });
+        }
+        addToast({ type: 'success', message: `${group.label} ${enabled ? 'diblokir' : 'diizinkan'}.` });
       } catch {
-        addToast({ type: 'error', message: `Gagal memperbarui ${label.toLowerCase()}.` });
+        addToast({ type: 'error', message: `Gagal memperbarui ${group.label.toLowerCase()}.` });
       } finally {
         setToggling(null);
       }
     },
     [onToggle, addToast]
   );
-
-  const groupKeys = Object.keys(SERVICE_GROUPS) as ServiceGroupKey[];
 
   return (
     <div className="rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
@@ -109,20 +123,24 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
       </div>
 
       <div className="flex flex-col gap-2">
-        {MAIN_TOGGLES.map((t) => (
-          <div key={t.key} className="flex items-center justify-between rounded-lg bg-bg-card-inner p-3">
-            <div className="flex-1 mr-3">
-              <p className="text-sm font-medium text-text-primary">{t.label}</p>
-              <p className="text-xs text-text-muted">{t.description}</p>
+        {MAIN_TOGGLES.map((t) => {
+          const isEngines = t.key === 'engines_safe_search_enabled';
+          const active = isEngines ? isSafeSearchActive : settings[t.key];
+          return (
+            <div key={t.key} className="flex items-center justify-between rounded-lg bg-bg-card-inner p-3">
+              <div className="flex-1 mr-3">
+                <p className="text-sm font-medium text-text-primary">{t.label}</p>
+                <p className="text-xs text-text-muted">{t.description}</p>
+              </div>
+              <ToggleSwitch
+                active={active}
+                disabled={toggling === t.key}
+                ariaLabel={t.label}
+                onClick={() => handleMainToggle(t.key)}
+              />
             </div>
-            <ToggleSwitch
-              active={settings[t.key]}
-              disabled={toggling === t.key}
-              ariaLabel={t.label}
-              onClick={() => handleMainToggle(t.key)}
-            />
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="mt-4 pt-3 border-t border-[rgba(193,198,214,0.3)]">
@@ -130,27 +148,34 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
           Pembatasan Layanan
         </h4>
         <div className="flex flex-col gap-2">
-          {groupKeys.map((key) => {
-            const state = getGroupState(key, settings.blocked_services);
-            const isBlocked = state !== 'allowed';
+          {DASHBOARD_GROUPS.map((group) => {
+            const state = getGroupState(group, settings.blocked_services);
+            const isFullyBlocked = state === 'blocked';
             const isPartial = state === 'partial';
+            const blockedCount = getBlockedCount(group, settings.blocked_services);
+            const allowedCount = getAllowedCount(group, settings.blocked_services);
 
             return (
-              <div key={key} className="flex items-center justify-between rounded-lg bg-bg-card-inner p-3">
-                <div className="flex items-center gap-2 flex-1 mr-3">
+              <div key={group.key} className="flex items-center justify-between rounded-lg bg-bg-card-inner p-3">
+                <div className="flex-1 mr-3">
                   <span className="text-sm font-medium text-text-primary">
-                    {groupLabel(key)}
+                    {group.label}
+                    {isPartial && <span className="ml-1 text-[10px] text-text-muted font-medium">(Sebagian)</span>}
                   </span>
-                  {isPartial && (
-                    <span className="text-[10px] text-text-muted font-medium">Sebagian</span>
+                  {isPartial ? (
+                    <p className="text-[10px] text-text-muted">{blockedCount} Layanan diblokir, {allowedCount} Layanan diizinkan.</p>
+                  ) : (
+                    <p className="text-[10px] text-text-muted">
+                      {isFullyBlocked ? `${blockedCount} Layanan diblokir.` : `${allowedCount} Layanan diizinkan.`}
+                    </p>
                   )}
                 </div>
                 <ToggleSwitch
-                  active={isBlocked}
-                  disabled={toggling === `grp:${key}`}
+                  active={isFullyBlocked}
+                  disabled={toggling === `grp:${group.key}`}
                   activeColor="bg-danger-bar"
-                  ariaLabel={groupLabel(key)}
-                  onClick={() => handleGroupToggle(key, !isBlocked)}
+                  ariaLabel={group.label}
+                  onClick={() => handleGroupToggle(group, !isFullyBlocked)}
                 />
               </div>
             );

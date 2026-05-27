@@ -27,4 +27,5 @@ export {
   GlobeIcon,
   CloseIcon,
   KeyIcon,
+  ParentalControlIcon,
 } from './icons';

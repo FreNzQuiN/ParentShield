@@ -456,6 +456,12 @@ class AdGuardService
         return is_array($data) ? $data : null;
     }
 
+    public function getWebServices(): array
+    {
+        $response = $this->get('/web_services');
+        return $response->json() ?? [];
+    }
+
     private function getTopDomains(int $timeFrom, int $timeTo): array
     {
         $stats = $this->getDomainStats($timeFrom, $timeTo);

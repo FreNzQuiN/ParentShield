@@ -248,3 +248,12 @@ export function TrashIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function ParentalControlIcon(props: IconProps) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" {...props}>
+      <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <path d="M10 6v4l3 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}

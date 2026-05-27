@@ -35,6 +35,12 @@ export interface BlockedWebService {
   enabled: boolean;
 }
 
+export interface WebServiceInfo {
+  icon_svg: string;
+  id: string;
+  name: string;
+}
+
 export interface ParentalControlSettings {
   enabled: boolean;
   block_adult_websites_enabled: boolean;

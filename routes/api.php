@@ -44,6 +44,7 @@ Route::prefix('v1')->group(function () {
     // Protected — requires auth + API key
     Route::middleware(['auth:sanctum', 'check.api-key'])->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
+        Route::get('/dashboard/services', [\App\Http\Controllers\Api\DashboardController::class, 'listServices']);
         Route::put('/dashboard/safebrowsing', [\App\Http\Controllers\Api\DashboardController::class, 'updateSafebrowsing']);
         Route::put('/dashboard/parental-control', [\App\Http\Controllers\Api\DashboardController::class, 'updateParentalControl']);
 

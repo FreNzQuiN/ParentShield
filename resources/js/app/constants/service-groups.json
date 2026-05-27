@@ -1,14 +1,51 @@
 {
-  "youtube": ["youtube"],
-  "roblox": ["roblox"],
-  "medsos": [
+  "konten_dewasa": [
+    "onlyfans", "tinder", "plenty_of_fish"
+  ],
+  "anonimizer": [
+    "proton", "privacy"
+  ],
+  "game": [
+    "roblox", "minecraft", "steam", "epic_games",
+    "xboxlive", "playstation", "nintendo",
+    "riot_games", "leagueoflegends", "valorant",
+    "rockstar_games", "ubisoft", "electronic_arts",
+    "battle_net", "origin", "wargaming",
+    "blizzard_entertainment", "activision_blizzard",
+    "warnerbrosgames", "io_interactive", "fifa"
+  ],
+  "media_berita": [
+    "espn"
+  ],
+  "media_sosial": [
     "instagram", "facebook", "twitter", "tiktok", "snapchat",
     "whatsapp", "telegram", "discord", "reddit", "pinterest",
     "linkedin", "bluesky", "mastodon", "signal", "viber",
-    "wechat", "kakaotalk", "line", "qq", "weibo", "vk", "ok"
+    "wechat", "kakaotalk", "line", "qq", "weibo", "vk", "ok",
+    "tumblr", "skype", "kik", "clubhouse", "bigo_live", "wizz",
+    "flickr", "yy"
   ],
-  "belanja": [
+  "keuangan": [
+    "betano", "betfair", "betway", "blaze"
+  ],
+  "mesin_cari": [
+    "deepseek", "chatgpt", "claude", "copilot", "gemini", "grok",
+    "manus", "perplexity", "meta_ai", "cloudflare"
+  ],
+  "toko_online": [
     "shopee", "lazada", "amazon", "aliexpress", "ebay",
     "temu", "shein", "mercado_libre"
+  ],
+  "video": [
+    "youtube", "netflix", "vimeo", "dailymotion",
+    "twitch", "bilibili", "disneyplus", "hbomax",
+    "hulu", "crunchyroll", "spotify", "spotify_video",
+    "tidal", "deezer", "soundcloud",
+    "amazon_streaming", "apple_streaming", "discoveryplus",
+    "paramountplus", "peacock_tv", "max",
+    "pluto_tv", "rakuten_viki", "samsung_tv_plus",
+    "canais_globo", "globoplay", "vivo_play", "voot",
+    "lionsgateplus", "looke", "nebula", "odysee",
+    "iqiyi", "plex", "directvgo", "douban"
   ]
 }

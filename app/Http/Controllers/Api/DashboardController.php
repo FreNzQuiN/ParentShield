@@ -163,6 +163,46 @@ class DashboardController extends Controller
         }
     }
 
+    public function listServices(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $apiKey = $user->getDecryptedAdguardKey();
+
+        if (!$apiKey) {
+            return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
+        }
+
+        $this->adGuard->setApiKey($apiKey);
+
+        try {
+            $services = $this->adGuard->getWebServices();
+            return $this->success($services, 'Daftar layanan berhasil dimuat.');
+        } catch (\App\Exceptions\AdGuardApiException $e) {
+            Log::warning('Dashboard services error', [
+                'user_id' => $user->id,
+                'code' => $e->getErrorCode(),
+                'message' => $e->getMessage(),
+            ]);
+
+            if ($e->getErrorCode() === 'ADGUARD_UNAUTHORIZED') {
+                $user->clearAdguardApiKey();
+            }
+
+            return $this->error($e->getMessage(), $e->getErrorCode(), $e->getStatusCode());
+        } catch (\Exception $e) {
+            Log::error('Dashboard services unexpected error', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->error(
+                'Gagal memuat daftar layanan. Silakan coba lagi.',
+                'DASHBOARD_ERROR',
+                500
+            );
+        }
+    }
+
     public function updateParentalControl(UpdateParentalControlRequest $request): JsonResponse
     {
         $user = $request->user();
