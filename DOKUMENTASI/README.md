@@ -43,18 +43,21 @@ app/
 resources/js/
 ├── app/
 │   ├── components/
-│   │   ├── features/              # SideNavBar, AppLayout, Dashboard/*, devices/*
+│   │   ├── features/              # SideNavBar, AppLayout, Dashboard/*, devices/*,
+│   │   │                          # parentalControl/*
 │   │   └── shared/                # AuthLayout, FormInput, Loading, LoadingOverlay,
 │   │                              # InlineError, Toast, EmptyState, Modal, StepList,
 │   │                              # ConfirmDialog, SettingsCard, RefreshBar, icons
+│   ├── constants/                 # serviceGroups (JSON + TS defs)
 │   ├── contexts/                  # AuthContext, ToastContext
-│   ├── hooks/                     # useDashboard, useIsMobile, useDialog
+│   ├── hooks/                     # useDashboard, useParentalControlPage, useIsMobile, useDialog
 │   ├── routes/guards/             # ProtectedRoute, RequireApiKey
 │   ├── services/api/              # client (axios), auth, dashboard, devices, setupApiKey
 │   ├── types/                     # api, auth, dashboard, device
 │   └── utils/                     # error, storage
 └── pages/                         # Login, Register, ForgotPassword, SetupApiKey,
-                                   # Dashboard, Activity, Devices, Settings
+                                   # Dashboard, Activity, Devices, Settings,
+                                   # ParentalControl
 ```
 
 ## Flow Aplikasi
@@ -66,7 +69,7 @@ Setup API Key AdGuard
   ↓ (key valid)
 Dashboard (statistik, proteksi global)
   ↓
-Monitoring (fitur device/activity/settings bertahap)
+Monitoring (ParentalControl, device/activity/settings bertahap)
 ```
 
 ### Auth Guard (urutan)
@@ -91,6 +94,7 @@ Monitoring (fitur device/activity/settings bertahap)
 | POST | `/api/v1/setup-api-key` | sanctum | Verifikasi & simpan API key |
 | GET | `/api/v1/setup-api-key/status` | sanctum | Cek status API key |
 | GET | `/api/v1/dashboard` | sanctum+key | Data aggregated dashboard |
+| GET | `/api/v1/dashboard/services` | sanctum+key | Daftar layanan web AdGuard |
 | PUT | `/api/v1/dashboard/safebrowsing` | sanctum+key | Toggle proteksi |
 | PUT | `/api/v1/dashboard/parental-control` | sanctum+key | Update kontrol parental |
 | GET | `/api/v1/devices` | sanctum+key | Daftar perangkat |
@@ -215,8 +219,24 @@ Font body **wajib 14px** — jangan gunakan `text-base` (16px) untuk body.
 ```
 PUBLIC:       /login, /register, /forgot-password
 SEMI-PUBLIC:  /setup-api-key (auth required, no API key needed)
-PROTECTED:    /dashboard, /activity, /devices, /settings
+PROTECTED:    /dashboard, /parental-control, /activity, /devices, /settings
 ```
+
+## Halaman Kontrol Parental
+
+Halaman `/parental-control` terdiri dari 2 section:
+
+| Section | Posisi | Konten |
+|---------|--------|--------|
+| **Sidebar** | Kiri (sticky) | 4 toggle utama: Kontrol Parental (master), Blokir Konten Dewasa, Pencarian Aman, YouTube Mode Terbatas |
+| **Pembatasan per Kategori** | Kanan (scrollable) | 9 kategori layanan (Konten Dewasa, Anonymizers, Game, Media Berita, Media Sosial, Keuangan, Mesin Pencari, Toko Online, Video) |
+| **Semua Layanan** | Kanan (scrollable) | Daftar semua layanan web AdGuard dengan pencarian dan toggle individual |
+
+- Master toggle OFF → semua sub-toggle dan layanan disabled (opacity-50, pointer-events-none)
+- Category toggle ON → seluruh layanan di kategori diblokir
+- Category partial → toggle OFF, label "(Sebagian)", tampil "X Layanan diblokir, Y Layanan diizinkan"
+- Dashboard card menampilkan 4 kategori: Anonymizers, Game, Media Sosial, Belanja Online & E-Wallet
+- Service IDs hanya yang valid di registry AdGuard DNS (gunakan `GET /dashboard/services` untuk daftar lengkap)
 
 ## Testing
 
@@ -227,10 +247,10 @@ npm run build             # Vite build check
 ```
 
 Backend tests mencakup: auth flow, API response contract, dashboard access control & data retrieval,
-safebrowsing/parental control updates, cache lock behavior, API key revocation, setup API key validation, exception handling.
+safebrowsing/parental control updates, web services listing, cache lock behavior, API key revocation, setup API key validation, exception handling.
 
 Frontend tests mencakup: component rendering, form states (loading/error/success),
 auth context (login/register/logout, refreshUser, checkAuth all-error cleanup),
 route guards, per-path navigation debounce, API client interceptors (auth retry, redirect),
-hooks (useDashboard), all pages (Dashboard, Devices, Login, Register, ForgotPassword, SetupApiKey, Settings),
+hooks (useDashboard, useParentalControlPage), all pages (Dashboard, ParentalControl, Devices, Login, Register, ForgotPassword, SetupApiKey, Settings),
 shared components (EmptyState, InlineError, Loading, SettingsCard).
