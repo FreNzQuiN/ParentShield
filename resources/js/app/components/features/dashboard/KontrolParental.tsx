@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../../../contexts/ToastContext';
 import { GlobeIcon } from '../../shared/icons';
+import ToggleSwitch from '../../shared/ToggleSwitch';
 import { DASHBOARD_GROUPS, getGroupState, getBlockedCount, getAllowedCount, type DashboardGroupDef } from '../../../constants/serviceGroups';
 import type { ParentalControlSettings } from '../../../types/dashboard';
 
@@ -18,37 +19,6 @@ const MAIN_TOGGLES = [
   { key: 'block_adult_websites_enabled' as const, label: 'Blokir Konten Dewasa', description: 'Blokir situs konten dewasa' },
   { key: 'engines_safe_search_enabled' as const, label: 'Pencarian Aman', description: 'Pencarian aman di browser & YouTube' },
 ];
-
-function ToggleSwitch({
-  active,
-  disabled,
-  activeColor,
-  ariaLabel,
-  onClick,
-}: {
-  active: boolean;
-  disabled?: boolean;
-  activeColor?: string;
-  ariaLabel: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-        disabled ? 'opacity-60' : ''
-      } ${active ? activeColor ?? 'bg-success' : 'bg-inactive'}`}
-      aria-label={ariaLabel}
-    >
-      <span
-        className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-          active ? 'translate-x-5' : 'translate-x-0'
-        }`}
-      />
-    </button>
-  );
-}
 
 export default function KontrolParental({ settings, onToggle }: KontrolParentalProps) {
   const [toggling, setToggling] = useState<string | null>(null);

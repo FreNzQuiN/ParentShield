@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreDeviceRequest extends FormRequest
 {
@@ -14,8 +15,8 @@ class StoreDeviceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:64'],
-            'device_type' => ['required', 'string', 'in:ANDROID,IOS,WINDOWS'],
+            'name' => ['required', 'string', 'max:' . config('adguard.device_name_max', 64)],
+            'device_type' => ['required', 'string', Rule::in(config('adguard.device_types', ['ANDROID', 'IOS', 'WINDOWS']))],
         ];
     }
 

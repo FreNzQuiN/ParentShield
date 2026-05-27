@@ -1,40 +1,12 @@
 ﻿import { useCallback, useState } from 'react';
 import { GlobeIcon } from '../../shared/icons';
+import ToggleSwitch from '../../shared/ToggleSwitch';
 import type { ParentalControlSettings } from '../../../types/dashboard';
 
 interface ParentalControlSidebarProps {
   settings: ParentalControlSettings | null;
   isToggling: string | null;
   onToggleSetting: (key: keyof ParentalControlSettings) => Promise<void>;
-}
-
-function ToggleSwitch({
-  active,
-  disabled,
-  ariaLabel,
-  onClick,
-}: {
-  active: boolean;
-  disabled?: boolean;
-  ariaLabel: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-        disabled ? 'opacity-60' : ''
-      } ${active ? 'bg-success' : 'bg-inactive'}`}
-      aria-label={ariaLabel}
-    >
-      <span
-        className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-          active ? 'translate-x-5' : 'translate-x-0'
-        }`}
-      />
-    </button>
-  );
 }
 
 const MAIN_TOGGLES = [

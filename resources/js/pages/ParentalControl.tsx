@@ -1,6 +1,6 @@
 import type { ParentalControlSettings } from '../app/types/dashboard';
 import { useParentalControlPage } from '../app/hooks/useParentalControlPage';
-import { LoadingOverlay, InlineError } from '../app/components/shared';
+import { InlineError } from '../app/components/shared';
 import { ParentalControlSidebar, ServiceBlocklistByCategory, ServiceBlocklistProvider } from '../app/components/features/parentalControl';
 import ParentalControlSkeleton from '../app/components/features/parentalControl/ParentalControlSkeleton';
 import { useToast } from '../app/contexts/ToastContext';
@@ -55,8 +55,6 @@ export default function ParentalControl() {
 
   return (
     <div className="relative">
-      <LoadingOverlay visible={!!isToggling && !!settings} />
-
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
         <ParentalControlSidebar
           settings={settings}

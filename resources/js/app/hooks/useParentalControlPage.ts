@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect, useCallback, useRef } from "react";
 import type { ParentalControlSettings, WebServiceInfo } from "../types/dashboard";
 import { fetchDashboard, fetchServices, updateParentalControl } from "../services/api/dashboard";
-import { SERVICE_GROUPS } from "../constants/serviceGroups";
+import { applyServiceGroup } from "../utils/parentalControl";
+import { getErrorMessage } from "../utils/error";
 
 export interface UseParentalControlPageResult {
   settings: ParentalControlSettings | null;
@@ -13,17 +14,6 @@ export interface UseParentalControlPageResult {
   toggleSetting: (key: keyof ParentalControlSettings, value?: boolean) => Promise<void>;
   toggleServiceGroup: (group: string, enabled: boolean) => Promise<void>;
   toggleService: (id: string, enabled: boolean) => Promise<void>;
-}
-
-function applyServiceGroup(
-  services: { id: string; enabled: boolean }[],
-  group: string,
-  enabled: boolean
-): { id: string; enabled: boolean }[] {
-  const groupServices = SERVICE_GROUPS[group]?.services ?? [];
-  const updated = services.filter((s) => !groupServices.includes(s.id));
-  const added = groupServices.map((id) => ({ id, enabled }));
-  return [...updated, ...added];
 }
 
 export function useParentalControlPage(): UseParentalControlPageResult {
@@ -48,10 +38,7 @@ export function useParentalControlPage(): UseParentalControlPageResult {
         setServices(svcData);
       }
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "message" in err
-          ? (err as { message: string }).message
-          : "Gagal memuat data kontrol orang tua.";
+      const msg = getErrorMessage(err, "Gagal memuat data kontrol orang tua.");
       if (mountedRef.current) setError(msg);
     } finally {
       if (mountedRef.current) setLoading(false);

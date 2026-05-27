@@ -5,6 +5,7 @@ import { Loading, InlineError, AuthLayout, FormInput } from '../app/components/s
 import { ShieldIcon, KeyIcon, EyeIcon, EyeOffIcon } from '../app/components/shared/icons';
 import { useToast } from '../app/contexts/ToastContext';
 import { storeApiKey } from '../app/services/api/setupApiKey';
+import { ADGUARD_API_KEY_HELP_URL } from '../app/constants/urls';
 
 export default function SetupApiKey() {
   const { refreshUser, hasApiKey } = useAuth();
@@ -125,7 +126,7 @@ export default function SetupApiKey() {
       <div className="border-t border-inactive pt-3">
         <p className="text-center text-sm text-text-secondary">
           <Link
-            to="https://adguard-dns.io/dashboard/user-settings/api-keys"
+            to={ADGUARD_API_KEY_HELP_URL}
             target="_blank"
             className="font-medium text-primary"
           >

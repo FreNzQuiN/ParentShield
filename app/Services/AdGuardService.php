@@ -12,10 +12,6 @@ use Illuminate\Support\Facades\Log;
 
 class AdGuardService
 {
-    private const DEVICE_ONLINE_THRESHOLD_MS = 300000;
-    private const SUSPICIOUS_THRESHOLD_MS = 21600000;
-    private const DASHBOARD_CACHE_TTL_SECONDS = 30;
-
     public static function getServiceGroups(): array
     {
         static $groups = null;
@@ -60,7 +56,7 @@ class AdGuardService
     {
         $cacheKey = $this->dashboardCacheKey();
 
-        return Cache::remember($cacheKey, self::DASHBOARD_CACHE_TTL_SECONDS, function () {
+        return Cache::remember($cacheKey, config('adguard.dashboard_cache_ttl_seconds', 30), function () {
             return $this->fetchDashboardData();
         });
     }
@@ -255,8 +251,8 @@ class AdGuardService
         foreach ($devices as $device) {
             $deviceId = $device['id'] ?? '';
             $lastSeen = $deviceLastSeen[$deviceId] ?? null;
-            $isOnline = $lastSeen && ($now->valueOf() - $lastSeen) < self::DEVICE_ONLINE_THRESHOLD_MS;
-            $isSuspicious = $lastSeen && ($now->valueOf() - $lastSeen) >= self::SUSPICIOUS_THRESHOLD_MS;
+            $isOnline = $lastSeen && ($now->valueOf() - $lastSeen) < config('adguard.device_online_threshold_ms', 300000);
+            $isSuspicious = $lastSeen && ($now->valueOf() - $lastSeen) >= config('adguard.suspicious_threshold_ms', 21600000);
 
             if ($isOnline) {
                 $activeCount++;
@@ -536,6 +532,14 @@ class AdGuardService
         return implode('&', $parts);
     }
 
+    private function authHeaders(): array
+    {
+        return [
+            'Authorization' => 'ApiKey ' . $this->apiKey,
+            'Accept' => 'application/json',
+        ];
+    }
+
     private function send(string $method, string $endpoint, array $data = []): Response
     {
         if (!$this->apiKey) {
@@ -552,15 +556,9 @@ class AdGuardService
         try {
             if ($method === 'get' && !empty($data)) {
                 $url .= '?' . $this->buildQueryString($data);
-                $response = Http::withHeaders([
-                    'Authorization' => 'ApiKey ' . $this->apiKey,
-                    'Accept' => 'application/json',
-                ])->timeout(15)->get($url);
+                $response = Http::withHeaders($this->authHeaders())->timeout(config('adguard.http_timeout', 15))->get($url);
             } else {
-                $response = Http::withHeaders([
-                    'Authorization' => 'ApiKey ' . $this->apiKey,
-                    'Accept' => 'application/json',
-                ])->timeout(15)->{$method}($url, $data);
+                $response = Http::withHeaders($this->authHeaders())->timeout(config('adguard.http_timeout', 15))->{$method}($url, $data);
             }
         } catch (ConnectionException $e) {
             $this->handleConnectionException();
@@ -586,20 +584,15 @@ class AdGuardService
             throw new AdGuardApiException('Kunci API tidak ditemukan.', 'API_KEY_MISSING', 401);
         }
 
-        $headers = [
-            'Authorization' => 'ApiKey ' . $this->apiKey,
-            'Accept' => 'application/json',
-        ];
-
         try {
-            $responses = Http::pool(function (Pool $pool) use ($requests, $headers, $timeout) {
+            $responses = Http::pool(function (Pool $pool) use ($requests, $timeout) {
                 foreach ($requests as $key => $spec) {
                     $url = $this->baseUrl . $spec['endpoint'];
                     $method = strtolower($spec['method']);
 
                     Log::debug("AdGuard API pool {$method}", ['url' => $url, 'data' => $spec['data']]);
 
-                    $req = $pool->as($key)->withHeaders($headers)->timeout($timeout);
+                    $req = $pool->as($key)->withHeaders($this->authHeaders())->timeout($timeout);
 
                     if ($method === 'get' && !empty($spec['data'])) {
                         $url .= '?' . $this->buildQueryString($spec['data']);

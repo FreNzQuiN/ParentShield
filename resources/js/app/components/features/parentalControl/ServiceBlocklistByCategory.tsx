@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { SERVICE_GROUPS, getGroupState, getBlockedCount, getAllowedCount, type ServiceGroupKey } from '../../../constants/serviceGroups';
+import ToggleSwitch from '../../shared/ToggleSwitch';
 import type { BlockedWebService } from '../../../types/dashboard';
 
 interface Props {
@@ -7,14 +8,6 @@ interface Props {
   isToggling: string | null;
   onToggleGroup: (group: string, enabled: boolean) => Promise<void>;
   parentalControlEnabled: boolean;
-}
-
-function ToggleSwitch({ active, disabled, ariaLabel, onClick }: { active: boolean; disabled?: boolean; ariaLabel: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} disabled={disabled} className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${disabled ? 'opacity-60' : ''} ${active ? 'bg-danger-bar' : 'bg-inactive'}`} aria-label={ariaLabel}>
-      <span className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${active ? 'translate-x-5' : 'translate-x-0'}`} />
-    </button>
-  );
 }
 
 function groupLabel(key: ServiceGroupKey): string {
@@ -73,7 +66,7 @@ export default function ServiceBlocklistByCategory({ blockedServices, isToggling
                   </p>
                 )}
               </div>
-              <ToggleSwitch active={isFullyBlocked} disabled={disabled} ariaLabel={groupLabel(key)} onClick={() => handleToggle(key, !isFullyBlocked)} />
+              <ToggleSwitch active={isFullyBlocked} disabled={disabled} activeColor="bg-danger-bar" ariaLabel={groupLabel(key)} onClick={() => handleToggle(key, !isFullyBlocked)} />
             </div>
           );
         })}

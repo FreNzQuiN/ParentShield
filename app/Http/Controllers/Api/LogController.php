@@ -17,14 +17,9 @@ class LogController extends Controller
     public function queryLog(Request $request): JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
-            return $this->error(
-                'Kunci API tidak ditemukan. Silakan atur ulang kunci API AdGuard Anda.',
-                'API_KEY_REQUIRED',
-                403
-            );
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
+            return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
 
         $timeFrom = $request->input('time_from_millis');
@@ -43,8 +38,6 @@ class LogController extends Controller
         $search = $request->input('search');
         $limit = $request->integer('limit', 100);
         $cursor = $request->input('cursor');
-
-        $this->adGuard->setApiKey($apiKey);
 
         try {
             $data = $this->adGuard->getQueryLog(

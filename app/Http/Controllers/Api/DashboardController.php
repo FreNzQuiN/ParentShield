@@ -20,17 +20,10 @@ class DashboardController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
-            return $this->error(
-                'Kunci API tidak ditemukan. Silakan atur ulang kunci API AdGuard Anda.',
-                'API_KEY_REQUIRED',
-                403
-            );
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
+            return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
-
-        $this->adGuard->setApiKey($apiKey);
 
         try {
             $data = $this->adGuard->getDashboardData();
@@ -65,22 +58,15 @@ class DashboardController extends Controller
     public function updateSafebrowsing(UpdateSafebrowsingRequest $request): JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
-            return $this->error(
-                'Kunci API tidak ditemukan.',
-                'API_KEY_REQUIRED',
-                403
-            );
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
+            return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
 
         $key = $request->input('key');
         $value = $request->boolean('value');
 
-        $this->adGuard->setApiKey($apiKey);
-
-        $lock = Cache::lock("dns_settings:{$user->id}", 20);
+        $lock = Cache::lock("dns_settings:{$user->id}", config('adguard.cache_lock_ttl', 20));
         if (!$lock->get()) {
             return $this->error('Mohon tunggu, pengaturan sedang diperbarui.', 'LOCK_TIMEOUT', 429);
         }
@@ -166,13 +152,10 @@ class DashboardController extends Controller
     public function listServices(Request $request): JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
-
-        $this->adGuard->setApiKey($apiKey);
 
         try {
             $services = $this->adGuard->getWebServices();
@@ -206,18 +189,15 @@ class DashboardController extends Controller
     public function updateParentalControl(UpdateParentalControlRequest $request): JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
 
         $key = $request->input('key');
         $value = $request->input('value');
 
-        $this->adGuard->setApiKey($apiKey);
-
-        $lock = Cache::lock("dns_settings:{$user->id}", 20);
+        $lock = Cache::lock("dns_settings:{$user->id}", config('adguard.cache_lock_ttl', 20));
         if (!$lock->get()) {
             return $this->error('Mohon tunggu, pengaturan sedang diperbarui.', 'LOCK_TIMEOUT', 429);
         }

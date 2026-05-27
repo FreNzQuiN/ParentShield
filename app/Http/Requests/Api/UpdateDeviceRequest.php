@@ -14,7 +14,7 @@ class UpdateDeviceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:64'],
+            'name' => ['required', 'string', 'max:' . config('adguard.device_name_max', 64)],
         ];
     }
 

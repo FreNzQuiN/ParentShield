@@ -37,7 +37,7 @@ trait ApiResponse
         return response()->json($body, $status);
     }
 
-    protected function created(mixed $data = null, string $message = 'Created'): JsonResponse
+    protected function created(mixed $data = null, string $message = 'Berhasil dibuat'): JsonResponse
     {
         return $this->success($data, $message, 201);
     }

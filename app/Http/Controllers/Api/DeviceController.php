@@ -19,20 +19,17 @@ class DeviceController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
-
-        $this->adGuard->setApiKey($apiKey);
 
         try {
             $devices = $this->adGuard->getDevices();
             $limits = $this->adGuard->getAccountLimits();
 
             $now = now()->valueOf();
-            $timeFrom = $now - 86400000;
+            $timeFrom = $now - config('adguard.stats_window_ms', 86400000);
             $deviceStats = $this->adGuard->getDeviceStats($timeFrom, $now);
             $deviceLastSeen = [];
             foreach (($deviceStats['stats'] ?? []) as $ds) {
@@ -78,15 +75,12 @@ class DeviceController extends Controller
     public function store(StoreDeviceRequest $request): JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
 
         $validated = $request->validated();
-
-        $this->adGuard->setApiKey($apiKey);
 
         try {
             $dnsServerId = $this->adGuard->getDefaultDnsServerId();
@@ -134,13 +128,10 @@ class DeviceController extends Controller
     public function show(Request $request, string $deviceId): JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
-
-        $this->adGuard->setApiKey($apiKey);
 
         try {
             $device = $this->adGuard->getDevice($deviceId);
@@ -180,15 +171,12 @@ class DeviceController extends Controller
     public function update(UpdateDeviceRequest $request, string $deviceId): JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
 
         $validated = $request->validated();
-
-        $this->adGuard->setApiKey($apiKey);
 
         try {
             $success = $this->adGuard->updateDevice($deviceId, [
@@ -228,13 +216,10 @@ class DeviceController extends Controller
     public function destroy(Request $request, string $deviceId): JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
-
-        $this->adGuard->setApiKey($apiKey);
 
         try {
             $success = $this->adGuard->deleteDevice($deviceId);
@@ -268,13 +253,10 @@ class DeviceController extends Controller
     public function downloadMobileConfig(Request $request, string $deviceId): \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
     {
         $user = $request->user();
-        $apiKey = $user->getDecryptedAdguardKey();
 
-        if (!$apiKey) {
+        if (!$this->setupAdGuardService($request, $this->adGuard)) {
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
-
-        $this->adGuard->setApiKey($apiKey);
 
         try {
             $device = $this->adGuard->getDevice($deviceId);

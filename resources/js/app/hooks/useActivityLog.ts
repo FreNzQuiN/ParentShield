@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { QueryLogItem, ActivityFilters } from '../types/activity';
 import { fetchQueryLog, type QueryLogParams } from '../services/api/activity';
+import { PERIOD_OFFSETS, PAGE_FETCH_SIZE, MAX_FETCH_PAGES } from '../constants/time';
+import { getErrorMessage } from '../utils/error';
 
 const defaultFilters: ActivityFilters = {
   search: '',
@@ -13,8 +15,6 @@ const defaultFilters: ActivityFilters = {
 
 export const LIMIT_OPTIONS = [15, 25, 50, 100] as const;
 export type PageLimit = typeof LIMIT_OPTIONS[number];
-const PAGE_FETCH_SIZE = 1000;
-const MAX_FETCH_PAGES = 3;
 
 interface UseActivityLogResult {
   entries: QueryLogItem[];
@@ -53,10 +53,7 @@ function matchesFilters(item: QueryLogItem, filters: ActivityFilters): boolean {
   }
   if (filters.period && filters.period !== 'custom') {
     const now = Date.now();
-    const offsets: Record<string, number> = {
-      '1h': 3600000, '12h': 43200000, '24h': 86400000, '7d': 604800000, '30d': 2592000000,
-    };
-    const timeFrom = now - (offsets[filters.period] ?? 86400000);
+    const timeFrom = now - (PERIOD_OFFSETS[filters.period] ?? PERIOD_OFFSETS['24h']);
     if (item.time_millis < timeFrom || item.time_millis > now) return false;
   }
   if (filters.period === 'custom' && filters.timeFrom && filters.timeTo) {
@@ -68,12 +65,9 @@ function matchesFilters(item: QueryLogItem, filters: ActivityFilters): boolean {
 function computePeriodRange(period: ActivityFilters['period'], timeFrom: number | null, timeTo: number | null): { from: number; to: number } {
   const now = Date.now();
   if (period && period !== 'custom') {
-    const offsets: Record<string, number> = {
-      '1h': 3600000, '12h': 43200000, '24h': 86400000, '7d': 604800000, '30d': 2592000000,
-    };
-    return { from: now - (offsets[period] ?? 86400000), to: now };
+    return { from: now - (PERIOD_OFFSETS[period] ?? PERIOD_OFFSETS['24h']), to: now };
   }
-  return { from: timeFrom ?? now - 3600000, to: timeTo ?? now };
+  return { from: timeFrom ?? now - PERIOD_OFFSETS['1h'], to: timeTo ?? now };
 }
 
 function mergeDedup(existing: QueryLogItem[], incoming: QueryLogItem[]): QueryLogItem[] {
@@ -167,9 +161,7 @@ export function useActivityLog(): UseActivityLogResult {
         setLoading(false);
       }
     } catch (err: unknown) {
-      const msg = err && typeof err === 'object' && 'message' in err
-        ? (err as { message: string }).message
-        : 'Gagal memuat data log.';
+      const msg = getErrorMessage(err, 'Gagal memuat data log.');
       if (mountedRef.current) { setError(msg); setLoading(false); }
     } finally {
       fetchingRef.current = false;

@@ -7,6 +7,7 @@ export { default as AuthLayout } from './AuthLayout';
 export { default as FormInput } from './FormInput';
 export { default as SettingsCard } from './SettingsCard';
 export { default as RefreshBar } from './RefreshBar';
+export { default as ToggleSwitch } from './ToggleSwitch';
 
 export {
   ShieldIcon,

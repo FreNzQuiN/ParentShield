@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { BlockedWebService, WebServiceInfo } from '../../../types/dashboard';
 import { getGroupForService } from '../../../constants/serviceGroups';
+import ToggleSwitch from '../../shared/ToggleSwitch';
 
 interface Props {
   blockedServices: BlockedWebService[];
@@ -8,14 +9,6 @@ interface Props {
   isToggling: string | null;
   onToggleService: (id: string, enabled: boolean) => Promise<void>;
   parentalControlEnabled: boolean;
-}
-
-function ToggleSwitch({ active, disabled, ariaLabel, onClick }: { active: boolean; disabled?: boolean; ariaLabel: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} disabled={disabled} className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${disabled ? 'opacity-60' : ''} ${active ? 'bg-danger-bar' : 'bg-inactive'}`} aria-label={ariaLabel}>
-      <span className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${active ? 'translate-x-5' : 'translate-x-0'}`} />
-    </button>
-  );
 }
 
 export default function ServiceBlocklistProvider({ blockedServices, services, isToggling, onToggleService, parentalControlEnabled }: Props) {
@@ -84,7 +77,7 @@ export default function ServiceBlocklistProvider({ blockedServices, services, is
                 {categoryLabel && <span className="text-[10px] text-text-muted bg-bg-tag rounded px-1.5 py-0.5 shrink-0">{categoryLabel}</span>}
                 {busy && <span className="text-[10px] text-primary font-medium animate-pulse shrink-0">Menyimpan...</span>}
               </div>
-              <ToggleSwitch active={isBlocked} disabled={disabled} ariaLabel={svc.name} onClick={() => handleToggle(svc.id, !isBlocked)} />
+              <ToggleSwitch active={isBlocked} disabled={disabled} activeColor="bg-danger-bar" ariaLabel={svc.name} onClick={() => handleToggle(svc.id, !isBlocked)} />
             </div>
           );
         })}

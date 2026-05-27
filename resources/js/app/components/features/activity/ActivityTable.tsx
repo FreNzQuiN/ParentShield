@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { QueryLogItem } from '../../../types/activity';
+import Loading from '../../shared/Loading';
 
 interface ActivityTableProps {
   entries: QueryLogItem[];
@@ -79,10 +80,9 @@ export default function ActivityTable({ entries, deviceMap = {}, loading = false
     setExpandedIndex((prev) => (prev === idx ? null : idx));
   };
 
-  return (
+  const content = (
     <>
       <div className="hidden overflow-hidden rounded-xl bg-bg-card shadow-[0px_4px_20px_-2px_rgba(0,91,192,0.15)] md:block">
-        {loading && <div className="h-1 animate-pulse bg-primary/40" />}
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border/20 text-xs font-medium text-text-muted">
@@ -144,7 +144,6 @@ export default function ActivityTable({ entries, deviceMap = {}, loading = false
         </table>
       </div>
 
-      {loading && <div className="h-1 animate-pulse bg-primary/40 md:hidden" />}
       <div className="flex flex-col gap-3 md:hidden">
         {entries.map((entry, idx) => {
           const badge = getStatusBadge(entry.filtering_info?.filtering_status);
@@ -189,5 +188,16 @@ export default function ActivityTable({ entries, deviceMap = {}, loading = false
         })}
       </div>
     </>
+  );
+
+  return (
+    <div className="relative">
+      {content}
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/70">
+          <Loading size="sm" message="Memuat ulang..." />
+        </div>
+      )}
+    </div>
   );
 }

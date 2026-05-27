@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->trustProxies(at: '*');
+        $middleware->trustProxies(at: explode(',', env('TRUSTED_PROXIES', '*')));
 
         $middleware->api(prepend: [
             \App\Http\Middleware\AddCorrelationId::class,

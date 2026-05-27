@@ -48,8 +48,9 @@ resources/js/
 │   │   │                          # activity/*, parentalControl/*
 │   │   └── shared/                # AuthLayout, FormInput, Loading, LoadingOverlay,
 │   │                              # InlineError, Toast, EmptyState, Modal, StepList,
-│   │                              # ConfirmDialog, SettingsCard, RefreshBar, icons
-│   ├── constants/                 # serviceGroups (JSON + TS defs), time.ts
+│   │                              # ConfirmDialog, SettingsCard, RefreshBar,
+│   │                              # ToggleSwitch, icons
+│   ├── constants/                 # serviceGroups (JSON + TS defs), time.ts, urls.ts
 │   ├── contexts/                  # AuthContext, ToastContext
 │   ├── hooks/                     # useDashboard, useActivityLog, useParentalControlPage,
 │   │                              # useIsMobile, useDialog
@@ -57,7 +58,7 @@ resources/js/
 │   ├── services/api/              # client (axios), auth, dashboard, devices,
 │   │                              # setupApiKey, activity
 │   ├── types/                     # api, auth, dashboard, device, activity
-│   └── utils/                     # error, storage
+│   └── utils/                     # error, storage, parentalControl
 └── pages/                         # Login, Register, ForgotPassword, SetupApiKey,
                                    # Dashboard, Activity, Devices, Settings,
                                    # ParentalControl

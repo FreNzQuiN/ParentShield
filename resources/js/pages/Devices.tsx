@@ -12,9 +12,7 @@ import SetupDeviceModal from '../app/components/features/devices/SetupDeviceModa
 import EditDeviceModal from '../app/components/features/devices/EditDeviceModal';
 import ConfirmDialog from '../app/components/shared/ConfirmDialog';
 
-import { LONG_OFFLINE_THRESHOLD_MS } from '../app/constants/time';
-
-const ONLINE_THRESHOLD_MS = 300000;
+import { ONLINE_THRESHOLD_MS, LONG_OFFLINE_THRESHOLD_MS } from '../app/constants/time';
 
 function computeIsOnline(lastSeenMillis: number | null | undefined): boolean {
   if (lastSeenMillis == null) return false;

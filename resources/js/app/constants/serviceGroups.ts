@@ -79,6 +79,4 @@ export function getGroupForService(serviceId: string): string | null {
   return null;
 }
 
-export function isServiceInAnyGroup(serviceId: string): boolean {
-  return Object.values(SERVICE_GROUPS).some((g) => g.services.includes(serviceId));
-}
+
