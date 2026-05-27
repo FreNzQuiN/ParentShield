@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: explode(',', env('TRUSTED_PROXIES', '*')));
 
         $middleware->api(prepend: [
+            \Illuminate\Foundation\Http\Middleware\TrimStrings::class,
+            \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
             \App\Http\Middleware\AddCorrelationId::class,
         ]);
 
