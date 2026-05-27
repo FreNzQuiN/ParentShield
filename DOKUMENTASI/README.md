@@ -34,7 +34,8 @@ app/
 │   └── Requests/
 │       ├── Api/                   # SetupApiKey, UpdateSafebrowsing,
 │       │                         # UpdateParentalControl, StoreDevice, UpdateDevice
-│       └── Auth/                  # Register, Login, ForgotPassword requests
+│       └── Auth/                  # Register, Login, ForgotPassword,
+│       │                         # UpdateProfile, ChangePassword requests
 ├── Models/User.php                # + adguard_api_key_encrypted, verified_at
 └── Services/
     └── AdGuardService.php         # HTTP client AdGuard API
@@ -45,7 +46,7 @@ resources/js/
 │   │   ├── features/              # SideNavBar, AppLayout, Dashboard/*, devices/*
 │   │   └── shared/                # AuthLayout, FormInput, Loading, LoadingOverlay,
 │   │                              # InlineError, Toast, EmptyState, Modal, StepList,
-│   │                              # ConfirmDialog, icons
+│   │                              # ConfirmDialog, SettingsCard, icons
 │   ├── contexts/                  # AuthContext, ToastContext
 │   ├── hooks/                     # useDashboard, useIsMobile, useDialog
 │   ├── routes/guards/             # ProtectedRoute, RequireApiKey
@@ -85,6 +86,8 @@ Monitoring (fitur device/activity/settings bertahap)
 | POST | `/api/v1/auth/forgot-password` | - | Kirim link reset |
 | GET | `/api/v1/auth/me` | sanctum | User + has_api_key |
 | POST | `/api/v1/auth/refresh` | sanctum | Perbarui token |
+| PUT | `/api/v1/auth/profile` | sanctum | Ubah nama profil |
+| PUT | `/api/v1/auth/password` | sanctum | Ubah kata sandi |
 | POST | `/api/v1/setup-api-key` | sanctum | Verifikasi & simpan API key |
 | GET | `/api/v1/setup-api-key/status` | sanctum | Cek status API key |
 | GET | `/api/v1/dashboard` | sanctum+key | Data aggregated dashboard |
@@ -205,7 +208,7 @@ Font body **wajib 14px** — jangan gunakan `text-base` (16px) untuk body.
 | Sidebar | 256px |
 | Card radius | 12px |
 | Card padding | 13px (default), 24px (large) |
-| Card shadow | `0px 1px 1px rgba(0,0,0,0.05)` |
+| Card shadow | `0px 4px 20px -2px rgba(0,91,192,0.15)` (`shadow-card`) |
 
 ## Routing
 
@@ -218,8 +221,8 @@ PROTECTED:    /dashboard, /activity, /devices, /settings
 ## Testing
 
 ```bash
-php artisan test          # PHPUnit (38 tests)
-npx vitest run            # Vitest (98 tests)
+php artisan test          # PHPUnit (45 tests)
+npx vitest run            # Vitest (110 tests)
 npm run build             # Vite build check
 ```
 
@@ -229,5 +232,5 @@ safebrowsing/parental control updates, cache lock behavior, API key revocation, 
 Frontend tests mencakup: component rendering, form states (loading/error/success),
 auth context (login/register/logout, refreshUser, checkAuth all-error cleanup),
 route guards, per-path navigation debounce, API client interceptors (auth retry, redirect),
-hooks (useDashboard), all pages (Dashboard, Devices, Login, Register, ForgotPassword, SetupApiKey),
-shared components (EmptyState, InlineError, Loading).
+hooks (useDashboard), all pages (Dashboard, Devices, Login, Register, ForgotPassword, SetupApiKey, Settings),
+shared components (EmptyState, InlineError, Loading, SettingsCard).
