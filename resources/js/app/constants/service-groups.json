@@ -12,7 +12,8 @@
     "rockstar_games", "ubisoft", "electronic_arts",
     "battle_net", "origin", "wargaming",
     "blizzard_entertainment", "activision_blizzard",
-    "warnerbrosgames", "io_interactive", "fifa"
+    "warnerbrosgames", "io_interactive", "fifa",
+    "gog", "nvidia"
   ],
   "media_berita": [
     "espn"
@@ -23,7 +24,10 @@
     "linkedin", "bluesky", "mastodon", "signal", "viber",
     "wechat", "kakaotalk", "line", "qq", "weibo", "vk", "ok",
     "tumblr", "skype", "kik", "clubhouse", "bigo_live", "wizz",
-    "flickr", "yy"
+    "flickr", "yy",
+    "4chan", "500px", "9gag", "amino", "imgur", "kook",
+    "mail_ru", "microsoft_teams", "olvid", "slack",
+    "xiaohongshu", "zhihu"
   ],
   "keuangan": [
     "betano", "betfair", "betway", "blaze"
@@ -34,7 +38,8 @@
   ],
   "toko_online": [
     "shopee", "lazada", "amazon", "aliexpress", "ebay",
-    "temu", "shein", "mercado_libre"
+    "temu", "shein", "mercado_libre",
+    "play_store", "coolapk"
   ],
   "video": [
     "youtube", "netflix", "vimeo", "dailymotion",
@@ -46,6 +51,10 @@
     "pluto_tv", "rakuten_viki", "samsung_tv_plus",
     "canais_globo", "globoplay", "vivo_play", "voot",
     "lionsgateplus", "looke", "nebula", "odysee",
-    "iqiyi", "plex", "directvgo", "douban"
+    "iqiyi", "plex", "directvgo", "douban",
+    "iheartradio", "claro"
+  ],
+  "lainnya": [
+    "box", "dropbox"
   ]
 }

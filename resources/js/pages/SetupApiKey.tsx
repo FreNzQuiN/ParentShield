@@ -1,11 +1,11 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../app/contexts/AuthContext';
 import { Loading, InlineError, AuthLayout, FormInput } from '../app/components/shared';
 import { ShieldIcon, KeyIcon, EyeIcon, EyeOffIcon } from '../app/components/shared/icons';
 import { useToast } from '../app/contexts/ToastContext';
 import { storeApiKey } from '../app/services/api/setupApiKey';
-import { ADGUARD_API_KEY_HELP_URL } from '../app/constants/urls';
+import ApiKeyInfoModal from '../app/components/features/setupApiKey/ApiKeyInfoModal';
 
 export default function SetupApiKey() {
   const { refreshUser, hasApiKey } = useAuth();
@@ -19,6 +19,7 @@ export default function SetupApiKey() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
 
   useEffect(() => {
     if (justSubmitted && hasApiKey) {
@@ -125,15 +126,17 @@ export default function SetupApiKey() {
 
       <div className="border-t border-inactive pt-3">
         <p className="text-center text-sm text-text-secondary">
-          <Link
-            to={ADGUARD_API_KEY_HELP_URL}
-            target="_blank"
-            className="font-medium text-primary"
+          <button
+            type="button"
+            onClick={() => setInfoModalOpen(true)}
+            className="font-medium text-primary hover:underline"
           >
-            Di mana menemukan API KEY?
-          </Link>
+            Di mana mendapatkan API KEY?
+          </button>
         </p>
       </div>
+
+      <ApiKeyInfoModal open={infoModalOpen} onClose={() => setInfoModalOpen(false)} />
     </AuthLayout>
   );
 }

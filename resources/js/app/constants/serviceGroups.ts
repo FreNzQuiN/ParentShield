@@ -16,6 +16,7 @@ const LABELS: Record<string, string> = {
   mesin_cari: 'Mesin Pencari',
   toko_online: 'Toko Online',
   video: 'Video',
+  lainnya: 'Lainnya',
 };
 
 export const SERVICE_GROUPS: Record<string, ServiceGroupDef> = Object.fromEntries(
