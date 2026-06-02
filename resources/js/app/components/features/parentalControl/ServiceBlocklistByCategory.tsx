@@ -16,19 +16,18 @@ function groupLabel(key: ServiceGroupKey): string {
 }
 
 export default function ServiceBlocklistByCategory({ blockedServices, onToggleGroup, parentalControlEnabled, services }: Props) {
-  const [localToggling, setLocalToggling] = useState<string | null>(null);
+  const [togglingGroups, setTogglingGroups] = useState<Set<string>>(new Set());
   const groupKeys = Object.keys(SERVICE_GROUPS) as ServiceGroupKey[];
   const lainnyaServices = useMemo(() => getDynamicLainnyaIds(services.map(s => s.id)), [services]);
 
   const handleToggle = useCallback(async (group: string, enabled: boolean) => {
-    const toggleKey = `grp:${group}`;
-    setLocalToggling(toggleKey);
+    setTogglingGroups(prev => new Set(prev).add(group));
     try {
       await onToggleGroup(group, enabled);
     } catch {
       // parent handles error
     } finally {
-      setLocalToggling(null);
+      setTogglingGroups(prev => { const next = new Set(prev); next.delete(group); return next; });
     }
   }, [onToggleGroup]);
 
@@ -47,7 +46,7 @@ export default function ServiceBlocklistByCategory({ blockedServices, onToggleGr
           const state = getGroupState(groupDef, blockedServices);
           const isFullyBlocked = state === 'blocked';
           const isPartial = state === 'partial';
-          const isTogglingThis = localToggling === `grp:${key}`;
+          const isTogglingThis = togglingGroups.has(key);
           const blocked = getBlockedCount(groupDef, blockedServices);
           const allowed = getAllowedCount(groupDef, blockedServices);
 
