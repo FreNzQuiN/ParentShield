@@ -13,7 +13,7 @@ interface Props {
 
 export default function ServiceBlocklistProvider({ blockedServices, services, togglingGroup, onToggleService, parentalControlEnabled }: Props) {
   const [search, setSearch] = useState('');
-  const [localToggling, setLocalToggling] = useState<string | null>(null);
+  const [togglingServices, setTogglingServices] = useState<Set<string>>(new Set());
 
   const getCategoryLabel = useCallback((serviceId: string): string | null => {
     return getGroupForService(serviceId);
@@ -26,14 +26,13 @@ export default function ServiceBlocklistProvider({ blockedServices, services, to
   }, [services, search]);
 
   const handleToggle = useCallback(async (id: string, enabled: boolean) => {
-    const toggleKey = `svc:${id}`;
-    setLocalToggling(toggleKey);
+    setTogglingServices(prev => new Set(prev).add(id));
     try {
       await onToggleService(id, enabled);
     } catch {
       // parent handles error
     } finally {
-      setLocalToggling(null);
+      setTogglingServices(prev => { const next = new Set(prev); next.delete(id); return next; });
     }
   }, [onToggleService]);
 
@@ -41,7 +40,7 @@ export default function ServiceBlocklistProvider({ blockedServices, services, to
     ? new Set(SERVICE_GROUPS[togglingGroup]?.services ?? [])
     : null;
 
-  const disabled = localToggling !== null || !parentalControlEnabled;
+  const disabled = !parentalControlEnabled;
 
   return (
     <div className={`rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-5 shadow-[0px_1px_1px_rgba(0,0,0,0.05)] transition-opacity ${!parentalControlEnabled ? 'opacity-50' : ''}`}>
@@ -66,7 +65,7 @@ export default function ServiceBlocklistProvider({ blockedServices, services, to
           const blocked = blockedServices.find((b) => b.id === svc.id);
           const isBlocked = blocked?.enabled ?? false;
           const categoryLabel = getCategoryLabel(svc.id);
-          const busy = localToggling === `svc:${svc.id}`;
+          const busy = togglingServices.has(svc.id);
           const isInTogglingGroup = groupServices?.has(svc.id) ?? false;
 
           return (
@@ -81,7 +80,7 @@ export default function ServiceBlocklistProvider({ blockedServices, services, to
                 {categoryLabel && <span className="text-[10px] text-text-muted bg-bg-tag rounded px-1.5 py-0.5 shrink-0">{categoryLabel}</span>}
                 {busy && <span className="text-[10px] text-primary font-medium animate-pulse shrink-0">Menyimpan...</span>}
               </div>
-              <ToggleSwitch active={isBlocked} disabled={disabled || isInTogglingGroup} activeColor="bg-danger-bar" ariaLabel={svc.name} onClick={() => handleToggle(svc.id, !isBlocked)} />
+              <ToggleSwitch active={isBlocked} disabled={busy || isInTogglingGroup || !parentalControlEnabled} activeColor="bg-danger-bar" ariaLabel={svc.name} onClick={() => handleToggle(svc.id, !isBlocked)} />
             </div>
           );
         })}
