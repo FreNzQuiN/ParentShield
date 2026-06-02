@@ -9,7 +9,6 @@ export interface UseParentalControlPageResult {
   services: WebServiceInfo[];
   loading: boolean;
   error: string | null;
-  isToggling: string | null;
   refresh: () => Promise<void>;
   toggleSetting: (key: keyof ParentalControlSettings, value?: boolean) => Promise<void>;
   toggleServiceGroup: (group: string, enabled: boolean) => Promise<void>;
@@ -144,7 +143,6 @@ export function useParentalControlPage(): UseParentalControlPageResult {
     services,
     loading,
     error,
-    isToggling,
     refresh,
     toggleSetting,
     toggleServiceGroup,

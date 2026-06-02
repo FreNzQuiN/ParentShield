@@ -25,7 +25,7 @@ describe('ServiceBlocklistProvider', () => {
       <ServiceBlocklistProvider
         blockedServices={[]}
         services={mockServices}
-        isToggling={null}
+        togglingGroup={null}
         onToggleService={vi.fn()}
         parentalControlEnabled={true}
       />,
@@ -39,7 +39,7 @@ describe('ServiceBlocklistProvider', () => {
       <ServiceBlocklistProvider
         blockedServices={[]}
         services={mockServices}
-        isToggling={null}
+        togglingGroup={null}
         onToggleService={vi.fn()}
         parentalControlEnabled={true}
       />,
@@ -53,7 +53,7 @@ describe('ServiceBlocklistProvider', () => {
       <ServiceBlocklistProvider
         blockedServices={[]}
         services={mockServices}
-        isToggling={null}
+        togglingGroup={null}
         onToggleService={onToggleService}
         parentalControlEnabled={true}
       />,
@@ -62,26 +62,12 @@ describe('ServiceBlocklistProvider', () => {
     expect(onToggleService).toHaveBeenCalledWith('9gag', true);
   });
 
-  it('disables toggles when isToggling', () => {
-    render(
-      <ServiceBlocklistProvider
-        blockedServices={[]}
-        services={mockServices}
-        isToggling="some-key"
-        onToggleService={vi.fn()}
-        parentalControlEnabled={true}
-      />,
-    );
-    expect(screen.getByRole('button', { name: '9GAG' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'TikTok' })).toBeDisabled();
-  });
-
   it('disables toggles when parental control disabled', () => {
     render(
       <ServiceBlocklistProvider
         blockedServices={[]}
         services={mockServices}
-        isToggling={null}
+        togglingGroup={null}
         onToggleService={vi.fn()}
         parentalControlEnabled={false}
       />,
@@ -94,7 +80,7 @@ describe('ServiceBlocklistProvider', () => {
       <ServiceBlocklistProvider
         blockedServices={[]}
         services={mockServices}
-        isToggling={null}
+        togglingGroup={null}
         onToggleService={vi.fn()}
         parentalControlEnabled={true}
       />,

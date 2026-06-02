@@ -39,7 +39,7 @@ describe('ServiceBlocklistByCategory', () => {
     render(
       <ServiceBlocklistByCategoryImpl
         blockedServices={[]}
-        isToggling={null}
+        togglingGroup={null}
         onToggleGroup={vi.fn()}
         parentalControlEnabled={true}
       />,
@@ -53,25 +53,12 @@ describe('ServiceBlocklistByCategory', () => {
     render(
       <ServiceBlocklistByCategoryImpl
         blockedServices={[]}
-        isToggling={null}
+        togglingGroup={null}
         onToggleGroup={onToggleGroup}
         parentalControlEnabled={true}
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: 'Anonymizers' }));
     expect(onToggleGroup).toHaveBeenCalledWith('anonimizer', true);
-  });
-
-  it('disables toggles when isToggling', () => {
-    render(
-      <ServiceBlocklistByCategoryImpl
-        blockedServices={[]}
-        isToggling="some-key"
-        onToggleGroup={vi.fn()}
-        parentalControlEnabled={true}
-      />,
-    );
-    expect(screen.getByRole('button', { name: 'Anonymizers' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Game' })).toBeDisabled();
   });
 });

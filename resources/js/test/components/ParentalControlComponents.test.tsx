@@ -18,7 +18,6 @@ describe('ParentalControlSidebar', () => {
     render(
       <ParentalControlSidebar
         settings={mockSettings}
-        isToggling={null}
         onToggleSetting={vi.fn()}
       />,
     );
@@ -33,7 +32,6 @@ describe('ParentalControlSidebar', () => {
     render(
       <ParentalControlSidebar
         settings={mockSettings}
-        isToggling={null}
         onToggleSetting={onToggle}
       />,
     );
@@ -46,7 +44,6 @@ describe('ParentalControlSidebar', () => {
     render(
       <ParentalControlSidebar
         settings={disabledSettings}
-        isToggling={null}
         onToggleSetting={vi.fn()}
       />,
     );
@@ -60,22 +57,10 @@ describe('ParentalControlSidebar', () => {
     render(
       <ParentalControlSidebar
         settings={disabledSettings}
-        isToggling={null}
         onToggleSetting={vi.fn()}
       />,
     );
     expect(screen.getByRole('button', { name: 'Kontrol Orang Tua' })).not.toBeDisabled();
-  });
-
-  it('disables all toggles when isToggling is non-null', () => {
-    render(
-      <ParentalControlSidebar
-        settings={mockSettings}
-        isToggling="some-key"
-        onToggleSetting={vi.fn()}
-      />,
-    );
-    expect(screen.getByRole('button', { name: 'Kontrol Orang Tua' })).toBeDisabled();
   });
 });
 

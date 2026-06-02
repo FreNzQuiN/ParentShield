@@ -1,17 +1,17 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { BlockedWebService, WebServiceInfo } from '../../../types/dashboard';
-import { getGroupForService } from '../../../constants/serviceGroups';
+import { getGroupForService, SERVICE_GROUPS } from '../../../constants/serviceGroups';
 import ToggleSwitch from '../../shared/ToggleSwitch';
 
 interface Props {
   blockedServices: BlockedWebService[];
   services: WebServiceInfo[];
-  isToggling: string | null;
+  togglingGroup: string | null;
   onToggleService: (id: string, enabled: boolean) => Promise<void>;
   parentalControlEnabled: boolean;
 }
 
-export default function ServiceBlocklistProvider({ blockedServices, services, isToggling, onToggleService, parentalControlEnabled }: Props) {
+export default function ServiceBlocklistProvider({ blockedServices, services, togglingGroup, onToggleService, parentalControlEnabled }: Props) {
   const [search, setSearch] = useState('');
   const [localToggling, setLocalToggling] = useState<string | null>(null);
 
@@ -27,7 +27,6 @@ export default function ServiceBlocklistProvider({ blockedServices, services, is
 
   const handleToggle = useCallback(async (id: string, enabled: boolean) => {
     const toggleKey = `svc:${id}`;
-    if (isToggling) return;
     setLocalToggling(toggleKey);
     try {
       await onToggleService(id, enabled);
@@ -36,9 +35,13 @@ export default function ServiceBlocklistProvider({ blockedServices, services, is
     } finally {
       setLocalToggling(null);
     }
-  }, [isToggling, onToggleService]);
+  }, [onToggleService]);
 
-  const disabled = isToggling !== null || localToggling !== null || !parentalControlEnabled;
+  const groupServices = togglingGroup
+    ? new Set(SERVICE_GROUPS[togglingGroup]?.services ?? [])
+    : null;
+
+  const disabled = localToggling !== null || !parentalControlEnabled;
 
   return (
     <div className={`rounded-xl border border-[rgba(193,198,214,0.2)] bg-white p-5 shadow-[0px_1px_1px_rgba(0,0,0,0.05)] transition-opacity ${!parentalControlEnabled ? 'opacity-50' : ''}`}>
@@ -64,9 +67,10 @@ export default function ServiceBlocklistProvider({ blockedServices, services, is
           const isBlocked = blocked?.enabled ?? false;
           const categoryLabel = getCategoryLabel(svc.id);
           const busy = localToggling === `svc:${svc.id}`;
+          const isInTogglingGroup = groupServices?.has(svc.id) ?? false;
 
           return (
-            <div key={svc.id} className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-bg-card-inner transition-colors">
+            <div key={svc.id} className={`flex items-center justify-between rounded-lg px-3 py-2 hover:bg-bg-card-inner transition-colors ${isInTogglingGroup ? 'opacity-50' : ''}`}>
               <div className="flex items-center gap-2 flex-1 mr-3 min-w-0">
                 {svc.icon_svg ? (
                   <span className="shrink-0 w-5 h-5 flex items-center justify-center" dangerouslySetInnerHTML={{ __html: svc.icon_svg }} />
@@ -77,7 +81,7 @@ export default function ServiceBlocklistProvider({ blockedServices, services, is
                 {categoryLabel && <span className="text-[10px] text-text-muted bg-bg-tag rounded px-1.5 py-0.5 shrink-0">{categoryLabel}</span>}
                 {busy && <span className="text-[10px] text-primary font-medium animate-pulse shrink-0">Menyimpan...</span>}
               </div>
-              <ToggleSwitch active={isBlocked} disabled={disabled} activeColor="bg-danger-bar" ariaLabel={svc.name} onClick={() => handleToggle(svc.id, !isBlocked)} />
+              <ToggleSwitch active={isBlocked} disabled={disabled || isInTogglingGroup} activeColor="bg-danger-bar" ariaLabel={svc.name} onClick={() => handleToggle(svc.id, !isBlocked)} />
             </div>
           );
         })}
