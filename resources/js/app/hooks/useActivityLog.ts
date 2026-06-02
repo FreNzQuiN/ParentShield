@@ -205,6 +205,7 @@ export function useActivityLog(): UseActivityLogResult {
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
     refresh();
     return () => { mountedRef.current = false; };
   }, [refresh]);

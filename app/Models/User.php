@@ -14,10 +14,14 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
+    private ?bool $cachedHasApiKey = null;
+
     protected $fillable = [
         'name',
         'email',
         'password',
+        'adguard_api_key_encrypted',
+        'adguard_api_key_verified_at',
     ];
 
     protected $hidden = [
@@ -62,8 +66,14 @@ class User extends Authenticatable
 
     public function getHasApiKeyAttribute(): bool
     {
-        return $this->adguard_api_key_verified_at !== null
+        if ($this->cachedHasApiKey !== null) {
+            return $this->cachedHasApiKey;
+        }
+
+        $this->cachedHasApiKey = $this->adguard_api_key_verified_at !== null
             && $this->adguard_api_key_encrypted !== null
             && $this->getDecryptedAdguardKey() !== null;
+
+        return $this->cachedHasApiKey;
     }
 }

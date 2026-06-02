@@ -42,7 +42,7 @@ class AdGuardService
 
     public function __construct(?string $apiKey = null)
     {
-        $this->baseUrl = config('services.adguard.base_url');
+        $this->baseUrl = config('adguard.base_url');
         $this->apiKey = $apiKey;
     }
 

@@ -153,8 +153,20 @@ describe('AuthProvider', () => {
     expect(localStorage.getItem('auth_token')).toBe('fake-token');
   });
 
-  it('checkAuth clears token on any error (including NETWORK_ERROR)', async () => {
+  it('checkAuth preserves token on network errors, clears on auth errors', async () => {
     vi.mocked(authApi.me).mockRejectedValue({ success: false, code: 'NETWORK_ERROR', message: 'Gagal' });
+    localStorage.setItem('auth_token', 'fake-token');
+
+    renderAuthProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('user').textContent).toBe('none');
+    });
+    expect(localStorage.getItem('auth_token')).toBe('fake-token');
+  });
+
+  it('checkAuth clears token on SESSION_EXPIRED error', async () => {
+    vi.mocked(authApi.me).mockRejectedValue({ success: false, code: 'SESSION_EXPIRED', message: 'Sesi berakhir' });
     localStorage.setItem('auth_token', 'fake-token');
 
     renderAuthProvider();

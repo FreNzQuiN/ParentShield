@@ -57,7 +57,7 @@ export default function Settings() {
     setPasswordFieldErrors(null);
 
     if (newPassword !== confirmPassword) {
-      setPasswordFieldErrors({ new_password_confirmation: 'Konfirmasi kata sandi tidak cocok.' });
+      setPasswordFieldErrors({ password_confirmation: 'Konfirmasi kata sandi tidak cocok.' });
       return;
     }
 
@@ -154,13 +154,13 @@ export default function Settings() {
                   error={fieldError('password')}
                 />
                 <FormInput
-                  id="new_password_confirmation"
+                  id="password_confirmation"
                   label="Konfirmasi Kata Sandi Baru"
                   type="password"
                   value={confirmPassword}
                   onChange={setConfirmPassword}
                   placeholder="Konfirmasi kata sandi baru"
-                  error={fieldError('new_password_confirmation')}
+                  error={fieldError('password_confirmation')}
                 />
               </div>
             </div>

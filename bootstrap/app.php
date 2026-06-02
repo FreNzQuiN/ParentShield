@@ -121,8 +121,6 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->expectsJson() || $request->is('api/*')) {
                 $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
 
-                report($e);
-
                 return response()->json([
                     'success' => false,
                     'code' => 'INTERNAL_ERROR',
