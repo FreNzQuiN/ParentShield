@@ -1,0 +1,13 @@
+.git
+.gitignore
+.editorconfig
+.env
+.env.example
+node_modules
+tests
+*.md
+storage/framework/cache/data
+storage/framework/sessions
+storage/framework/testing
+storage/framework/views
+storage/logs

@@ -17,9 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        apiPrefix: '',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->trustProxies(at: explode(',', env('TRUSTED_PROXIES', '*')));
+        $middleware->trustProxies(at: '*');
+        $middleware->statefulApi();
 
         $middleware->api(prepend: [
             \Illuminate\Foundation\Http\Middleware\TrimStrings::class,
@@ -33,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $e) {
-            return $request->expectsJson() || $request->is('api/*');
+            return $request->expectsJson() || $request->is('api/*') || str_starts_with($request->path(), 'v1/');
         });
 
         $exceptions->render(function (ValidationException $e, Request $request) {
@@ -120,6 +122,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+
+                report($e);
 
                 return response()->json([
                     'success' => false,
