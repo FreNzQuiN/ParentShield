@@ -42,7 +42,7 @@ export default function ConfirmDialog({
       onClick={(e) => { if (e.target === e.currentTarget && !loading) onCancel(); }}
     >
       <div
-        className="w-full max-w-sm rounded-xl bg-bg-card p-6 shadow-lg"
+        className="w-full max-w-sm animate-[fadeIn_0.2s_ease-out] rounded-xl bg-bg-card p-6 shadow-lg"
         role="dialog"
         aria-modal="true"
         aria-label={title}

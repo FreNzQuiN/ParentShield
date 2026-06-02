@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 const mockOnLogout = vi.fn().mockResolvedValue(undefined);
@@ -12,12 +12,15 @@ vi.mock('../../app/contexts/AuthContext', () => ({
     hasApiKey: true,
     loginError: null,
     onLogin: vi.fn(),
-    onLogin: vi.fn(),
     onRegister: vi.fn(),
     onLogout: mockOnLogout,
     clearError: vi.fn(),
     refreshUser: vi.fn(),
   }),
+}));
+
+vi.mock('../../app/contexts/ToastContext', () => ({
+  useToast: () => ({ addToast: vi.fn() }),
 }));
 
 import SideNavBar from '../../app/components/features/SideNavBar';
@@ -49,14 +52,16 @@ describe('SideNavBar', () => {
     expect(screen.getAllByText('Pengaturan Akun').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('calls onLogout when logout button clicked', () => {
+  it('opens dialog then calls onLogout when confirmed', async () => {
     render(
       <MemoryRouter>
         <SideNavBar mobileOpen={false} onClose={() => {}} />
       </MemoryRouter>,
     );
     fireEvent.click(screen.getAllByText('Keluar')[0]);
-    expect(mockOnLogout).toHaveBeenCalled();
+    await waitFor(() => expect(screen.getByText('Konfirmasi Keluar')).toBeInTheDocument());
+    fireEvent.click(screen.getAllByText('Keluar')[2]);
+    await waitFor(() => expect(mockOnLogout).toHaveBeenCalled());
   });
 
   it('calls onClose when a nav link is clicked', () => {
