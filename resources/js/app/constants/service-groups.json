@@ -47,8 +47,7 @@
   ],
   "belanja_online": [
     "shopee", "lazada", "amazon", "aliexpress", "ebay",
-    "temu", "shein", "mercado_libre",
-    "google_play"
+    "temu", "shein", "mercado_libre"
   ],
   "judi_taruhan": [
     "betano", "betfair", "betway", "blaze"
@@ -58,6 +57,6 @@
     "manus", "perplexity", "meta_ai", "cloudflare"
   ],
   "lainnya": [
-    "box", "dropbox", "coolapk", "zhihu", "espn"
+    "box", "dropbox", "coolapk", "zhihu", "espn", "google_play_store"
   ]
 }

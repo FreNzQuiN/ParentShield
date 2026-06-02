@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { ParentalControlSettings } from '../app/types/dashboard';
 import { useParentalControlPage } from '../app/hooks/useParentalControlPage';
 import { InlineError } from '../app/components/shared';
@@ -10,7 +10,8 @@ import { MAIN_TOGGLES_LABELS } from '../app/components/features/parentalControl/
 export default function ParentalControl() {
   const { settings, services, loading, error, refresh, toggleSetting, toggleServiceGroup, toggleService } = useParentalControlPage();
   const { addToast } = useToast();
-  const [togglingGroup, setTogglingGroup] = useState<string | null>(null);
+  const [togglingGroups, setTogglingGroups] = useState<string[]>([]);
+  const togglingGroup = useMemo(() => togglingGroups.length > 0 ? togglingGroups[0] : null, [togglingGroups]);
 
   const handleToggleSetting = useCallback(async (key: keyof ParentalControlSettings) => {
     const label = MAIN_TOGGLES_LABELS[key] ?? key;
@@ -23,14 +24,14 @@ export default function ParentalControl() {
   }, [toggleSetting, addToast]);
 
   const handleToggleGroup = useCallback(async (group: string, enabled: boolean) => {
-    setTogglingGroup(group);
+    setTogglingGroups(prev => [...prev, group]);
     try {
       await toggleServiceGroup(group, enabled);
       addToast({ type: 'success', message: `Grup layanan ${enabled ? 'diblokir' : 'diizinkan'}.` });
     } catch {
       addToast({ type: 'error', message: 'Gagal memperbarui grup layanan.' });
     } finally {
-      setTogglingGroup(null);
+      setTogglingGroups(prev => prev.filter(g => g !== group));
     }
   }, [toggleServiceGroup, addToast]);
 
@@ -68,7 +69,6 @@ export default function ParentalControl() {
         <div className="flex-1 flex flex-col gap-5 lg:overflow-y-auto lg:max-h-[calc(100vh-128px)]">
           <ServiceBlocklistByCategory
             blockedServices={settings?.blocked_services ?? []}
-            togglingGroup={togglingGroup}
             onToggleGroup={handleToggleGroup}
             parentalControlEnabled={settings?.enabled ?? false}
           />

@@ -5,7 +5,6 @@ import type { BlockedWebService } from '../../../types/dashboard';
 
 interface Props {
   blockedServices: BlockedWebService[];
-  togglingGroup: string | null;
   onToggleGroup: (group: string, enabled: boolean) => Promise<void>;
   parentalControlEnabled: boolean;
 }
@@ -15,7 +14,7 @@ function groupLabel(key: ServiceGroupKey): string {
   return def ? def.label : key;
 }
 
-export default function ServiceBlocklistByCategory({ blockedServices, togglingGroup, onToggleGroup, parentalControlEnabled }: Props) {
+export default function ServiceBlocklistByCategory({ blockedServices, onToggleGroup, parentalControlEnabled }: Props) {
   const [localToggling, setLocalToggling] = useState<string | null>(null);
   const groupKeys = Object.keys(SERVICE_GROUPS) as ServiceGroupKey[];
 

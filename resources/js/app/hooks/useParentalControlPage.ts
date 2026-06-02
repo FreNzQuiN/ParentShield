@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useCallback, useRef } from "react";
-import type { ParentalControlSettings, WebServiceInfo } from "../types/dashboard";
+import type { BlockedWebService, ParentalControlSettings, WebServiceInfo } from "../types/dashboard";
 import { fetchDashboard, fetchServices, updateParentalControl } from "../services/api/dashboard";
 import { applyServiceGroup } from "../utils/parentalControl";
 import { getErrorMessage } from "../utils/error";
@@ -77,8 +77,10 @@ export function useParentalControlPage(): UseParentalControlPageResult {
     async (group: string, enabled: boolean) => {
       const toggleKey = `grp:${group}`;
       setIsToggling(toggleKey);
+      let snapshot: BlockedWebService[] = [];
       setSettings((prev) => {
         if (!prev) return prev;
+        snapshot = prev.blocked_services;
         return {
           ...prev,
           blocked_services: applyServiceGroup(prev.blocked_services, group, enabled),
@@ -89,10 +91,7 @@ export function useParentalControlPage(): UseParentalControlPageResult {
       } catch {
         setSettings((prev) => {
           if (!prev) return prev;
-          return {
-            ...prev,
-            blocked_services: applyServiceGroup(prev.blocked_services, group, !enabled),
-          };
+          return { ...prev, blocked_services: snapshot };
         });
         throw new Error("Gagal memperbarui grup layanan.");
       } finally {
@@ -106,8 +105,10 @@ export function useParentalControlPage(): UseParentalControlPageResult {
     async (id: string, enabled: boolean) => {
       const toggleKey = `svc:${id}`;
       setIsToggling(toggleKey);
+      let snapshot: BlockedWebService[] = [];
       setSettings((prev) => {
         if (!prev) return prev;
+        snapshot = prev.blocked_services;
         const exists = prev.blocked_services.some((s) => s.id === id);
         return {
           ...prev,
@@ -123,12 +124,7 @@ export function useParentalControlPage(): UseParentalControlPageResult {
       } catch {
         setSettings((prev) => {
           if (!prev) return prev;
-          return {
-            ...prev,
-            blocked_services: prev.blocked_services.map((s) =>
-              s.id === id ? { ...s, enabled: !enabled } : s
-            ),
-          };
+          return { ...prev, blocked_services: snapshot };
         });
         throw new Error("Gagal memperbarui layanan.");
       } finally {
