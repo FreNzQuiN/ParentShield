@@ -10,12 +10,14 @@ const LABELS: Record<string, string> = {
   konten_dewasa: 'Konten Dewasa',
   anonimizer: 'Anonymizers, VPN & Proxy',
   game: 'Game',
-  media_berita: 'Media Berita',
   media_sosial: 'Media Sosial',
-  keuangan: 'Keuangan & E-Wallet',
-  mesin_cari: 'Mesin Pencari',
-  toko_online: 'Toko Online',
-  video: 'Video',
+  chat_komunikasi: 'Chat & Komunikasi',
+  video_hiburan: 'Video Hiburan',
+  video_sosial: 'Video Sosial',
+  musik_audio: 'Musik & Audio',
+  belanja_online: 'Belanja Online',
+  judi_taruhan: 'Perjudian & Taruhan',
+  mesin_cari_ai: 'Mesin Pencari & AI',
   lainnya: 'Lainnya',
 };
 
@@ -35,17 +37,10 @@ export interface DashboardGroupDef {
 }
 
 export const DASHBOARD_GROUPS: DashboardGroupDef[] = [
-  { key: 'anonimizer', label: 'Anonymizers', services: SERVICE_GROUPS.anonimizer?.services ?? [] },
-  { key: 'game', label: 'Game', services: SERVICE_GROUPS.game?.services ?? [] },
+  { key: 'konten_dewasa', label: 'Konten Dewasa', services: SERVICE_GROUPS.konten_dewasa?.services ?? [] },
   { key: 'media_sosial', label: 'Media Sosial', services: SERVICE_GROUPS.media_sosial?.services ?? [] },
-  {
-    key: 'belanja_keuangan',
-    label: 'Belanja Online & E-Wallet',
-    services: [
-      ...(SERVICE_GROUPS.toko_online?.services ?? []),
-      ...(SERVICE_GROUPS.keuangan?.services ?? []),
-    ],
-  },
+  { key: 'game', label: 'Game', services: SERVICE_GROUPS.game?.services ?? [] },
+  { key: 'video_sosial', label: 'Video Sosial', services: SERVICE_GROUPS.video_sosial?.services ?? [] },
 ];
 
 export function getGroupState(group: string | DashboardGroupDef, blockedServices: BlockedWebService[]): 'blocked' | 'partial' | 'allowed' {
@@ -79,5 +74,3 @@ export function getGroupForService(serviceId: string): string | null {
   }
   return null;
 }
-
-

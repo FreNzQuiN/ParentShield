@@ -63,12 +63,7 @@ export default function KontrolParental({ settings, onToggle }: KontrolParentalP
       const toggleKey = `grp:${group.key}`;
       setToggling(toggleKey);
       try {
-        if (group.key === 'belanja_keuangan') {
-          await onToggle('service_group', { group: 'toko_online', enabled });
-          await onToggle('service_group', { group: 'keuangan', enabled });
-        } else {
-          await onToggle('service_group', { group: group.key, enabled });
-        }
+        await onToggle('service_group', { group: group.key, enabled });
         addToast({ type: 'success', message: `${group.label} ${enabled ? 'diblokir' : 'diizinkan'}.` });
       } catch {
         addToast({ type: 'error', message: `Gagal memperbarui ${group.label.toLowerCase()}.` });

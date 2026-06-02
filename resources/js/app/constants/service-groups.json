@@ -15,46 +15,49 @@
     "warnerbrosgames", "io_interactive", "fifa",
     "gog", "nvidia"
   ],
-  "media_berita": [
-    "espn"
-  ],
   "media_sosial": [
-    "instagram", "facebook", "twitter", "tiktok", "snapchat",
-    "whatsapp", "telegram", "discord", "reddit", "pinterest",
-    "linkedin", "bluesky", "mastodon", "signal", "viber",
-    "wechat", "kakaotalk", "line", "qq", "weibo", "vk", "ok",
-    "tumblr", "skype", "kik", "clubhouse", "bigo_live", "wizz",
-    "flickr", "yy",
-    "4chan", "500px", "9gag", "amino", "imgur", "kook",
-    "mail_ru", "microsoft_teams", "olvid", "slack",
-    "xiaohongshu", "zhihu"
+    "facebook", "instagram", "twitter", "tiktok", "snapchat",
+    "reddit", "pinterest", "linkedin", "bluesky", "mastodon",
+    "tumblr", "flickr", "9gag", "500px", "4chan", "imgur",
+    "vk", "ok", "weibo", "xiaohongshu", "amino"
   ],
-  "keuangan": [
+  "chat_komunikasi": [
+    "whatsapp", "telegram", "discord", "signal", "viber",
+    "wechat", "kakaotalk", "line", "qq", "skype", "kik",
+    "clubhouse", "bigo_live", "wizz",
+    "microsoft_teams", "slack", "mail_ru", "olvid", "kook"
+  ],
+  "video_hiburan": [
+    "netflix", "disneyplus", "hbomax", "max", "hulu",
+    "amazon_streaming", "apple_streaming",
+    "paramountplus", "peacock_tv", "discoveryplus",
+    "crunchyroll", "vimeo", "dailymotion",
+    "pluto_tv", "rakuten_viki", "samsung_tv_plus",
+    "lionsgateplus", "looke", "nebula", "plex",
+    "directvgo", "vivo_play", "voot",
+    "globoplay", "canais_globo", "claro"
+  ],
+  "video_sosial": [
+    "youtube", "twitch", "bilibili", "iqiyi", "douban",
+    "yy", "odysee"
+  ],
+  "musik_audio": [
+    "spotify", "spotify_video", "soundcloud",
+    "tidal", "deezer", "iheartradio"
+  ],
+  "belanja_online": [
+    "shopee", "lazada", "amazon", "aliexpress", "ebay",
+    "temu", "shein", "mercado_libre",
+    "google_play"
+  ],
+  "judi_taruhan": [
     "betano", "betfair", "betway", "blaze"
   ],
-  "mesin_cari": [
+  "mesin_cari_ai": [
     "deepseek", "chatgpt", "claude", "copilot", "gemini", "grok",
     "manus", "perplexity", "meta_ai", "cloudflare"
   ],
-  "toko_online": [
-    "shopee", "lazada", "amazon", "aliexpress", "ebay",
-    "temu", "shein", "mercado_libre",
-    "play_store", "coolapk"
-  ],
-  "video": [
-    "youtube", "netflix", "vimeo", "dailymotion",
-    "twitch", "bilibili", "disneyplus", "hbomax",
-    "hulu", "crunchyroll", "spotify", "spotify_video",
-    "tidal", "deezer", "soundcloud",
-    "amazon_streaming", "apple_streaming", "discoveryplus",
-    "paramountplus", "peacock_tv", "max",
-    "pluto_tv", "rakuten_viki", "samsung_tv_plus",
-    "canais_globo", "globoplay", "vivo_play", "voot",
-    "lionsgateplus", "looke", "nebula", "odysee",
-    "iqiyi", "plex", "directvgo", "douban",
-    "iheartradio", "claro"
-  ],
   "lainnya": [
-    "box", "dropbox"
+    "box", "dropbox", "coolapk", "zhihu", "espn"
   ]
 }
