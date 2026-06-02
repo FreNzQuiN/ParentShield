@@ -12,19 +12,23 @@ vi.mock('../../app/constants/serviceGroups', () => ({
     { key: 'game', label: 'Game', services: ['steam', 'epic_games'] },
   ],
   getGroupState: (group: any, blocked: any[]) => {
-    const services = { anonimizer: ['vpn_go', 'tor'], game: ['steam', 'epic_games'] }[group] ?? [];
+    const services = group?.services ?? { anonimizer: ['vpn_go', 'tor'], game: ['steam', 'epic_games'] }[group] ?? [];
     const enabledCount = services.filter((id: string) => blocked.some((s: any) => s.id === id && s.enabled)).length;
     if (enabledCount === 0) return 'allowed';
     if (enabledCount >= services.length) return 'blocked';
     return 'partial';
   },
   getBlockedCount: (group: any, blocked: any[]) => {
-    const services = { anonimizer: ['vpn_go', 'tor'], game: ['steam', 'epic_games'] }[group] ?? [];
+    const services = group?.services ?? { anonimizer: ['vpn_go', 'tor'], game: ['steam', 'epic_games'] }[group] ?? [];
     return services.filter((id: string) => blocked.some((s: any) => s.id === id && s.enabled)).length;
   },
   getAllowedCount: (group: any, blocked: any[]) => {
-    const services = { anonimizer: ['vpn_go', 'tor'], game: ['steam', 'epic_games'] }[group] ?? [];
+    const services = group?.services ?? { anonimizer: ['vpn_go', 'tor'], game: ['steam', 'epic_games'] }[group] ?? [];
     return services.length - services.filter((id: string) => blocked.some((s: any) => s.id === id && s.enabled)).length;
+  },
+  getDynamicLainnyaIds: (allIds: string[]) => {
+    const otherIds = new Set(['vpn_go', 'tor', 'steam', 'epic_games']);
+    return allIds.filter((id: string) => !otherIds.has(id));
   },
 }));
 
@@ -39,9 +43,9 @@ describe('ServiceBlocklistByCategory', () => {
     render(
       <ServiceBlocklistByCategoryImpl
         blockedServices={[]}
-        togglingGroup={null}
         onToggleGroup={vi.fn()}
         parentalControlEnabled={true}
+        services={[]}
       />,
     );
     expect(screen.getByText('Anonymizers')).toBeInTheDocument();
@@ -53,9 +57,9 @@ describe('ServiceBlocklistByCategory', () => {
     render(
       <ServiceBlocklistByCategoryImpl
         blockedServices={[]}
-        togglingGroup={null}
         onToggleGroup={onToggleGroup}
         parentalControlEnabled={true}
+        services={[]}
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: 'Anonymizers' }));

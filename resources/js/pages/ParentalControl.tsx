@@ -71,6 +71,7 @@ export default function ParentalControl() {
             blockedServices={settings?.blocked_services ?? []}
             onToggleGroup={handleToggleGroup}
             parentalControlEnabled={settings?.enabled ?? false}
+            services={services}
           />
 
           <ServiceBlocklistProvider

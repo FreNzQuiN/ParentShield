@@ -1,12 +1,13 @@
-import { useCallback, useState } from 'react';
-import { SERVICE_GROUPS, getGroupState, getBlockedCount, getAllowedCount, type ServiceGroupKey } from '../../../constants/serviceGroups';
+import { useCallback, useMemo, useState } from 'react';
+import { SERVICE_GROUPS, getGroupState, getBlockedCount, getAllowedCount, getDynamicLainnyaIds, type ServiceGroupKey } from '../../../constants/serviceGroups';
 import ToggleSwitch from '../../shared/ToggleSwitch';
-import type { BlockedWebService } from '../../../types/dashboard';
+import type { BlockedWebService, WebServiceInfo } from '../../../types/dashboard';
 
 interface Props {
   blockedServices: BlockedWebService[];
   onToggleGroup: (group: string, enabled: boolean) => Promise<void>;
   parentalControlEnabled: boolean;
+  services: WebServiceInfo[];
 }
 
 function groupLabel(key: ServiceGroupKey): string {
@@ -14,9 +15,10 @@ function groupLabel(key: ServiceGroupKey): string {
   return def ? def.label : key;
 }
 
-export default function ServiceBlocklistByCategory({ blockedServices, onToggleGroup, parentalControlEnabled }: Props) {
+export default function ServiceBlocklistByCategory({ blockedServices, onToggleGroup, parentalControlEnabled, services }: Props) {
   const [localToggling, setLocalToggling] = useState<string | null>(null);
   const groupKeys = Object.keys(SERVICE_GROUPS) as ServiceGroupKey[];
+  const lainnyaServices = useMemo(() => getDynamicLainnyaIds(services.map(s => s.id)), [services]);
 
   const handleToggle = useCallback(async (group: string, enabled: boolean) => {
     const toggleKey = `grp:${group}`;
@@ -38,12 +40,16 @@ export default function ServiceBlocklistByCategory({ blockedServices, onToggleGr
       </div>
       <div className="flex flex-col gap-2">
         {groupKeys.map((key) => {
-          const state = getGroupState(key, blockedServices);
+          const isLainnya = key === 'lainnya';
+          const groupDef = isLainnya
+            ? { key, label: groupLabel(key), services: lainnyaServices }
+            : { key, label: groupLabel(key), services: SERVICE_GROUPS[key]?.services ?? [] };
+          const state = getGroupState(groupDef, blockedServices);
           const isFullyBlocked = state === 'blocked';
           const isPartial = state === 'partial';
           const isTogglingThis = localToggling === `grp:${key}`;
-          const blocked = getBlockedCount(key, blockedServices);
-          const allowed = getAllowedCount(key, blockedServices);
+          const blocked = getBlockedCount(groupDef, blockedServices);
+          const allowed = getAllowedCount(groupDef, blockedServices);
 
           return (
             <div key={key} className={`flex items-center justify-between rounded-lg bg-bg-card-inner p-3 ${isTogglingThis ? 'pointer-events-none' : ''}`}>

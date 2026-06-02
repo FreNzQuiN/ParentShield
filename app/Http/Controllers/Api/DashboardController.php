@@ -236,7 +236,7 @@ class DashboardController extends Controller
             } elseif ($key === 'service_group') {
                 $group = $value['group'] ?? '';
                 $groupEnabled = filter_var($value['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
-                $groupServices = \App\Services\AdGuardService::getServiceGroups()[$group] ?? [];
+                $groupServices = $this->adGuard->getGroupServices($group);
 
                 if (empty($groupServices)) {
                     return $this->error('Grup layanan tidak valid.', 'INVALID_GROUP', 400);

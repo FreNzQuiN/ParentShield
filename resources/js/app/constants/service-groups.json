@@ -56,7 +56,5 @@
     "deepseek", "chatgpt", "claude", "copilot", "gemini", "grok",
     "manus", "perplexity", "meta_ai", "cloudflare"
   ],
-  "lainnya": [
-    "box", "dropbox", "coolapk", "zhihu", "espn", "google_play_store"
-  ]
+  "lainnya": []
 }

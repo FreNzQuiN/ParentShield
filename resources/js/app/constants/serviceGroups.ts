@@ -72,5 +72,17 @@ export function getGroupForService(serviceId: string): string | null {
   for (const def of Object.values(SERVICE_GROUPS)) {
     if (def.services.includes(serviceId)) return def.label;
   }
-  return null;
+  return 'Lainnya';
+}
+
+export function getDynamicLainnyaIds(allServiceIds: string[]): string[] {
+  const otherIds = new Set<string>();
+  for (const [key, def] of Object.entries(SERVICE_GROUPS)) {
+    if (key !== 'lainnya') {
+      for (const id of def.services) {
+        otherIds.add(id);
+      }
+    }
+  }
+  return allServiceIds.filter(id => !otherIds.has(id));
 }

@@ -83,7 +83,7 @@ export function useParentalControlPage(): UseParentalControlPageResult {
         snapshot = prev.blocked_services;
         return {
           ...prev,
-          blocked_services: applyServiceGroup(prev.blocked_services, group, enabled),
+          blocked_services: applyServiceGroup(prev.blocked_services, group, enabled, services),
         };
       });
       try {
@@ -98,7 +98,7 @@ export function useParentalControlPage(): UseParentalControlPageResult {
         setIsToggling(null);
       }
     },
-    []
+    [services]
   );
 
   const toggleService = useCallback(

@@ -458,6 +458,32 @@ class AdGuardService
         return $response->json() ?? [];
     }
 
+    public function getGroupServices(string $group): array
+    {
+        $knownGroups = self::getServiceGroups();
+
+        if ($group !== 'lainnya') {
+            return $knownGroups[$group] ?? [];
+        }
+
+        return $this->getDynamicLainnyaServices($knownGroups);
+    }
+
+    private function getDynamicLainnyaServices(array $knownGroups): array
+    {
+        $allServices = $this->getWebServices();
+        $allIds = array_column($allServices, 'id');
+
+        $otherGroupIds = [];
+        foreach ($knownGroups as $key => $services) {
+            if ($key !== 'lainnya') {
+                $otherGroupIds = array_merge($otherGroupIds, $services);
+            }
+        }
+
+        return array_values(array_diff($allIds, $otherGroupIds));
+    }
+
     /**
      * @param int[] $devices
      * @param string[] $statuses
