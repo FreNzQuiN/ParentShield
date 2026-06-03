@@ -1,0 +1,2352 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ParentShield API",
+    "description": "API untuk aplikasi ParentShield — kontrol orang tua berbasis AdGuard DNS.\n\nCatatan: URL server (`/api/v1`) dapat berubah di lingkungan produksi.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/api/v1",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Sistem"],
+        "summary": "Cek kesehatan API",
+        "operationId": "healthCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "API tersedia",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Autentikasi"],
+        "summary": "Registrasi pengguna baru",
+        "operationId": "register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registrasi berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Terlalu banyak permintaan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Autentikasi"],
+        "summary": "Masuk pengguna",
+        "operationId": "login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Berhasil masuk",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Kredensial salah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Terlalu banyak permintaan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "tags": ["Autentikasi"],
+        "summary": "Minta reset kata sandi",
+        "operationId": "forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tautan reset telah dikirim (jika email terdaftar)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Terlalu banyak permintaan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Autentikasi"],
+        "summary": "Keluar (hapus token)",
+        "operationId": "logout",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Berhasil keluar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Autentikasi"],
+        "summary": "Ambil data pengguna saat ini",
+        "operationId": "me",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Data pengguna berhasil dimuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Autentikasi"],
+        "summary": "Perbarui token autentikasi",
+        "operationId": "refreshToken",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Token berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshTokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/profile": {
+      "put": {
+        "tags": ["Autentikasi"],
+        "summary": "Perbarui profil pengguna",
+        "operationId": "updateProfile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profil berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password": {
+      "put": {
+        "tags": ["Autentikasi"],
+        "summary": "Ubah kata sandi",
+        "operationId": "changePassword",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kata sandi berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Kata sandi saat ini tidak sesuai atau validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setup-api-key": {
+      "post": {
+        "tags": ["Kunci API"],
+        "summary": "Simpan dan verifikasi kunci API AdGuard",
+        "operationId": "storeApiKey",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupApiKeyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kunci API berhasil diverifikasi dan disimpan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupApiKeyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Kunci API tidak valid atau validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Gagal terhubung ke AdGuard DNS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Terlalu banyak permintaan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setup-api-key/status": {
+      "get": {
+        "tags": ["Kunci API"],
+        "summary": "Cek status kunci API AdGuard",
+        "operationId": "apiKeyStatus",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Status kunci API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "Ambil data dashboard (statistik, perangkat, pengaturan)",
+        "operationId": "dashboardIndex",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Data dashboard berhasil dimuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard/services": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "Ambil daftar layanan web AdGuard",
+        "operationId": "listServices",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Daftar layanan berhasil dimuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServicesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard/safebrowsing": {
+      "put": {
+        "tags": ["Dashboard"],
+        "summary": "Perbarui pengaturan safe browsing",
+        "operationId": "updateSafebrowsing",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSafebrowsingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pengaturan berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateSettingResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tidak ditemukan server DNS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Lock timeout atau terlalu banyak permintaan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard/parental-control": {
+      "put": {
+        "tags": ["Dashboard"],
+        "summary": "Perbarui pengaturan parental control",
+        "operationId": "updateParentalControl",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateParentalControlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pengaturan parental control berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateSettingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Grup layanan tidak valid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tidak ditemukan server DNS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Lock timeout atau terlalu banyak permintaan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logs/query": {
+      "get": {
+        "tags": ["Log"],
+        "summary": "Ambil log query DNS",
+        "operationId": "queryLog",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "time_from_millis",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Waktu awal (milliseconds epoch)"
+          },
+          {
+            "name": "time_to_millis",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Waktu akhir (milliseconds epoch), harus >= time_from_millis"
+          },
+          {
+            "name": "devices",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Filter berdasarkan ID perangkat"
+          },
+          {
+            "name": "statuses",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["UNKNOWN", "NONE", "REQUEST_BLOCKED", "RESPONSE_BLOCKED", "REQUEST_ALLOWED", "RESPONSE_ALLOWED", "MODIFIED"]
+              }
+            },
+            "description": "Filter berdasarkan status"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "description": "Pencarian teks"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
+            },
+            "description": "Jumlah data per halaman (maks 1000)"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Kursor untuk paginasi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data log aktivitas berhasil dimuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryLogResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/devices": {
+      "get": {
+        "tags": ["Perangkat"],
+        "summary": "Ambil daftar perangkat",
+        "operationId": "listDevices",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Daftar perangkat berhasil dimuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Perangkat"],
+        "summary": "Buat perangkat baru",
+        "operationId": "createDevice",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StoreDeviceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perangkat berhasil dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceCreatedResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tidak ditemukan server DNS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/devices/{device}": {
+      "get": {
+        "tags": ["Perangkat"],
+        "summary": "Ambil detail perangkat",
+        "operationId": "showDevice",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "device",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID perangkat"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail perangkat berhasil dimuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Perangkat tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Perangkat"],
+        "summary": "Perbarui nama perangkat",
+        "operationId": "updateDevice",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "device",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID perangkat"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDeviceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Nama perangkat berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceUpdatedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Gagal memperbarui perangkat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Perangkat"],
+        "summary": "Hapus perangkat",
+        "operationId": "deleteDevice",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "device",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID perangkat"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perangkat berhasil dihapus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Gagal menghapus perangkat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/devices/{device}/doh.mobileconfig": {
+      "get": {
+        "tags": ["Perangkat"],
+        "summary": "Unduh konfigurasi DoH untuk iOS/macOS",
+        "operationId": "downloadMobileConfig",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "device",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID perangkat"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File konfigurasi .mobileconfig",
+            "content": {
+              "application/x-apple-aspen-config": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Tidak terautentikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Kunci API tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRequiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Perangkat tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Sanctum",
+        "description": "Token autentikasi Sanctum. Diperoleh dari endpoint login/register."
+      },
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Kunci API AdGuard (tidak digunakan secara langsung; diverifikasi melalui setup-api-key)."
+      }
+    },
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "nullable": true,
+            "default": null
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [false]
+          },
+          "code": {
+            "type": "string",
+            "description": "Kode error"
+          },
+          "message": {
+            "type": "string",
+            "description": "Pesan error"
+          }
+        },
+        "required": ["success", "code", "message"]
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [false]
+          },
+          "code": {
+            "type": "string",
+            "enum": ["VALIDATION_ERROR"]
+          },
+          "message": {
+            "type": "string",
+            "example": "Data yang diberikan tidak valid."
+          },
+          "errors": {
+            "type": "object",
+            "description": "Error per field",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": ["success", "code", "message", "errors"]
+      },
+      "AuthErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [false]
+          },
+          "code": {
+            "type": "string",
+            "enum": ["UNAUTHENTICATED"]
+          },
+          "message": {
+            "type": "string",
+            "example": "Sesi telah berakhir. Silakan masuk kembali."
+          }
+        },
+        "required": ["success", "code", "message"]
+      },
+      "ApiKeyRequiredResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [false]
+          },
+          "code": {
+            "type": "string",
+            "enum": ["API_KEY_REQUIRED"]
+          },
+          "message": {
+            "type": "string",
+            "example": "Kunci API AdGuard belum diatur. Silakan atur kunci API terlebih dahulu."
+          }
+        },
+        "required": ["success", "code", "message"]
+      },
+      "UserObject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "has_api_key": {
+            "type": "boolean",
+            "description": "Apakah kunci API AdGuard sudah diatur"
+          }
+        },
+        "required": ["id", "name", "email", "has_api_key"]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "API tersedia."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "app": {
+                "type": "string"
+              },
+              "env": {
+                "type": "string"
+              },
+              "time": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["app", "env", "time"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nama lengkap"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 255,
+            "description": "Alamat email (unik)"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Kata sandi (min 8 karakter)"
+          },
+          "password_confirmation": {
+            "type": "string",
+            "description": "Konfirmasi kata sandi (harus sama dengan password)"
+          }
+        },
+        "required": ["name", "email", "password", "password_confirmation"]
+      },
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Registrasi berhasil."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/UserObject"
+              },
+              "token": {
+                "type": "string",
+                "description": "Token Sanctum"
+              }
+            },
+            "required": ["user", "token"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Alamat email"
+          },
+          "password": {
+            "type": "string",
+            "description": "Kata sandi"
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Berhasil masuk."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/UserObject"
+              },
+              "token": {
+                "type": "string",
+                "description": "Token Sanctum"
+              }
+            },
+            "required": ["user", "token"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Alamat email terdaftar"
+          }
+        },
+        "required": ["email"]
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/UserObject"
+              }
+            },
+            "required": ["user"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "RefreshTokenResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Token berhasil diperbarui."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/UserObject"
+              },
+              "token": {
+                "type": "string",
+                "description": "Token Sanctum baru"
+              }
+            },
+            "required": ["user", "token"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nama lengkap"
+          }
+        },
+        "required": ["name"]
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "properties": {
+          "current_password": {
+            "type": "string",
+            "description": "Kata sandi saat ini"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Kata sandi baru (min 8 karakter)"
+          },
+          "password_confirmation": {
+            "type": "string",
+            "description": "Konfirmasi kata sandi baru"
+          }
+        },
+        "required": ["current_password", "password", "password_confirmation"]
+      },
+      "SetupApiKeyRequest": {
+        "type": "object",
+        "properties": {
+          "api_key": {
+            "type": "string",
+            "description": "Kunci API AdGuard DNS"
+          }
+        },
+        "required": ["api_key"]
+      },
+      "SetupApiKeyResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Kunci API berhasil diverifikasi dan disimpan."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "has_api_key": {
+                "type": "boolean",
+                "enum": [true]
+              }
+            },
+            "required": ["has_api_key"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "ApiKeyStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "has_api_key": {
+                "type": "boolean",
+                "description": "Apakah kunci API AdGuard sudah diatur dan diverifikasi"
+              }
+            },
+            "required": ["has_api_key"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "DashboardResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Data dashboard berhasil dimuat."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "stats": {
+                "type": "object",
+                "properties": {
+                  "total_queries": {
+                    "type": "integer",
+                    "description": "Total query dalam 24 jam"
+                  },
+                  "blocked_count": {
+                    "type": "integer",
+                    "description": "Jumlah query yang diblokir"
+                  },
+                  "blocked_categories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "3 kategori paling banyak diblokir"
+                  },
+                  "active_devices": {
+                    "type": "integer",
+                    "description": "Perangkat aktif"
+                  },
+                  "suspicious_devices": {
+                    "type": "integer",
+                    "description": "Perangkat mencurigakan (tidak aktif > 6 jam)"
+                  }
+                },
+                "required": ["total_queries", "blocked_count", "blocked_categories", "active_devices", "suspicious_devices"]
+              },
+              "time_series": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "hour": {
+                      "type": "integer",
+                      "description": "Timestamp millis"
+                    },
+                    "allowed": {
+                      "type": "integer"
+                    },
+                    "blocked": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["hour", "allowed", "blocked"]
+                },
+                "description": "Data time series per jam"
+              },
+              "top_activities": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "domain": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "percentage": {
+                      "type": "number",
+                      "format": "float"
+                    }
+                  },
+                  "required": ["domain", "count", "percentage"]
+                },
+                "description": "5 domain paling aktif"
+              },
+              "categories_blocked": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "percentage": {
+                      "type": "number",
+                      "format": "float"
+                    }
+                  },
+                  "required": ["name", "count", "percentage"]
+                },
+                "description": "5 kategori paling banyak diblokir"
+              },
+              "sources_blocked": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "percentage": {
+                      "type": "number",
+                      "format": "float"
+                    }
+                  },
+                  "required": ["name", "count", "percentage"]
+                },
+                "description": "5 sumber filtering paling banyak"
+              },
+              "safebrowsing": {
+                "$ref": "#/components/schemas/SafebrowsingSettings"
+              },
+              "parental_control": {
+                "$ref": "#/components/schemas/ParentalControlSettings"
+              },
+              "devices": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DashboardDevice"
+                }
+              },
+              "account_limits": {
+                "type": "object",
+                "properties": {
+                  "devices": {
+                    "type": "object",
+                    "properties": {
+                      "used": {
+                        "type": "integer"
+                      },
+                      "max": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": ["used", "max"]
+                  }
+                },
+                "required": ["devices"]
+              }
+            },
+            "required": ["stats", "time_series", "top_activities", "categories_blocked", "sources_blocked", "safebrowsing", "parental_control", "devices", "account_limits"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "SafebrowsingSettings": {
+        "type": "object",
+        "properties": {
+          "safe_search_enabled": {
+            "type": "boolean"
+          },
+          "block_dangerous_enabled": {
+            "type": "boolean"
+          },
+          "block_nrd_enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": ["safe_search_enabled", "block_dangerous_enabled", "block_nrd_enabled"]
+      },
+      "ParentalControlSettings": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "block_adult_websites_enabled": {
+            "type": "boolean"
+          },
+          "engines_safe_search_enabled": {
+            "type": "boolean"
+          },
+          "youtube_safe_search_enabled": {
+            "type": "boolean"
+          },
+          "blocked_services": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["id", "enabled"]
+            }
+          }
+        },
+        "required": ["enabled", "block_adult_websites_enabled", "engines_safe_search_enabled", "youtube_safe_search_enabled", "blocked_services"]
+      },
+      "DashboardDevice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "device_type": {
+            "type": "string"
+          },
+          "is_online": {
+            "type": "boolean"
+          },
+          "last_seen": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp millis terakhir terlihat"
+          },
+          "protection_enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": ["id", "name", "device_type", "is_online", "last_seen", "protection_enabled"]
+      },
+      "ServicesResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Daftar layanan berhasil dimuat."
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "icon": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Daftar layanan web dari AdGuard"
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "UpdateSafebrowsingRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": ["safe_search_enabled", "block_dangerous_enabled", "block_nrd_enabled"],
+            "description": "Pengaturan yang akan diperbarui"
+          },
+          "value": {
+            "type": "boolean",
+            "description": "Nilai pengaturan"
+          }
+        },
+        "required": ["key", "value"]
+      },
+      "UpdateParentalControlRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": ["enabled", "block_adult_websites_enabled", "engines_safe_search_enabled", "youtube_safe_search_enabled", "blocked_service", "service_group"],
+            "description": "Pengaturan yang akan diperbarui"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "boolean",
+                "description": "Nilai boolean untuk key: enabled, block_adult_websites_enabled, engines_safe_search_enabled, youtube_safe_search_enabled"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": ["id", "enabled"],
+                "description": "Objek untuk key: blocked_service"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "group": {
+                    "type": "string"
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": ["group", "enabled"],
+                "description": "Objek untuk key: service_group"
+              }
+            ],
+            "description": "Nilai pengaturan"
+          }
+        },
+        "required": ["key", "value"]
+      },
+      "UpdateSettingResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "value": {}
+            },
+            "required": ["key", "value"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "QueryLogResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Data log aktivitas berhasil dimuat."
+          },
+          "data": {
+            "type": "object",
+            "description": "Data query log dari AdGuard DNS (struktur disesuaikan dengan response AdGuard API)"
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "DeviceListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Daftar perangkat berhasil dimuat."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "devices": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DeviceObject"
+                }
+              },
+              "account_limits": {
+                "type": "object",
+                "properties": {
+                  "devices": {
+                    "type": "object",
+                    "properties": {
+                      "used": {
+                        "type": "integer"
+                      },
+                      "max": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": ["used", "max"]
+                  }
+                },
+                "required": ["devices"]
+              }
+            },
+            "required": ["devices", "account_limits"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "DeviceObject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID perangkat dari AdGuard"
+          },
+          "name": {
+            "type": "string"
+          },
+          "device_type": {
+            "type": "string"
+          },
+          "dns_addresses": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "dns_over_tls_url": {
+                "type": "string",
+                "nullable": true
+              },
+              "dns_over_https_url": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "last_seen": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp millis terakhir terlihat"
+          }
+        },
+        "required": ["id", "name", "device_type", "dns_addresses", "last_seen"]
+      },
+      "StoreDeviceRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Nama perangkat (maks 64 karakter)"
+          },
+          "device_type": {
+            "type": "string",
+            "enum": ["ANDROID", "IOS", "WINDOWS"],
+            "description": "Tipe perangkat"
+          }
+        },
+        "required": ["name", "device_type"]
+      },
+      "DeviceCreatedResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Perangkat berhasil dibuat."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "device_type": {
+                "type": "string"
+              },
+              "dns_addresses": {
+                "type": "object",
+                "properties": {
+                  "dns_over_tls_url": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "dns_over_https_url": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                },
+                "required": ["dns_over_tls_url", "dns_over_https_url"]
+              }
+            },
+            "required": ["id", "name", "device_type", "dns_addresses"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "DeviceDetailResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Detail perangkat berhasil dimuat."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "device_type": {
+                "type": "string"
+              },
+              "dns_addresses": {
+                "type": "object",
+                "properties": {
+                  "dns_over_tls_url": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "dns_over_https_url": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                },
+                "required": ["dns_over_tls_url", "dns_over_https_url"]
+              }
+            },
+            "required": ["id", "name", "device_type", "dns_addresses"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "UpdateDeviceRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Nama baru perangkat (maks 64 karakter)"
+          }
+        },
+        "required": ["name"]
+      },
+      "DeviceUpdatedResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "message": {
+            "type": "string",
+            "example": "Nama perangkat berhasil diperbarui."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "device_type": {
+                "type": "string"
+              }
+            },
+            "required": ["id", "name", "device_type"]
+          }
+        },
+        "required": ["success", "message", "data"]
+      }
+    }
+  }
+}
