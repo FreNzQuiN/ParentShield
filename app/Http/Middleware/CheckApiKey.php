@@ -11,7 +11,10 @@ class CheckApiKey
     {
         $user = $request->user();
 
-        if (!$user || !$user->has_api_key) {
+        if (!$user
+            || !$user->adguard_api_key_encrypted
+            || !$user->adguard_api_key_verified_at
+        ) {
             return response()->json([
                 'success' => false,
                 'code' => 'API_KEY_REQUIRED',

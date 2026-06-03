@@ -42,7 +42,7 @@ class AdGuardService
 
     public function __construct(?string $apiKey = null)
     {
-        $this->baseUrl = config('services.adguard.base_url');
+        $this->baseUrl = config('adguard.base_url');
         $this->apiKey = $apiKey;
     }
 
@@ -456,6 +456,32 @@ class AdGuardService
     {
         $response = $this->get('/web_services');
         return $response->json() ?? [];
+    }
+
+    public function getGroupServices(string $group): array
+    {
+        $knownGroups = self::getServiceGroups();
+
+        if ($group !== 'lainnya') {
+            return $knownGroups[$group] ?? [];
+        }
+
+        return $this->getDynamicLainnyaServices($knownGroups);
+    }
+
+    private function getDynamicLainnyaServices(array $knownGroups): array
+    {
+        $allServices = $this->getWebServices();
+        $allIds = array_column($allServices, 'id');
+
+        $otherGroupIds = [];
+        foreach ($knownGroups as $key => $services) {
+            if ($key !== 'lainnya') {
+                $otherGroupIds = array_merge($otherGroupIds, $services);
+            }
+        }
+
+        return array_values(array_diff($allIds, $otherGroupIds));
     }
 
     /**

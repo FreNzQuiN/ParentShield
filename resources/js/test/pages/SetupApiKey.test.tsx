@@ -47,7 +47,7 @@ describe('SetupApiKey page', () => {
     expect(screen.getByText('Masukkan Kunci API')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Masukkan kunci API Anda')).toBeInTheDocument();
     expect(screen.getByText('Simpan & Lanjutkan')).toBeInTheDocument();
-    expect(screen.getByText('Di mana menemukan API KEY?')).toBeInTheDocument();
+    expect(screen.getByText('Di mana mendapatkan API KEY?')).toBeInTheDocument();
   });
 
   it('shows error for empty key', async () => {

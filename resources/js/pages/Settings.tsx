@@ -6,6 +6,7 @@ import SettingsCard from '../app/components/shared/SettingsCard';
 import { updateProfile, changePassword } from '../app/services/api/auth';
 import { storeApiKey, checkStatus } from '../app/services/api/setupApiKey';
 import { flattenFieldErrors, getErrorMessage } from '../app/utils/error';
+import ApiKeyInfoModal from '../app/components/features/setupApiKey/ApiKeyInfoModal';
 
 export default function Settings() {
   const { user, refreshUser } = useAuth();
@@ -26,6 +27,7 @@ export default function Settings() {
   const [apiKeyLoading, setApiKeyLoading] = useState(false);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const [hasApiKeyStatus, setHasApiKeyStatus] = useState(false);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
 
   useEffect(() => {
     if (user?.name) setName(user.name);
@@ -57,7 +59,7 @@ export default function Settings() {
     setPasswordFieldErrors(null);
 
     if (newPassword !== confirmPassword) {
-      setPasswordFieldErrors({ new_password_confirmation: 'Konfirmasi kata sandi tidak cocok.' });
+      setPasswordFieldErrors({ password_confirmation: 'Konfirmasi kata sandi tidak cocok.' });
       return;
     }
 
@@ -154,13 +156,13 @@ export default function Settings() {
                   error={fieldError('password')}
                 />
                 <FormInput
-                  id="new_password_confirmation"
+                  id="password_confirmation"
                   label="Konfirmasi Kata Sandi Baru"
                   type="password"
                   value={confirmPassword}
                   onChange={setConfirmPassword}
                   placeholder="Konfirmasi kata sandi baru"
-                  error={fieldError('new_password_confirmation')}
+                  error={fieldError('password_confirmation')}
                 />
               </div>
             </div>
@@ -188,7 +190,14 @@ export default function Settings() {
                 placeholder="Masukkan API Key AdGuard"
               />
               <p className="text-xs italic text-text-muted">
-                Masukkan kunci API dari akun AdGuard DNS Anda.
+                Masukkan kunci API dari akun AdGuard DNS Anda.{' '}
+                <button
+                  type="button"
+                  onClick={() => setInfoModalOpen(true)}
+                  className="not-italic font-medium text-primary hover:underline"
+                >
+                  Di mana mendapatkan API KEY?
+                </button>
               </p>
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-text-muted">Status:</span>
@@ -215,6 +224,8 @@ export default function Settings() {
           </SettingsCard>
         </div>
       </div>
+
+      <ApiKeyInfoModal open={infoModalOpen} onClose={() => setInfoModalOpen(false)} />
     </div>
   );
 }

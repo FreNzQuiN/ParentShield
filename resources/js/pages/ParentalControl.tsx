@@ -1,15 +1,17 @@
+import { useState, useCallback, useMemo } from 'react';
 import type { ParentalControlSettings } from '../app/types/dashboard';
 import { useParentalControlPage } from '../app/hooks/useParentalControlPage';
 import { InlineError } from '../app/components/shared';
 import { ParentalControlSidebar, ServiceBlocklistByCategory, ServiceBlocklistProvider } from '../app/components/features/parentalControl';
 import ParentalControlSkeleton from '../app/components/features/parentalControl/ParentalControlSkeleton';
 import { useToast } from '../app/contexts/ToastContext';
-import { useCallback } from 'react';
 import { MAIN_TOGGLES_LABELS } from '../app/components/features/parentalControl/constants';
 
 export default function ParentalControl() {
-  const { settings, services, loading, error, isToggling, refresh, toggleSetting, toggleServiceGroup, toggleService } = useParentalControlPage();
+  const { settings, services, loading, error, refresh, toggleSetting, toggleServiceGroup, toggleService } = useParentalControlPage();
   const { addToast } = useToast();
+  const [togglingGroups, setTogglingGroups] = useState<string[]>([]);
+  const togglingGroup = useMemo(() => togglingGroups.length > 0 ? togglingGroups[0] : null, [togglingGroups]);
 
   const handleToggleSetting = useCallback(async (key: keyof ParentalControlSettings) => {
     const label = MAIN_TOGGLES_LABELS[key] ?? key;
@@ -22,11 +24,14 @@ export default function ParentalControl() {
   }, [toggleSetting, addToast]);
 
   const handleToggleGroup = useCallback(async (group: string, enabled: boolean) => {
+    setTogglingGroups(prev => [...prev, group]);
     try {
       await toggleServiceGroup(group, enabled);
       addToast({ type: 'success', message: `Grup layanan ${enabled ? 'diblokir' : 'diizinkan'}.` });
     } catch {
       addToast({ type: 'error', message: 'Gagal memperbarui grup layanan.' });
+    } finally {
+      setTogglingGroups(prev => prev.filter(g => g !== group));
     }
   }, [toggleServiceGroup, addToast]);
 
@@ -58,22 +63,21 @@ export default function ParentalControl() {
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
         <ParentalControlSidebar
           settings={settings}
-          isToggling={isToggling}
           onToggleSetting={handleToggleSetting}
         />
 
         <div className="flex-1 flex flex-col gap-5 lg:overflow-y-auto lg:max-h-[calc(100vh-128px)]">
           <ServiceBlocklistByCategory
             blockedServices={settings?.blocked_services ?? []}
-            isToggling={isToggling}
             onToggleGroup={handleToggleGroup}
             parentalControlEnabled={settings?.enabled ?? false}
+            services={services}
           />
 
           <ServiceBlocklistProvider
             blockedServices={settings?.blocked_services ?? []}
             services={services}
-            isToggling={isToggling}
+            togglingGroup={togglingGroup}
             onToggleService={handleToggleService}
             parentalControlEnabled={settings?.enabled ?? false}
           />

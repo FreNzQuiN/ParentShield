@@ -5,7 +5,6 @@ import type { ParentalControlSettings } from '../../../types/dashboard';
 
 interface ParentalControlSidebarProps {
   settings: ParentalControlSettings | null;
-  isToggling: string | null;
   onToggleSetting: (key: keyof ParentalControlSettings) => Promise<void>;
 }
 
@@ -18,7 +17,6 @@ const MAIN_TOGGLES = [
 
 export default function ParentalControlSidebar({
   settings,
-  isToggling,
   onToggleSetting,
 }: ParentalControlSidebarProps) {
   const [togglingKey, setTogglingKey] = useState<string | null>(null);
@@ -26,7 +24,6 @@ export default function ParentalControlSidebar({
 
   const handleToggle = useCallback(
     async (key: keyof ParentalControlSettings) => {
-      if (isToggling) return;
       setTogglingKey(key);
       try {
         await onToggleSetting(key);
@@ -36,7 +33,7 @@ export default function ParentalControlSidebar({
         setTogglingKey(null);
       }
     },
-    [isToggling, onToggleSetting]
+    [onToggleSetting]
   );
 
   return (
@@ -51,7 +48,6 @@ export default function ParentalControlSidebar({
           {MAIN_TOGGLES.map((t) => {
             const isMaster = t.key === 'enabled';
             const isDisabled =
-              isToggling !== null ||
               togglingKey !== null ||
               (!parentalEnabled && !isMaster);
             const isSubDisabled = !parentalEnabled && !isMaster;

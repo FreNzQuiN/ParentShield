@@ -179,6 +179,8 @@ class DeviceController extends Controller
         $validated = $request->validated();
 
         try {
+            $device = $this->adGuard->getDevice($deviceId);
+
             $success = $this->adGuard->updateDevice($deviceId, [
                 'name' => $validated['name'],
             ]);
@@ -192,7 +194,7 @@ class DeviceController extends Controller
             return $this->success([
                 'id' => $deviceId,
                 'name' => $validated['name'],
-                'device_type' => 'unknown',
+                'device_type' => $device['device_type'] ?? 'unknown',
             ], 'Nama perangkat berhasil diperbarui.');
         } catch (\App\Exceptions\AdGuardApiException $e) {
             Log::warning('Device update error', ['user_id' => $user->id, 'code' => $e->getErrorCode()]);

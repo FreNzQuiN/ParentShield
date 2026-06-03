@@ -1,5 +1,8 @@
+import { useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import ConfirmDialog from '../shared/ConfirmDialog';
 import { ShieldIconSmall, HomeIcon, ActivityIcon, DeviceIcon, SettingsIcon, LogoutIcon, CloseIcon, ParentalControlIcon } from '../shared/icons';
 
 interface SideNavBarProps {
@@ -18,6 +21,22 @@ const navItems = [
 export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
   const { pathname } = useLocation();
   const { onLogout } = useAuth();
+  const { addToast } = useToast();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const handleLogout = useCallback(async () => {
+    setLogoutLoading(true);
+    try {
+      await onLogout();
+      addToast({ type: 'success', message: 'Berhasil keluar.' });
+    } catch {
+      addToast({ type: 'error', message: 'Gagal keluar, coba lagi.' });
+    } finally {
+      setLogoutLoading(false);
+      setShowLogoutDialog(false);
+    }
+  }, [onLogout, addToast]);
 
   const sidebarContent = (
     <>
@@ -66,7 +85,7 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
 
       <div className="px-3 pb-4 lg:px-4">
         <button
-          onClick={() => { onClose(); onLogout().catch(() => console.warn('Logout gagal, state lokal telah dibersihkan.')); }}
+          onClick={() => setShowLogoutDialog(true)}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-text-secondary transition-colors hover:bg-primary/5 lg:px-4 lg:py-3"
         >
           <LogoutIcon />
@@ -94,6 +113,19 @@ export default function SideNavBar({ mobileOpen, onClose }: SideNavBarProps) {
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-[256px] flex-col bg-bg-sidebar shadow-lg transition-transform lg:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {sidebarContent}
       </aside>
+
+      <ConfirmDialog
+        open={showLogoutDialog}
+        title="Konfirmasi Keluar"
+        message="Apakah Anda yakin ingin keluar? Anda perlu masuk kembali untuk mengakses dashboard."
+        confirmLabel="Keluar"
+        cancelLabel="Batal"
+        variant="danger"
+        loading={logoutLoading}
+        loadingLabel="Keluar..."
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutDialog(false)}
+      />
     </>
   );
 }

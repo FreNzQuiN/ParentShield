@@ -7,7 +7,7 @@ use RuntimeException;
 class AdGuardApiException extends RuntimeException
 {
     private readonly string $errorCode;
-    protected int $statusCode;
+    private readonly int $statusCode;
 
     public function __construct(
         string $message = 'Terjadi kesalahan pada layanan AdGuard.',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\QueryLogRequest;
 use App\Services\AdGuardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ class LogController extends Controller
         private readonly AdGuardService $adGuard
     ) {}
 
-    public function queryLog(Request $request): JsonResponse
+    public function queryLog(QueryLogRequest $request): JsonResponse
     {
         $user = $request->user();
 
@@ -22,32 +23,17 @@ class LogController extends Controller
             return $this->error('Kunci API tidak ditemukan.', 'API_KEY_REQUIRED', 403);
         }
 
-        $timeFrom = $request->input('time_from_millis');
-        $timeTo = $request->input('time_to_millis');
-
-        if (!$timeFrom) {
-            return $this->error('Parameter time_from_millis wajib diisi.', 'VALIDATION_ERROR', 400);
-        }
-
-        if (!$timeTo) {
-            return $this->error('Parameter time_to_millis wajib diisi.', 'VALIDATION_ERROR', 400);
-        }
-
-        $devices = $request->input('devices');
-        $statuses = $request->input('statuses');
-        $search = $request->input('search');
-        $limit = $request->integer('limit', 100);
-        $cursor = $request->input('cursor');
+        $validated = $request->validated();
 
         try {
             $data = $this->adGuard->getQueryLog(
-                timeFrom: (int) $timeFrom,
-                timeTo: (int) $timeTo,
-                devices: $devices !== null ? (is_array($devices) ? $devices : [$devices]) : null,
-                statuses: $statuses !== null ? (is_array($statuses) ? $statuses : [$statuses]) : null,
-                search: $search,
-                limit: $limit,
-                cursor: $cursor,
+                timeFrom: (int) $validated['time_from_millis'],
+                timeTo: (int) $validated['time_to_millis'],
+                devices: $validated['devices'] ?? null,
+                statuses: $validated['statuses'] ?? null,
+                search: $validated['search'] ?? null,
+                limit: $validated['limit'] ?? 100,
+                cursor: $validated['cursor'] ?? null,
             );
 
             return $this->success($data, 'Data log aktivitas berhasil dimuat.');
