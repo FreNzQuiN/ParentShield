@@ -1,6 +1,6 @@
 # ParentShield
 
-Aplikasi monitoring orang tua untuk aktivitas internet anak melalui API AdGuard DNS. Frontend React SPA dengan backend Laravel — semua komunikasi ke AdGuard melalui Laravel, tanpa *direct call* dari browser.
+Aplikasi monitoring orang tua untuk aktivitas internet anak melalui API AdGuard DNS. Frontend React SPA dengan backend Laravel — semua komunikasi ke AdGuard melalui Laravel, tanpa *direct call* dari browser. 
 
 ## Tech Stack
 
